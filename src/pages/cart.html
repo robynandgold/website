@@ -1,47 +1,111 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Cart — Robyn and Gold</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="/src/css/styles.css" />
+  <meta charset="UTF-8" />
+  <title>Your Cart — Robyn &amp; Gold</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta
+    name="description"
+    content="View the antique jewellery pieces currently in your Robyn &amp; Gold cart."
+  />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="icon" type="image/png" href="../images/favicon.png" />
 </head>
-<body>
-  <header><a href="/src/pages/shop.html">Continue shopping</a></header>
+<body class="page">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="brand">
+        <span class="brand-main">Robyn &amp; Gold</span>
+        <span class="brand-tagline">Antique Jewellery</span>
+      </a>
+
+      <nav class="nav">
+        <a href="/pages/shop.html" class="nav-link">Shop</a>
+        <a href="/index.html#about" class="nav-link">Our story</a>
+        <a href="/index.html#ethos" class="nav-link">Ethos</a>
+        <a href="/pages/cart.html" class="nav-link nav-link--cart">
+          Cart
+          <span id="cart-count" class="cart-count">0</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
   <main>
-    <h1>Your cart</h1>
-    <div id="cart-contents"></div>
-    <div id="cart-total"></div>
-    <button id="checkout">Checkout with Stripe</button>
+    <section class="section section--alt">
+      <div class="container">
+        <p class="eyebrow">Cart</p>
+        <h1 class="page-title">Your chosen pieces</h1>
+        <p class="page-intro">
+          Review your selection before checkout. Each ring is unique; items are not reserved until payment is complete.
+        </p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container cart-layout">
+        <div class="cart-items-wrapper">
+          <div id="cart-items" class="cart-items">
+            <!-- JS renders line items here -->
+          </div>
+
+          <p class="cart-empty-message" id="cart-empty-message" hidden>
+            Your cart is currently empty.  
+            <a href="/pages/shop.html" class="breadcrumb-link">Browse the collection</a>
+          </p>
+        </div>
+
+        <aside class="cart-summary" aria-label="Order summary">
+          <h2 class="cart-summary-title">Order summary</h2>
+          <div class="cart-summary-row">
+            <span>Subtotal</span>
+            <span id="cart-subtotal">£0</span>
+          </div>
+          <p class="cart-summary-note">
+            Shipping and any taxes are calculated at checkout.
+          </p>
+
+          <button id="checkout-button" class="btn btn-primary btn-full">
+            Proceed to secure checkout
+          </button>
+
+          <p class="cart-summary-small">
+            Payments are processed securely via Stripe. We never store your card details.
+          </p>
+        </aside>
+      </div>
+    </section>
   </main>
 
-  <script src="/src/js/cart.js"></script>
-  <script src="/src/js/stripe-integration.js"></script>
-  <script>
-    function render() {
-      const container = document.getElementById('cart-contents');
-      container.innerHTML = '';
-      const cart = window.RGCart.getCart();
-      if (!cart || cart.length === 0) {
-        container.innerHTML = '<p>Your cart is empty.</p>';
-      } else {
-        cart.forEach(item => {
-          const row = document.createElement('div');
-          row.className = 'cart-row';
-          row.innerHTML = `<strong>${item.name}</strong> x ${item.quantity} — £${(item.price * item.quantity).toFixed(2)}
-            <button data-id="${item.id}" class="remove">Remove</button>`;
-          container.appendChild(row);
-        });
-      }
-      document.getElementById('cart-total').textContent = 'Total: £' + window.RGCart.cartTotal().toFixed(2);
-      document.querySelectorAll('.remove').forEach(btn => btn.addEventListener('click', e => {
-        window.RGCart.removeFromCart(Number(e.target.dataset.id));
-        render();
-      }));
-    }
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="brand-main">Robyn &amp; Gold</span>
+        <span class="brand-tagline">Antique Jewellery</span>
+      </div>
+      <div class="footer-links">
+        <a href="/pages/shop.html" class="footer-link">Shop</a>
+        <a href="/index.html#about" class="footer-link">About</a>
+        <a href="/index.html#ethos" class="footer-link">Ethos</a>
+        <a href="mailto:hello@robynandgold.com" class="footer-link">Contact</a>
+      </div>
+      <p class="footer-meta">© <span id="year"></span> Robyn &amp; Gold. All rights reserved.</p>
+    </div>
+  </footer>
 
-    document.getElementById('checkout').addEventListener('click', checkoutCart);
-    render();
+  <script src="../js/cart.js"></script>
+  <script src="../js/stripe-integration.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
   </script>
 </body>
 </html>

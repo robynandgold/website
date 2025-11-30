@@ -1,39 +1,96 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Product — Robyn and Gold</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="/src/css/styles.css" />
-</head>
-<body>
-  <header><a href="/src/pages/shop.html">Back to shop</a></header>
-  <main id="detail"></main>
+  <meta charset="UTF-8" />
+  <title>Piece — Robyn &amp; Gold</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta
+    name="description"
+    content="Discover one-of-a-kind antique rings and jewellery from Robyn &amp; Gold."
+  />
 
-  <script src="/src/js/products.js"></script>
-  <script src="/src/js/cart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="icon" type="image/png" href="../images/favicon.png" />
+</head>
+<body class="page">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="brand">
+        <span class="brand-main">Robyn &amp; Gold</span>
+        <span class="brand-tagline">Antique Jewellery</span>
+      </a>
+
+      <nav class="nav">
+        <a href="/pages/shop.html" class="nav-link">Shop</a>
+        <a href="/index.html#about" class="nav-link">Our story</a>
+        <a href="/index.html#ethos" class="nav-link">Ethos</a>
+        <a href="/pages/cart.html" class="nav-link nav-link--cart">
+          Cart
+          <span id="cart-count" class="cart-count">0</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="section section--alt">
+      <div class="container">
+        <a href="/pages/shop.html" class="breadcrumb-link">← Back to collection</a>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <!-- JS populates this element -->
+        <div id="product-detail" class="product-detail-layout">
+          <!-- Example structure (for reference only; filled by JS):
+          <div class="product-detail-image">
+            <img src="../images/products/example.jpg" alt="..." />
+          </div>
+          <div class="product-detail-info">
+            <p class="eyebrow">Art Deco · c.1930</p>
+            <h1 class="product-detail-title">Art Deco Solitaire Diamond Ring</h1>
+            <p class="product-detail-meta">Platinum · Old European-cut diamond · Size L</p>
+            <p class="product-detail-price">£4,600</p>
+            <button class="btn btn-primary">Add to cart</button>
+            <div class="product-detail-copy">
+              <p>Long-form description here...</p>
+            </div>
+          </div>
+          -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="brand-main">Robyn &amp; Gold</span>
+        <span class="brand-tagline">Antique Jewellery</span>
+      </div>
+      <div class="footer-links">
+        <a href="/pages/shop.html" class="footer-link">Shop</a>
+        <a href="/index.html#about" class="footer-link">About</a>
+        <a href="/index.html#ethos" class="footer-link">Ethos</a>
+        <a href="mailto:hello@robynandgold.com" class="footer-link">Contact</a>
+      </div>
+      <p class="footer-meta">© <span id="year"></span> Robyn &amp; Gold. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="../js/products.js"></script>
+  <script src="../js/cart.js"></script>
+  <script src="../js/main.js"></script>
   <script>
-    function getParam(name) {
-      return new URLSearchParams(window.location.search).get(name);
-    }
-    const id = Number(getParam('id'));
-    const prod = products.find(p => p.id === id);
-    const el = document.getElementById('detail');
-    if (!prod) {
-      el.innerHTML = '<p>Product not found.</p>';
-    } else {
-      el.innerHTML = `
-        <img class="detail-img" src="${prod.image}" alt="${prod.name}" />
-        <h1>${prod.name}</h1>
-        <p class="price">£${prod.price.toFixed(2)}</p>
-        <p>${prod.description}</p>
-        <button id="add">Add to cart</button>
-      `;
-      document.getElementById('add').addEventListener('click', () => {
-        window.RGCart.addToCart(prod, 1);
-        alert('Added to cart');
-      });
-    }
+    document.getElementById('year').textContent = new Date().getFullYear();
   </script>
 </body>
 </html>

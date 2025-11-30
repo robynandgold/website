@@ -517,3 +517,271 @@ a {
     grid-template-columns: 1fr;
   }
 }
+/* =========================
+   Page titles & layout
+   ========================= */
+
+.page-title {
+  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 3vw, 2.4rem);
+  letter-spacing: 0.06em;
+  text-transform: none;
+  margin: 0.3rem 0 0.8rem;
+}
+
+.page-intro {
+  max-width: 35rem;
+  font-size: 0.96rem;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+/* =========================
+   Shop layout
+   ========================= */
+
+.shop-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 2.1fr);
+  gap: 2.5rem;
+  align-items: flex-start;
+}
+
+.shop-filters {
+  background: #fdfbf8;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(221, 209, 194, 0.9);
+  padding: 1.4rem 1.3rem 1.6rem;
+}
+
+.filters-title {
+  font-size: 0.9rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin: 0 0 0.9rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.9rem;
+}
+
+.filter-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+
+.filter-select {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.7rem;
+  background: #fdfbf8;
+  font-size: 0.88rem;
+  font-family: inherit;
+  color: var(--ink);
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+
+.btn-full {
+  width: 100%;
+  justify-content: center;
+}
+
+.shop-results {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.shop-results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.shop-count {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+/* =========================
+   Product detail
+   ========================= */
+
+.product-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.3fr);
+  gap: 2.6rem;
+  align-items: flex-start;
+}
+
+.product-detail-image img {
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(221, 209, 194, 0.8);
+  box-shadow: var(--shadow-soft);
+}
+
+.product-detail-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.product-detail-title {
+  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+  font-size: 1.7rem;
+  margin: 0;
+}
+
+.product-detail-meta {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.product-detail-price {
+  font-size: 1rem;
+  margin-top: 0.4rem;
+}
+
+.product-detail-copy {
+  margin-top: 0.6rem;
+  font-size: 0.94rem;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+/* Breadcrumb-style link */
+
+.breadcrumb-link {
+  font-size: 0.85rem;
+  color: var(--muted);
+  border-bottom: 1px solid transparent;
+  padding-bottom: 0.1rem;
+}
+
+.breadcrumb-link:hover {
+  color: var(--ink);
+  border-color: var(--muted);
+}
+
+/* =========================
+   Cart
+   ========================= */
+
+.cart-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.1fr);
+  gap: 2.3rem;
+}
+
+.cart-items-wrapper {
+  background: #fdfbf8;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(221, 209, 194, 0.9);
+  padding: 1.4rem 1.3rem 1.6rem;
+}
+
+.cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.cart-empty-message {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-top: 0.5rem;
+}
+
+.cart-summary {
+  background: #fdfbf8;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(221, 209, 194, 0.9);
+  padding: 1.4rem 1.3rem 1.6rem;
+}
+
+.cart-summary-title {
+  font-size: 0.95rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin: 0 0 1rem;
+}
+
+.cart-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  margin-bottom: 0.6rem;
+}
+
+.cart-summary-note {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+
+.cart-summary-small {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 0.7rem;
+}
+
+/* =========================
+   Success page
+   ========================= */
+
+.success-layout {
+  display: flex;
+  justify-content: center;
+}
+
+.success-card {
+  max-width: 540px;
+  width: 100%;
+  background: #fdfbf8;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(221, 209, 194, 0.9);
+  padding: 2.2rem 2rem 2.4rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.success-note {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--muted);
+  margin-top: 1rem;
+}
+
+.success-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-top: 1.6rem;
+}
+
+/* =========================
+   Responsive tweaks (pages)
+   ========================= */
+
+@media (max-width: 900px) {
+  .shop-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .product-detail-layout {
+    grid-template-columns: 1fr;
+  }
+}
+

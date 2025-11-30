@@ -800,3 +800,12 @@ a {
   }
 }
 
+@media (max-width: 640px) {
+  .brand-text {
+    display: none;
+  }
+
+  .brand-logo {
+    height: 36px;
+  }
+}

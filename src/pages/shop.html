@@ -1,32 +1,135 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Shop — Robyn and Gold</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="/src/css/styles.css" />
+  <meta charset="UTF-8" />
+  <title>Shop — Robyn &amp; Gold</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta
+    name="description"
+    content="Browse the curated collection of antique and vintage rings from Robyn &amp; Gold."
+  />
+
+  <!-- Fonts (same as index) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="icon" type="image/png" href="../images/favicon.png" />
 </head>
-<body>
-  <header><h1>Shop</h1><a href="/src/pages/cart.html">Cart</a></header>
+<body class="page">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="brand">
+        <span class="brand-main">Robyn &amp; Gold</span>
+        <span class="brand-tagline">Antique Jewellery</span>
+      </a>
+
+      <nav class="nav">
+        <a href="/pages/shop.html" class="nav-link">Shop</a>
+        <a href="/index.html#about" class="nav-link">Our story</a>
+        <a href="/index.html#ethos" class="nav-link">Ethos</a>
+        <a href="/pages/cart.html" class="nav-link nav-link--cart">
+          Cart
+          <span id="cart-count" class="cart-count">0</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
   <main>
-    <div id="product-list" class="product-grid"></div>
+    <!-- Page hero -->
+    <section class="section section--alt">
+      <div class="container">
+        <p class="eyebrow">Shop</p>
+        <h1 class="page-title">The collection</h1>
+        <p class="page-intro">
+          A considered edit of antique and vintage rings in solid gold and natural stones.
+          Each piece is one-of-a-kind; once it finds its owner, it is gone.
+        </p>
+      </div>
+    </section>
+
+    <!-- Filters + product grid -->
+    <section class="section">
+      <div class="container shop-layout">
+        <aside class="shop-filters" aria-label="Filters">
+          <h2 class="filters-title">Refine</h2>
+
+          <label class="filter-group">
+            <span class="filter-label">Era</span>
+            <select id="filter-era" class="filter-select">
+              <option value="">All eras</option>
+              <option value="Victorian">Victorian</option>
+              <option value="Edwardian">Edwardian</option>
+              <option value="Art Deco">Art Deco</option>
+              <option value="Georgian">Georgian</option>
+              <option value="Retro">Mid-century / Retro</option>
+            </select>
+          </label>
+
+          <label class="filter-group">
+            <span class="filter-label">Category</span>
+            <select id="filter-category" class="filter-select">
+              <option value="">All categories</option>
+              <option value="rings">Rings</option>
+              <option value="necklaces">Necklaces</option>
+              <option value="bracelets">Bracelets</option>
+              <option value="earrings">Earrings</option>
+              <option value="brooches">Brooches</option>
+            </select>
+          </label>
+
+          <label class="filter-group">
+            <span class="filter-label">Sort</span>
+            <select id="filter-sort" class="filter-select">
+              <option value="newest">Newest first</option>
+              <option value="price-asc">Price · Low to high</option>
+              <option value="price-desc">Price · High to low</option>
+            </select>
+          </label>
+
+          <button id="clear-filters" class="btn btn-ghost btn-full">
+            Clear filters
+          </button>
+        </aside>
+
+        <div class="shop-results">
+          <div class="shop-results-header">
+            <p class="shop-count" id="product-count">Showing all pieces</p>
+          </div>
+
+          <!-- JS will render products here -->
+          <div id="product-list" class="product-grid"></div>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <script src="/src/js/products.js"></script>
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="brand-main">Robyn &amp; Gold</span>
+        <span class="brand-tagline">Antique Jewellery</span>
+      </div>
+      <div class="footer-links">
+        <a href="/pages/shop.html" class="footer-link">Shop</a>
+        <a href="/index.html#about" class="footer-link">About</a>
+        <a href="/index.html#ethos" class="footer-link">Ethos</a>
+        <a href="mailto:hello@robynandgold.com" class="footer-link">Contact</a>
+      </div>
+      <p class="footer-meta">© <span id="year"></span> Robyn &amp; Gold. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="../js/products.js"></script>
+  <script src="../js/cart.js"></script>
+  <script src="../js/main.js"></script>
   <script>
-    const container = document.getElementById('product-list');
-    products.forEach(p => {
-      const card = document.createElement('div');
-      card.className = 'product-card';
-      card.innerHTML = `
-        <a href="/src/pages/product-detail.html?id=${p.id}">
-          <img src="${p.image}" alt="${p.name}" />
-          <h3>${p.name}</h3>
-        </a>
-        <p class="price">£${p.price.toFixed(2)}</p>
-      `;
-      container.appendChild(card);
-    });
+    document.getElementById('year').textContent = new Date().getFullYear();
   </script>
 </body>
 </html>

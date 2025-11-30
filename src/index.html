@@ -1,28 +1,225 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Robyn and Gold — Antique Jewellery</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="/src/css/styles.css" />
+  <meta charset="UTF-8" />
+  <title>Robyn &amp; Gold — Antique Jewellery</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta
+    name="description"
+    content="Robyn &amp; Gold curates antique and vintage gold jewellery — one-of-a-kind rings and heirlooms, chosen for their craftsmanship and quiet beauty."
+  />
+
+  <!-- Google Fonts: classic serif + clean sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" type="image/png" href="images/favicon.png" />
 </head>
-<body>
-  <header>
-    <h1><a href="/src/index.html">Robyn and Gold</a></h1>
-    <nav><a href="/src/pages/shop.html">Shop</a> | <a href="/src/pages/cart.html">Cart</a></nav>
+<body class="page">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="brand">
+        <span class="brand-main">Robyn &amp; Gold</span>
+        <span class="brand-tagline">Antique Jewellery</span>
+      </a>
+
+      <nav class="nav">
+        <a href="pages/shop.html" class="nav-link">Shop</a>
+        <a href="#about" class="nav-link">Our story</a>
+        <a href="#ethos" class="nav-link">Ethos</a>
+        <a href="pages/cart.html" class="nav-link nav-link--cart">
+          Cart
+          <span id="cart-count" class="cart-count">0</span>
+        </a>
+      </nav>
+    </div>
   </header>
 
   <main>
+    <!-- HERO -->
     <section class="hero">
-      <h2>Timeless Antique Jewellery</h2>
-      <p>Carefully curated pieces from the Victorian and Art Deco eras.</p>
-      <a class="cta" href="/src/pages/shop.html">Shop the Collection</a>
+      <div class="container hero-inner">
+        <div class="hero-copy">
+          <p class="eyebrow">Curated antique rings</p>
+          <h1>Antique jewellery for lives that don’t follow trends.</h1>
+          <p class="hero-text">
+            Robyn &amp; Gold curates one-of-a-kind vintage and antique pieces in solid gold and natural diamonds –
+            jewellery chosen for its craftsmanship, history and quiet beauty.
+          </p>
+          <div class="hero-actions">
+            <a href="pages/shop.html" class="btn btn-primary">Explore the collection</a>
+            <a href="#about" class="btn btn-ghost">Our sourcing philosophy</a>
+          </div>
+        </div>
+
+        <div class="hero-image-panel">
+          <div class="hero-card hero-card--primary">
+            <img
+              src="images/hero-ring-1.jpg"
+              alt="Antique diamond ring from Robyn &amp; Gold"
+              class="hero-image"
+            />
+            <div class="hero-card-caption">
+              <p class="hero-card-title">The Heirloom Edit</p>
+              <p class="hero-card-text">Victorian, Edwardian &amp; Art Deco rings, chosen to be worn every day.</p>
+            </div>
+          </div>
+
+          <div class="hero-card hero-card--secondary">
+            <img
+              src="images/hero-ring-2.jpg"
+              alt="Vintage gold band"
+              class="hero-image"
+            />
+            <div class="hero-card-caption hero-card-caption--small">
+              <p class="hero-card-title">One-of-a-kind</p>
+              <p class="hero-card-text">Each piece is unique – once it’s gone, it’s gone.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURED PRODUCTS (you can wire real products later in JS) -->
+    <section class="section" aria-labelledby="featured-title">
+      <div class="container">
+        <div class="section-header">
+          <h2 id="featured-title">Featured rings</h2>
+          <a href="pages/shop.html" class="section-link">View all pieces</a>
+        </div>
+
+        <div class="product-grid">
+          <!-- Example cards – can be replaced or generated from JS/products.js -->
+          <article class="product-card">
+            <img
+              src="images/products/victorian-diamond-ring-1890.jpg"
+              alt="Victorian diamond ring"
+              class="product-card-image"
+            />
+            <div class="product-card-body">
+              <h3 class="product-card-title">Victorian Diamond Ring, c.1890</h3>
+              <p class="product-card-meta">18ct gold · Old-cut diamonds</p>
+              <p class="product-card-price">£2,450</p>
+              <a href="pages/product-detail.html?id=1" class="product-card-link">View details</a>
+            </div>
+          </article>
+
+          <article class="product-card">
+            <img
+              src="images/products/edwardian-sapphire-cluster-1905.jpg"
+              alt="Edwardian sapphire cluster ring"
+              class="product-card-image"
+            />
+            <div class="product-card-body">
+              <h3 class="product-card-title">Edwardian Sapphire Cluster, c.1905</h3>
+              <p class="product-card-meta">18ct gold &amp; platinum · Natural sapphire</p>
+              <p class="product-card-price">£3,150</p>
+              <a href="pages/product-detail.html?id=2" class="product-card-link">View details</a>
+            </div>
+          </article>
+
+          <article class="product-card">
+            <img
+              src="images/products/art-deco-solitaire-1930.jpg"
+              alt="Art Deco solitaire ring"
+              class="product-card-image"
+            />
+            <div class="product-card-body">
+              <h3 class="product-card-title">Art Deco Solitaire, c.1930</h3>
+              <p class="product-card-meta">Platinum · Old European-cut diamond</p>
+              <p class="product-card-price">£4,600</p>
+              <a href="pages/product-detail.html?id=3" class="product-card-link">View details</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="section section--alt">
+      <div class="container two-column">
+        <div class="two-column-block">
+          <h2>Jewellery with a past, chosen for your future.</h2>
+          <p>
+            Robyn &amp; Gold was born from a quiet obsession with jewellery that feels like it has lived a life before
+            yours. We work with trusted auction houses and private collections to source antique and vintage rings worth
+            passing on.
+          </p>
+          <p>
+            Every piece is carefully assessed, lightly restored only where necessary, and photographed without filters
+            so you can see what we see: patina, character and that elusive, old-world sparkle.
+          </p>
+        </div>
+        <div class="two-column-block two-column-block--border">
+          <p class="eyebrow">Based in Ireland</p>
+          <p>
+            Each ring is shipped from Ireland in fully insured packaging, with a handwritten note detailing its story,
+            metal and stones. We are happy to answer questions about sizing, styling and care before you purchase.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ETHOS / WHY ANTIQUE -->
+    <section id="ethos" class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Why antique?</h2>
+        </div>
+
+        <div class="pillars">
+          <div class="pillar">
+            <h3>Craftsmanship first</h3>
+            <p>
+              Before mass production, jewellers carved, engraved and set each stone by hand. That care is still visible
+              today in crisp settings, balanced proportions and fine details.
+            </p>
+          </div>
+          <div class="pillar">
+            <h3>Responsible luxury</h3>
+            <p>
+              Choosing antique extends the life of existing gold and diamonds, reducing the need for new mining while
+              still offering something truly special.
+            </p>
+          </div>
+          <div class="pillar">
+            <h3>One-of-a-kind</h3>
+            <p>
+              Once a Robyn &amp; Gold piece finds its owner, it is gone. No restocks, just a small, evolving collection
+              of rings with real character.
+            </p>
+          </div>
+        </div>
+      </div>
     </section>
   </main>
 
-  <footer>
-    <p>Email: hello@robynandgold.com | Phone: +44 123 456 7890</p>
-    <p>&copy; 2025 Robyn and Gold. All rights reserved.</p>
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="brand-main">Robyn &amp; Gold</span>
+        <span class="brand-tagline">Antique Jewellery</span>
+      </div>
+      <div class="footer-links">
+        <a href="pages/shop.html" class="footer-link">Shop</a>
+        <a href="#about" class="footer-link">About</a>
+        <a href="#ethos" class="footer-link">Ethos</a>
+        <a href="mailto:hello@robynandgold.com" class="footer-link">Contact</a>
+      </div>
+      <p class="footer-meta">© <span id="year"></span> Robyn &amp; Gold. All rights reserved.</p>
+    </div>
   </footer>
+
+  <script src="js/cart.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    // tiny enhancement for year + cart badge if you already track cart length
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Shop — Robyn and Gold</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/src/css/styles.css" />
+</head>
+<body>
+  <header><h1>Shop</h1><a href="/src/pages/cart.html">Cart</a></header>
+  <main>
+    <div id="product-list" class="product-grid"></div>
+  </main>
+
+  <script src="/src/js/products.js"></script>
+  <script>
+    const container = document.getElementById('product-list');
+    products.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.innerHTML = `
+        <a href="/src/pages/product-detail.html?id=${p.id}">
+          <img src="${p.image}" alt="${p.name}" />
+          <h3>${p.name}</h3>
+        </a>
+        <p class="price">£${p.price.toFixed(2)}</p>
+      `;
+      container.appendChild(card);
+    });
+  </script>
+</body>
+</html>

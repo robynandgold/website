@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Product — Robyn and Gold</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/src/css/styles.css" />
+</head>
+<body>
+  <header><a href="/src/pages/shop.html">Back to shop</a></header>
+  <main id="detail"></main>
+
+  <script src="/src/js/products.js"></script>
+  <script src="/src/js/cart.js"></script>
+  <script>
+    function getParam(name) {
+      return new URLSearchParams(window.location.search).get(name);
+    }
+    const id = Number(getParam('id'));
+    const prod = products.find(p => p.id === id);
+    const el = document.getElementById('detail');
+    if (!prod) {
+      el.innerHTML = '<p>Product not found.</p>';
+    } else {
+      el.innerHTML = `
+        <img class="detail-img" src="${prod.image}" alt="${prod.name}" />
+        <h1>${prod.name}</h1>
+        <p class="price">£${prod.price.toFixed(2)}</p>
+        <p>${prod.description}</p>
+        <button id="add">Add to cart</button>
+      `;
+      document.getElementById('add').addEventListener('click', () => {
+        window.RGCart.addToCart(prod, 1);
+        alert('Added to cart');
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Cart — Robyn and Gold</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/src/css/styles.css" />
+</head>
+<body>
+  <header><a href="/src/pages/shop.html">Continue shopping</a></header>
+  <main>
+    <h1>Your cart</h1>
+    <div id="cart-contents"></div>
+    <div id="cart-total"></div>
+    <button id="checkout">Checkout with Stripe</button>
+  </main>
+
+  <script src="/src/js/cart.js"></script>
+  <script src="/src/js/stripe-integration.js"></script>
+  <script>
+    function render() {
+      const container = document.getElementById('cart-contents');
+      container.innerHTML = '';
+      const cart = window.RGCart.getCart();
+      if (!cart || cart.length === 0) {
+        container.innerHTML = '<p>Your cart is empty.</p>';
+      } else {
+        cart.forEach(item => {
+          const row = document.createElement('div');
+          row.className = 'cart-row';
+          row.innerHTML = `<strong>${item.name}</strong> x ${item.quantity} — £${(item.price * item.quantity).toFixed(2)}
+            <button data-id="${item.id}" class="remove">Remove</button>`;
+          container.appendChild(row);
+        });
+      }
+      document.getElementById('cart-total').textContent = 'Total: £' + window.RGCart.cartTotal().toFixed(2);
+      document.querySelectorAll('.remove').forEach(btn => btn.addEventListener('click', e => {
+        window.RGCart.removeFromCart(Number(e.target.dataset.id));
+        render();
+      }));
+    }
+
+    document.getElementById('checkout').addEventListener('click', checkoutCart);
+    render();
+  </script>
+</body>
+</html>

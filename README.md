@@ -1,86 +1,109 @@
-# Robyn and Gold - Antique Jewellery Shop
+# Robyn & Gold - Antique Jewellery
 
-A complete e-commerce website for Robyn and Gold antique jewellery with Stripe payment integration.
+An elegant ecommerce site for antique rings and jewellery, featuring a minimalist "old money" aesthetic with parchment backgrounds, gold accents, and refined typography.
 
 **Live Site:** https://robynandgold.com
 
-## Features
+## Architecture
 
-- 🎨 Elegant, responsive design optimized for antique jewellery
-- 🛍️ Product catalog with filtering by era and category
-- 🛒 Full shopping cart functionality
-- 💳 Secure Stripe payment integration
-- 📱 Mobile-friendly responsive layout
-- 🔒 SSL security (automatic with Vercel)
-- ⚡ Fast loading with optimized images
+- **Platform**: Vercel
+- **Backend**: Serverless functions (`@vercel/node`)
+- **Frontend**: Static HTML/CSS/JavaScript (`@vercel/static`)
+- **Payments**: Stripe Checkout
+- **Data**: JSON-based product catalog (`/src/data/products.json`)
 
 ## Quick Start
 
-1. **Clone and Install:**
+### 1. Install Dependencies
+
 ```bash
-cd c:\Git\test\robynandgold
 npm install
 ```
 
-2. **Add Your Stripe Keys:**
-Create `.env` file (copy from `.env.example`):
-```
-STRIPE_PUBLISHABLE_KEY=pk_live_your_key_here
-STRIPE_SECRET_KEY=sk_live_your_key_here
-SITE_URL=https://robynandgold.com
+### 2. Set Environment Variables
+
+Create environment variables in Vercel dashboard or `.env.local` for local development:
+
+```env
+STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
+STRIPE_CURRENCY=eur
+SITE_URL=http://localhost:3000
 ```
 
-3. **Test Locally:**
+### 3. Run Locally
+
 ```bash
-npm start
+npm run dev
 ```
-Open http://localhost:3000
 
-4. **Deploy to Vercel:**
+This starts Vercel dev server at `http://localhost:3000`
+
+### 4. Deploy to Vercel
+
 ```bash
 vercel --prod
 ```
 
 ---
 
-## Adding Products
+## Managing Products
 
-### Step 1: Add Product Images
+### Product Data Structure
 
-1. Place high-quality images in `src/images/products/`
-2. Recommended specs:
-   - **Format:** JPG or PNG
-   - **Size:** 1000x1000px (square)
-   - **File size:** Under 500KB (compress at tinypng.com)
-   - **Naming:** Use descriptive names (e.g., `victorian-diamond-ring-1890.jpg`)
+All products are stored in **`/src/data/products.json`**. This is the **single source of truth** for your inventory.
 
-### Step 2: Update Product Database
+### How to Add a New Product
 
-Edit `src/js/products.js`:
+1. **Add product images** to `/src/images/products/`
+   - Use descriptive filenames (e.g., `victorian-ruby-ring-1.jpg`)
+   - Include 3-5 images per product for best presentation
+   - Recommended: 1000x1000px, under 500KB per image
 
-```javascript
+2. **Edit `/src/data/products.json`**
+   - Copy an existing product object as a template
+   - Update all fields:
+
+```json
 {
-    id: 1,
-    name: 'Victorian Diamond Ring',
-    description: 'Exquisite Victorian-era diamond ring featuring...',
-    price: 2500.00,  // Price in GBP
-    image: 'images/products/victorian-diamond-ring.jpg',
-    category: 'rings',  // rings, necklaces, bracelets, earrings, brooches
-    condition: 'Excellent',  // Excellent, Very Good, Good
-    era: 'Victorian',  // Victorian, Edwardian, Art Deco, Georgian, Retro
-    metal: '18ct Gold',
-    stone: 'Diamond',
-    year: '1890'
+  "id": "unique-product-id",
+  "name": "Victorian Ruby Ring",
+  "slug": "victorian-ruby-ring",
+  "era": "Victorian, c.1880",
+  "description": "A charming Victorian cluster ring centered with a Burmese ruby surrounded by old cut diamonds...",
+  "metal": "18ct Yellow Gold",
+  "stones": "Burmese Ruby (0.65ct), Old Cut Diamonds (0.50ct total)",
+  "size": "UK M / US 6.25",
+  "price": 3200,
+  "currency": "EUR",
+  "featured": false,
+  "period": "Victorian",
+  "style": "Cluster",
+  "images": [
+    "/images/products/victorian-ruby-ring-1.jpg",
+    "/images/products/victorian-ruby-ring-2.jpg",
+    "/images/products/victorian-ruby-ring-3.jpg"
+  ]
 }
 ```
 
-### Easy Product Management
+3. **Save the file** - Changes appear immediately (no build step needed for static files)
 
-Just add entries to the `products` array in `products.js`. The website will automatically:
-- Display products on the shop page
-- Create individual product detail pages
-- Enable "Add to Cart" functionality
-- Calculate pricing and checkout
+### How to Update Price or Description
+
+1. Open `/src/data/products.json`
+2. Find the product by `id`, `slug`, or `name`
+3. Edit the `price`, `description`, or any other field
+4. Save the file and deploy
+
+### How to Feature a Product on Homepage
+
+Set `"featured": true` in the product object. The homepage displays the first 3 featured products.
+
+### How to Change Product Images
+
+1. Upload new images to `/src/images/products/`
+2. Update the `images` array in the product object with new paths
+3. Keep 3-5 images per product for the gallery
 
 ---
 

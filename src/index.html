@@ -88,7 +88,7 @@
       </div>
     </section>
 
-    <!-- FEATURED PRODUCTS (you can wire real products later in JS) -->
+    <!-- FEATURED PRODUCTS -->
     <section class="section" aria-labelledby="featured-title">
       <div class="container">
         <div class="section-header">
@@ -97,7 +97,7 @@
         </div>
 
         <div class="product-grid">
-          <!-- Example cards – can be replaced or generated from JS/products.js -->
+          <!-- Products loaded dynamically from /src/data/products.json -->
           <article class="product-card">
             <img
               src="images/products/victorian-diamond-ring-1890.jpg"
@@ -219,10 +219,40 @@
   </footer>
 
   <script src="js/cart.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/products.js"></script>
   <script>
-    // tiny enhancement for year + cart badge if you already track cart length
+    // Set current year
     document.getElementById('year').textContent = new Date().getFullYear();
+    
+    // Load featured products
+    async function loadFeaturedProducts() {
+      const products = await window.ProductsAPI.getFeaturedProducts();
+      const grid = document.querySelector('.product-grid');
+      
+      if (!grid || products.length === 0) return;
+      
+      grid.innerHTML = products.slice(0, 3).map(product => `
+        <article class="product-card">
+          <a href="pages/product-detail.html?slug=${product.slug}">
+            <img
+              src="${product.images[0]}"
+              alt="${product.name}"
+              class="product-card-image"
+              onerror="this.src='/images/products/placeholder.jpg'"
+            />
+          </a>
+          <div class="product-card-body">
+            <h3 class="product-card-title">${product.name}</h3>
+            <p class="product-card-meta">${product.era} · ${product.metal}</p>
+            <p class="product-card-price">${window.ProductsAPI.formatPrice(product.price, product.currency)}</p>
+            <a href="pages/product-detail.html?slug=${product.slug}" class="product-card-link">View details</a>
+          </div>
+        </article>
+      `).join('');
+    }
+    
+    // Load products when page loads
+    document.addEventListener('DOMContentLoaded', loadFeaturedProducts);
   </script>
 </body>
 </html>

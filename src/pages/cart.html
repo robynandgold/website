@@ -107,9 +107,76 @@
 
   <script src="../js/cart.js"></script>
   <script src="../js/stripe-integration.js"></script>
-  <script src="../js/main.js"></script>
+  <script src="../js/products.js"></script>
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
+    
+    // Render cart items
+    function renderCart() {
+      const cart = window.CartAPI.getCart();
+      const itemsContainer = document.getElementById('cart-items');
+      const emptyMessage = document.getElementById('cart-empty-message');
+      const subtotalEl = document.getElementById('cart-subtotal');
+      const checkoutBtn = document.getElementById('checkout-button');
+      
+      if (!cart || cart.length === 0) {
+        itemsContainer.innerHTML = '';
+        emptyMessage.hidden = false;
+        subtotalEl.textContent = window.ProductsAPI.formatPrice(0, 'EUR');
+        checkoutBtn.disabled = true;
+        return;
+      }
+      
+      emptyMessage.hidden = true;
+      checkoutBtn.disabled = false;
+      
+      // Render each cart item
+      itemsContainer.innerHTML = cart.map(item => `
+        <div class="cart-item" data-id="${item.id}">
+          <img 
+            src=".${item.image}" 
+            alt="${item.name}" 
+            class="product-card-image"
+            style="width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-md);"
+            onerror="this.src='../images/products/placeholder.jpg'"
+          />
+          <div>
+            <h3 class="product-card-title" style="margin-bottom: 0.3rem;">${item.name}</h3>
+            <p class="product-card-meta" style="margin-bottom: 0.5rem;">${item.era}</p>
+            <p class="product-card-price">${window.ProductsAPI.formatPrice(item.price, item.currency)}</p>
+          </div>
+          <div>
+            <button class="remove-item" data-id="${item.id}" style="background: none; border: none; color: var(--muted); text-decoration: underline; cursor: pointer; font-size: 0.85rem;">
+              Remove
+            </button>
+          </div>
+        </div>
+      `).join('');
+      
+      // Update subtotal
+      const total = window.CartAPI.getCartTotal();
+      subtotalEl.textContent = window.ProductsAPI.formatPrice(total, 'EUR');
+      
+      // Add remove button listeners
+      document.querySelectorAll('.remove-item').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const productId = e.target.dataset.id;
+          window.CartAPI.removeFromCart(productId);
+          renderCart();
+        });
+      });
+    }
+    
+    // Setup checkout button
+    document.getElementById('checkout-button').addEventListener('click', () => {
+      window.StripeCheckout.initiateCheckout();
+    });
+    
+    // Listen for cart updates
+    window.addEventListener('cartUpdated', renderCart);
+    
+    // Initial render
+    document.addEventListener('DOMContentLoaded', renderCart);
   </script>
 </body>
 </html>

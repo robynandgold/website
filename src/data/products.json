@@ -1,0 +1,168 @@
+[
+  {
+    "id": "victorian-rose-cut-diamond-ring",
+    "name": "Victorian Rose Cut Diamond Ring",
+    "slug": "victorian-rose-cut-diamond-ring",
+    "era": "Victorian, c.1890",
+    "description": "An exquisite Victorian-era ring featuring a rose cut diamond set in 18ct yellow gold. The hand-carved gallery work demonstrates the finest craftsmanship of the period. This piece has been carefully restored while maintaining its original character and patina.",
+    "metal": "18ct Yellow Gold",
+    "stones": "Rose Cut Diamond (approx. 0.45ct)",
+    "size": "UK M / US 6.25",
+    "price": 2850,
+    "currency": "EUR",
+    "featured": true,
+    "period": "Victorian",
+    "style": "Solitaire",
+    "images": [
+      "/images/products/victorian-rose-diamond-1.jpg",
+      "/images/products/victorian-rose-diamond-2.jpg",
+      "/images/products/victorian-rose-diamond-3.jpg",
+      "/images/products/victorian-rose-diamond-4.jpg"
+    ]
+  },
+  {
+    "id": "edwardian-sapphire-platinum-ring",
+    "name": "Edwardian Sapphire & Diamond Ring",
+    "slug": "edwardian-sapphire-platinum-ring",
+    "era": "Edwardian, c.1910",
+    "description": "A stunning Edwardian ring showcasing a natural Ceylon sapphire surrounded by old mine cut diamonds. Set in platinum with intricate milgrain detailing. The craftsmanship reflects the elegance and refinement of the Edwardian era.",
+    "metal": "Platinum",
+    "stones": "Natural Sapphire (1.2ct), Old Mine Cut Diamonds (0.60ct total)",
+    "size": "UK N / US 6.75",
+    "price": 4250,
+    "currency": "EUR",
+    "featured": true,
+    "period": "Edwardian",
+    "style": "Cluster",
+    "images": [
+      "/images/products/edwardian-sapphire-1.jpg",
+      "/images/products/edwardian-sapphire-2.jpg",
+      "/images/products/edwardian-sapphire-3.jpg",
+      "/images/products/edwardian-sapphire-4.jpg",
+      "/images/products/edwardian-sapphire-5.jpg"
+    ]
+  },
+  {
+    "id": "art-deco-emerald-ring",
+    "name": "Art Deco Emerald & Diamond Ring",
+    "slug": "art-deco-emerald-ring",
+    "era": "Art Deco, c.1925",
+    "description": "A magnificent Art Deco ring featuring a Colombian emerald flanked by baguette diamonds. The geometric design is quintessentially Art Deco, with clean lines and architectural symmetry. Crafted in platinum with exceptional attention to detail.",
+    "metal": "Platinum",
+    "stones": "Colombian Emerald (1.5ct), Baguette Diamonds (0.40ct total)",
+    "size": "UK L / US 5.75",
+    "price": 5600,
+    "currency": "EUR",
+    "featured": true,
+    "period": "Art Deco",
+    "style": "Three Stone",
+    "images": [
+      "/images/products/art-deco-emerald-1.jpg",
+      "/images/products/art-deco-emerald-2.jpg",
+      "/images/products/art-deco-emerald-3.jpg"
+    ]
+  },
+  {
+    "id": "georgian-mourning-ring",
+    "name": "Georgian Mourning Ring",
+    "slug": "georgian-mourning-ring",
+    "era": "Georgian, c.1820",
+    "description": "A rare Georgian mourning ring with black enamel detailing and a central memorial compartment. The band features 'In Memory Of' inscription in elegant script. A poignant piece of history, beautifully preserved.",
+    "metal": "18ct Yellow Gold",
+    "stones": "Black Enamel, Table Cut Diamond",
+    "size": "UK O / US 7",
+    "price": 1950,
+    "currency": "EUR",
+    "featured": false,
+    "period": "Georgian",
+    "style": "Memorial",
+    "images": [
+      "/images/products/georgian-mourning-1.jpg",
+      "/images/products/georgian-mourning-2.jpg",
+      "/images/products/georgian-mourning-3.jpg",
+      "/images/products/georgian-mourning-4.jpg"
+    ]
+  },
+  {
+    "id": "victorian-ruby-cluster-ring",
+    "name": "Victorian Ruby Cluster Ring",
+    "slug": "victorian-ruby-cluster-ring",
+    "era": "Victorian, c.1880",
+    "description": "A charming Victorian cluster ring centered with a Burmese ruby surrounded by old cut diamonds. The flower-head design was highly popular during the Victorian period. Set in 18ct gold with a delicate carved gallery.",
+    "metal": "18ct Yellow Gold",
+    "stones": "Burmese Ruby (0.65ct), Old Cut Diamonds (0.50ct total)",
+    "size": "UK M / US 6.25",
+    "price": 3200,
+    "currency": "EUR",
+    "featured": false,
+    "period": "Victorian",
+    "style": "Cluster",
+    "images": [
+      "/images/products/victorian-ruby-cluster-1.jpg",
+      "/images/products/victorian-ruby-cluster-2.jpg",
+      "/images/products/victorian-ruby-cluster-3.jpg"
+    ]
+  },
+  {
+    "id": "art-nouveau-opal-ring",
+    "name": "Art Nouveau Opal Ring",
+    "slug": "art-nouveau-opal-ring",
+    "era": "Art Nouveau, c.1900",
+    "description": "An enchanting Art Nouveau ring featuring a large Australian opal with remarkable play of color. The flowing, organic setting is characteristic of the Art Nouveau movement. Crafted in 9ct gold with naturalistic detailing.",
+    "metal": "9ct Yellow Gold",
+    "stones": "Australian Opal (2.1ct)",
+    "size": "UK N / US 6.75",
+    "price": 1650,
+    "currency": "EUR",
+    "featured": false,
+    "period": "Art Nouveau",
+    "style": "Solitaire",
+    "images": [
+      "/images/products/art-nouveau-opal-1.jpg",
+      "/images/products/art-nouveau-opal-2.jpg",
+      "/images/products/art-nouveau-opal-3.jpg",
+      "/images/products/art-nouveau-opal-4.jpg"
+    ]
+  },
+  {
+    "id": "retro-aquamarine-cocktail-ring",
+    "name": "Retro Aquamarine Cocktail Ring",
+    "slug": "retro-aquamarine-cocktail-ring",
+    "era": "Retro, c.1945",
+    "description": "A bold Retro-era cocktail ring showcasing a large aquamarine in a sculptural gold setting. The substantial design reflects the glamorous aesthetic of the 1940s. Perfect as a statement piece.",
+    "metal": "14ct Yellow Gold",
+    "stones": "Aquamarine (4.5ct)",
+    "size": "UK P / US 7.5",
+    "price": 2400,
+    "currency": "EUR",
+    "featured": false,
+    "period": "Retro",
+    "style": "Cocktail",
+    "images": [
+      "/images/products/retro-aquamarine-1.jpg",
+      "/images/products/retro-aquamarine-2.jpg",
+      "/images/products/retro-aquamarine-3.jpg"
+    ]
+  },
+  {
+    "id": "edwardian-pearl-diamond-ring",
+    "name": "Edwardian Pearl & Diamond Ring",
+    "slug": "edwardian-pearl-diamond-ring",
+    "era": "Edwardian, c.1905",
+    "description": "A delicate Edwardian ring featuring a natural pearl flanked by old European cut diamonds. The platinum setting showcases the period's finest filigree work. Elegant and timeless.",
+    "metal": "Platinum",
+    "stones": "Natural Pearl (6mm), Old European Cut Diamonds (0.30ct total)",
+    "size": "UK L / US 5.75",
+    "price": 2750,
+    "currency": "EUR",
+    "featured": false,
+    "period": "Edwardian",
+    "style": "Three Stone",
+    "images": [
+      "/images/products/edwardian-pearl-1.jpg",
+      "/images/products/edwardian-pearl-2.jpg",
+      "/images/products/edwardian-pearl-3.jpg",
+      "/images/products/edwardian-pearl-4.jpg"
+    ]
+  }
+]

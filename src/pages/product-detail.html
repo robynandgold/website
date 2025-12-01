@@ -92,9 +92,154 @@
 
   <script src="../js/products.js"></script>
   <script src="../js/cart.js"></script>
-  <script src="../js/main.js"></script>
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
+    
+    let currentProduct = null;
+    let currentImageIndex = 0;
+    
+    // Get slug from URL
+    function getSlugFromURL() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('slug');
+    }
+    
+    // Load product details
+    async function loadProduct() {
+      const slug = getSlugFromURL();
+      
+      if (!slug) {
+        document.getElementById('product-detail').innerHTML = '<p>Product not found</p>';
+        return;
+      }
+      
+      currentProduct = await window.ProductsAPI.getProductBySlug(slug);
+      
+      if (!currentProduct) {
+        document.getElementById('product-detail').innerHTML = '<p>Product not found</p>';
+        return;
+      }
+      
+      // Update page title
+      document.title = `${currentProduct.name} — Robyn & Gold`;
+      
+      renderProduct();
+    }
+    
+    // Render product details
+    function renderProduct() {
+      const container = document.getElementById('product-detail');
+      
+      container.innerHTML = `
+        <div class="product-detail-image">
+          <img 
+            id="main-image" 
+            src=".${currentProduct.images[0]}" 
+            alt="${currentProduct.name}"
+            onerror="this.src='../images/products/placeholder.jpg'"
+          />
+          ${currentProduct.images.length > 1 ? `
+            <div class="thumbnail-grid" style="margin-top: 1rem;">
+              ${currentProduct.images.map((img, index) => `
+                <div class="thumbnail ${index === 0 ? 'active' : ''}" data-index="${index}">
+                  <img src=".${img}" alt="${currentProduct.name} view ${index + 1}" />
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+        
+        <div class="product-detail-info">
+          <p class="eyebrow">${currentProduct.period} · ${currentProduct.era}</p>
+          <h1 class="product-detail-title">${currentProduct.name}</h1>
+          <p class="product-detail-meta">${currentProduct.metal} · ${currentProduct.stones} · ${currentProduct.size}</p>
+          <p class="product-detail-price">${window.ProductsAPI.formatPrice(currentProduct.price, currentProduct.currency)}</p>
+          
+          <button id="add-to-cart-btn" class="btn btn-primary" style="margin-top: 1.5rem;">
+            Add to cart
+          </button>
+          <p id="cart-message" style="margin-top: 0.8rem; font-size: 0.9rem; color: var(--muted); display: none;"></p>
+          
+          <div class="product-detail-copy" style="margin-top: 1.8rem;">
+            <p>${currentProduct.description}</p>
+          </div>
+          
+          <div style="margin-top: 1.5rem; padding: 1.2rem; background: var(--bg-alt); border-radius: var(--radius-md);">
+            <h3 style="font-size: 0.95rem; margin-bottom: 0.8rem;">Details</h3>
+            <div style="display: grid; gap: 0.5rem; font-size: 0.9rem;">
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: var(--muted);">Metal:</span>
+                <span>${currentProduct.metal}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: var(--muted);">Stones:</span>
+                <span>${currentProduct.stones}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: var(--muted);">Size:</span>
+                <span>${currentProduct.size}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: var(--muted);">Period:</span>
+                <span>${currentProduct.period}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: var(--muted);">Style:</span>
+                <span>${currentProduct.style}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Add event listeners
+      setupImageGallery();
+      setupAddToCart();
+    }
+    
+    // Setup image gallery thumbnails
+    function setupImageGallery() {
+      const thumbnails = document.querySelectorAll('.thumbnail');
+      const mainImage = document.getElementById('main-image');
+      
+      thumbnails.forEach(thumb => {
+        thumb.addEventListener('click', () => {
+          const index = parseInt(thumb.dataset.index);
+          currentImageIndex = index;
+          
+          // Update main image
+          mainImage.src = `.${currentProduct.images[index]}`;
+          
+          // Update active thumbnail
+          thumbnails.forEach(t => t.classList.remove('active'));
+          thumb.classList.add('active');
+        });
+      });
+    }
+    
+    // Setup add to cart button
+    function setupAddToCart() {
+      const btn = document.getElementById('add-to-cart-btn');
+      const message = document.getElementById('cart-message');
+      
+      btn.addEventListener('click', () => {
+        const result = window.CartAPI.addToCart(currentProduct);
+        
+        message.textContent = result.message;
+        message.style.display = 'block';
+        message.style.color = result.success ? 'var(--accent)' : 'var(--muted)';
+        
+        if (result.success) {
+          btn.textContent = 'Added to cart';
+          setTimeout(() => {
+            btn.textContent = 'Add to cart';
+          }, 2000);
+        }
+      });
+    }
+    
+    // Load product on page load
+    document.addEventListener('DOMContentLoaded', loadProduct);
   </script>
 </body>
 </html>

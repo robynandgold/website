@@ -1,30 +1,154 @@
-const products = [
-  {
-    id: 1,
-    name: 'Victorian Diamond Ring',
-    description: 'Exquisite Victorian-era diamond ring featuring a round-cut diamond set in 18ct gold.',
-    price: 2500.00,
-    image: '/src/images/products/victorian-diamond-ring.svg',
-    category: 'rings',
-    condition: 'Excellent',
-    era: 'Victorian',
-    metal: '18ct Gold',
-    stone: 'Diamond',
-    year: '1890'
-  },
-  {
-    id: 2,
-    name: 'Art Deco Sapphire Pendant',
-    description: 'Rare Art Deco pendant with a deep blue sapphire and filigree details.',
-    price: 1450.00,
-    image: '/src/images/products/art-deco-sapphire-pendant.svg',
-    category: 'necklaces',
-    condition: 'Very Good',
-    era: 'Art Deco',
-    metal: 'Platinum',
-    stone: 'Sapphire',
-    year: '1925'
-  }
-];
+/**
+ * PRODUCTS.JS - Product Data Management
+ * ========================================
+ * 
+ * This module handles loading and filtering product data from /src/data/products.json
+ * All pages (home, shop, product detail) use this centralized data source.
+ * 
+ * HOW TO MANAGE PRODUCTS:
+ * 
+ * 1. ADD A NEW PRODUCT:
+ *    - Open /src/data/products.json
+ *    - Copy an existing product object and modify all fields
+ *    - Add product images to /src/images/products/ folder
+ *    - Update the "images" array with correct paths (e.g., "/images/products/your-ring-1.jpg")
+ *    - Set "featured": true if you want it on the homepage
+ * 
+ * 2. UPDATE PRICE/DESCRIPTION:
+ *    - Open /src/data/products.json
+ *    - Find the product by "id" or "name"
+ *    - Edit "price", "description", or any other field
+ *    - Save the file - changes appear immediately
+ * 
+ * 3. CHANGE IMAGES:
+ *    - Upload new images to /src/images/products/
+ *    - Update the "images" array in products.json with new filenames
+ *    - Keep 3-5 images per product for best presentation
+ */
 
-if (typeof module !== 'undefined') module.exports = products;
+let cachedProducts = null;
+
+/**
+ * Load products from JSON file
+ */
+async function loadProducts() {
+  if (cachedProducts) {
+    return cachedProducts;
+  }
+  
+  try {
+    const response = await fetch('/data/products.json');
+    if (!response.ok) {
+      throw new Error('Failed to load products');
+    }
+    cachedProducts = await response.json();
+    return cachedProducts;
+  } catch (error) {
+    console.error('Error loading products:', error);
+    return [];
+  }
+}
+
+/**
+ * Get all products
+ */
+async function getAllProducts() {
+  return await loadProducts();
+}
+
+/**
+ * Get featured products for homepage
+ */
+async function getFeaturedProducts() {
+  const products = await loadProducts();
+  return products.filter(product => product.featured === true);
+}
+
+/**
+ * Get product by slug
+ */
+async function getProductBySlug(slug) {
+  const products = await loadProducts();
+  return products.find(product => product.slug === slug);
+}
+
+/**
+ * Get product by ID
+ */
+async function getProductById(id) {
+  const products = await loadProducts();
+  return products.find(product => product.id === id);
+}
+
+/**
+ * Filter products by period
+ */
+async function filterByPeriod(period) {
+  const products = await loadProducts();
+  if (!period || period === 'all') {
+    return products;
+  }
+  return products.filter(product => 
+    product.period.toLowerCase() === period.toLowerCase()
+  );
+}
+
+/**
+ * Filter products by style
+ */
+async function filterByStyle(style) {
+  const products = await loadProducts();
+  if (!style || style === 'all') {
+    return products;
+  }
+  return products.filter(product => 
+    product.style.toLowerCase() === style.toLowerCase()
+  );
+}
+
+/**
+ * Format price for display
+ */
+function formatPrice(price, currency = 'EUR') {
+  const formatter = new Intl.NumberFormat('en-IE', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  });
+  return formatter.format(price);
+}
+
+/**
+ * Get unique periods from all products
+ */
+async function getAllPeriods() {
+  const products = await loadProducts();
+  const periods = [...new Set(products.map(p => p.period))];
+  return periods.sort();
+}
+
+/**
+ * Get unique styles from all products
+ */
+async function getAllStyles() {
+  const products = await loadProducts();
+  const styles = [...new Set(products.map(p => p.style))];
+  return styles.sort();
+}
+
+// Export functions for use in other files
+if (typeof window !== 'undefined') {
+  window.ProductsAPI = {
+    loadProducts,
+    getAllProducts,
+    getFeaturedProducts,
+    getProductBySlug,
+    getProductById,
+    filterByPeriod,
+    filterByStyle,
+    formatPrice,
+    getAllPeriods,
+    getAllStyles
+  };
+}

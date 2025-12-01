@@ -124,10 +124,11 @@ a {
 }
 
 .brand-logo {
-  height: 42px;         /* adjust if needed: 36–48px works perfectly for your circular logo */
+  height: 60px;         /* increased from 42px */
   width: auto;
   display: block;
-  border-radius: 50%;   /* optional — keeps it crisp */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
 .brand-text {

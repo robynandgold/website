@@ -5,6 +5,14 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Check for Stripe API key
+  if (!process.env.STRIPE_SECRET_KEY) {
+    console.error('STRIPE_SECRET_KEY is not set in environment variables');
+    return res.status(500).json({ 
+      error: 'Stripe is not configured. Please set STRIPE_SECRET_KEY in Vercel environment variables.' 
+    });
+  }
+
   try {
     const { items, successUrl, cancelUrl } = req.body;
 
@@ -14,7 +22,7 @@ module.exports = async (req, res) => {
 
     const line_items = items.map(item => ({
       price_data: {
-        currency: process.env.STRIPE_CURRENCY || 'gbp',
+        currency: item.currency || process.env.STRIPE_CURRENCY || 'eur',
         product_data: {
           name: item.name,
           description: item.description || undefined
@@ -28,8 +36,8 @@ module.exports = async (req, res) => {
       payment_method_types: ['card'],
       mode: 'payment',
       line_items,
-      success_url: successUrl || `${process.env.SITE_URL}/src/pages/success.html?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: cancelUrl || `${process.env.SITE_URL}/src/pages/cart.html`,
+      success_url: successUrl || `${process.env.SITE_URL}/pages/success.html?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: cancelUrl || `${process.env.SITE_URL}/pages/cart.html`,
     });
 
     res.status(200).json({ url: session.url, id: session.id });

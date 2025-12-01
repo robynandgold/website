@@ -22,13 +22,34 @@ npm install
 
 ### 2. Set Environment Variables
 
-Create environment variables in Vercel dashboard or `.env.local` for local development:
+**For Local Development:**
 
+1. Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
+```
+
+2. Edit `.env` and add your Stripe secret key:
 ```env
-STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
+STRIPE_SECRET_KEY=sk_test_your_actual_stripe_secret_key
 STRIPE_CURRENCY=eur
 SITE_URL=http://localhost:3000
 ```
+
+**For Production (Vercel):**
+
+Set environment variables in Vercel Dashboard:
+1. Go to your project in Vercel
+2. Settings → Environment Variables
+3. Add these three variables:
+   - `STRIPE_SECRET_KEY` = `sk_live_your_live_stripe_secret_key`
+   - `STRIPE_CURRENCY` = `eur`
+   - `SITE_URL` = `https://yourdomain.com`
+
+**Important:** 
+- Never commit `.env` to git (it's in `.gitignore`)
+- Use `sk_test_` keys for testing, `sk_live_` for production
+- Get your keys from https://dashboard.stripe.com/apikeys
 
 ### 3. Run Locally
 
@@ -327,75 +348,81 @@ Edit footer in all HTML files:
 
 ---
 
+---
+
 ## Troubleshooting
 
+### "You did not provide an API key" Error
+
+**Problem:** Stripe checkout fails with authentication error.
+
+**Solution:**
+1. Check that `STRIPE_SECRET_KEY` is set in your environment:
+   - **Local:** Create `.env` file from `.env.example`
+   - **Vercel:** Go to Settings → Environment Variables
+   
+2. Verify you're using the **Secret Key** (starts with `sk_test_` or `sk_live_`), NOT the Publishable Key
+   
+3. Restart Vercel dev server after adding environment variables:
+   ```bash
+   vercel dev
+   ```
+
+4. For production, redeploy after adding environment variables:
+   ```bash
+   vercel --prod
+   ```
+
 ### Products Not Displaying
-- Check `products.js` for syntax errors
-- Verify image paths are correct
-- Open browser console for errors (F12)
 
-### Stripe Checkout Not Working
-- Verify API keys in Vercel environment variables
-- Check browser console for errors
-- Ensure you're using correct key type (test vs live)
+**Problem:** Shop page is empty or products don't load.
 
-### Domain Not Working
-- Verify DNS records are correct
-- Check DNS propagation status
-- Wait up to 48 hours for DNS to propagate
-- Ensure SSL certificate is active in Vercel
+**Solution:**
+- Check `/src/data/products.json` for syntax errors (missing commas, brackets)
+- Verify image paths in products.json match actual files
+- Open browser console (F12) to see JavaScript errors
+- Clear browser cache and hard reload (Ctrl+Shift+R)
 
-### Cart Not Persisting
-- Check browser localStorage is enabled
+### Cart Not Working
+
+**Problem:** Items don't stay in cart or cart count shows 0.
+
+**Solution:**
+- Check that browser localStorage is enabled (disable private/incognito mode)
 - Clear browser cache and cookies
-- Test in incognito mode
+- Open console and check for JavaScript errors
+- Verify `cart.js` is loaded on the page
+
+### Images Not Loading
+
+**Problem:** Product images show as broken.
+
+**Solution:**
+- Verify images exist in `/src/images/products/`
+- Check file paths in `products.json` are correct (e.g., `/images/products/ring-1.jpg`)
+- Ensure image filenames match exactly (case-sensitive)
+- Check image file formats are supported (JPG, PNG, WebP)
+
+### Domain/DNS Issues
+
+**Problem:** Custom domain not working.
+
+**Solution:**
+- Verify DNS records at your registrar match Vercel's requirements
+- Wait 24-48 hours for DNS propagation
+- Check DNS status: https://www.whatsmydns.net
+- Ensure SSL certificate is active in Vercel dashboard
 
 ---
 
 ## Support Resources
 
 - **Stripe Documentation:** https://stripe.com/docs
-- **Vercel Documentation:** https://vercel.com/docs
-- **GitHub Issues:** Create issue in repository
+- **Vercel Documentation:** https://vercel.com/docs  
 - **Stripe Support:** https://support.stripe.com
-
----
-
-## Performance Tips
-
-1. **Optimize Images:**
-   - Use tinypng.com or squoosh.app
-   - Target: under 500KB per image
-   - Use WebP format for better compression
-
-2. **Enable Caching:**
-   - Vercel automatically caches static assets
-   - Images cached for 1 year
-
-3. **Monitor Performance:**
-   - Use Google PageSpeed Insights
-   - Target score: 90+ for mobile and desktop
 
 ---
 
 ## License
 
-MIT License - Feel free to customize for your business
-
----
-
-## Changelog
-
-### v1.0.0 (2025-11-29)
-- Initial release
-- Stripe payment integration
-- Responsive design
-- Product catalog
-- Shopping cart
-- Vercel deployment ready
-
----
-
-**Built with ❤️ for Robyn and Gold**
-
-For questions or support, refer to the troubleshooting section above.
+© 2025 Robyn & Gold. All rights reserved.

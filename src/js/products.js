@@ -37,11 +37,14 @@ async function loadProducts() {
   }
   
   try {
+    console.log('Fetching products from /data/products.json');
     const response = await fetch('/data/products.json');
+    console.log('Fetch response:', response.status, response.ok);
     if (!response.ok) {
-      throw new Error('Failed to load products');
+      throw new Error(`Failed to load products: ${response.status}`);
     }
     cachedProducts = await response.json();
+    console.log('Products loaded:', cachedProducts);
     return cachedProducts;
   } catch (error) {
     console.error('Error loading products:', error);

@@ -1,24 +1,64 @@
 [
   {
-    "id": "victorian-rose-cut-diamond-ring",
-    "name": "Victorian Rose Cut Diamond Ring",
-    "slug": "victorian-rose-cut-diamond-ring",
-    "era": "Victorian, c.1890",
-    "description": "An exquisite Victorian-era ring featuring a rose cut diamond set in 18ct yellow gold. The hand-carved gallery work demonstrates the finest craftsmanship of the period. This piece has been carefully restored while maintaining its original character and patina.",
-    "metal": "18ct Yellow Gold",
-    "stones": "Rose Cut Diamond (approx. 0.45ct)",
-    "size": "UK M / US 6.25",
-    "price": 2850,
+    "id": "9ct-gold-diamond-crossover-ring",
+    "name": "9ct Gold Diamond Crossover Ring",
+    "slug": "9ct-gold-diamond-crossover-ring",
+    "era": "Contemporary",
+    "description": "An elegant channel-set diamond crossover ring crafted in 9ct gold. The modern design features a graceful crossover band with sparkling diamonds set in a secure channel setting. Weighing 2.8g, this piece offers both style and comfort.",
+    "metal": "9ct Yellow Gold",
+    "stones": "Channel-Set Diamonds",
+    "size": "UK P / US 7.5",
+    "price": 275,
     "currency": "EUR",
     "featured": true,
-    "period": "Victorian",
-    "style": "Solitaire",
+    "period": "Contemporary",
+    "style": "Crossover",
     "available": true,
     "images": [
-      "/images/products/victorian-rose-diamond-1.jpg",
-      "/images/products/victorian-rose-diamond-2.jpg",
-      "/images/products/victorian-rose-diamond-3.jpg",
-      "/images/products/victorian-rose-diamond-4.jpg"
+      "/images/products/9ct-gold-diamond-crossover-1.jpg",
+      "/images/products/9ct-gold-diamond-crossover-2.jpg",
+      "/images/products/9ct-gold-diamond-crossover-3.jpg"
+    ]
+  },
+  {
+    "id": "9ct-gold-diamond-crossover-ring-2",
+    "name": "9ct Gold Diamond Crossover Ring",
+    "slug": "9ct-gold-diamond-crossover-ring-2",
+    "era": "Contemporary",
+    "description": "An elegant channel-set diamond crossover ring crafted in 9ct gold. The modern design features a graceful crossover band with sparkling diamonds set in a secure channel setting. Weighing 2.8g, this piece offers both style and comfort.",
+    "metal": "9ct Yellow Gold",
+    "stones": "Channel-Set Diamonds",
+    "size": "UK P / US 7.5",
+    "price": 0.50,
+    "currency": "EUR",
+    "featured": true,
+    "period": "Contemporary",
+    "style": "Crossover",
+    "available": true,
+    "images": [
+      "/images/products/9ct-gold-diamond-crossover-1.jpg",
+      "/images/products/9ct-gold-diamond-crossover-2.jpg",
+      "/images/products/9ct-gold-diamond-crossover-3.jpg"
+    ]
+  },
+  {
+    "id": "9ct-gold-diamond-band",
+    "name": "9ct Gold Diamond Band",
+    "slug": "9ct-gold-diamond-band",
+    "era": "Contemporary",
+    "description": "A beautiful diamond band ring crafted in 9ct gold. The classic design features sparkling diamonds in an elegant band setting. Weighing 1.8g, this piece combines timeless style with everyday wearability.",
+    "metal": "9ct Yellow Gold",
+    "stones": "Diamonds",
+    "size": "UK P / US 7.5",
+    "price": 285,
+    "currency": "EUR",
+    "featured": true,
+    "period": "Contemporary",
+    "style": "Band",
+    "available": true,
+    "images": [
+      "/images/products/9ct-gold-diamond-band-1.jpg",
+      "/images/products/9ct-gold-diamond-band-2.jpg"
     ]
   }
 ]

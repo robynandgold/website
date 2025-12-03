@@ -135,15 +135,15 @@
         <div class="product-detail-image">
           <img 
             id="main-image" 
-            src=".${currentProduct.images[0]}" 
+            src="${currentProduct.images[0]}" 
             alt="${currentProduct.name}"
-            onerror="this.src='../images/products/placeholder.jpg'"
+            onerror="this.src='../images/homepage.png'"
           />
           ${currentProduct.images.length > 1 ? `
             <div class="thumbnail-grid" style="margin-top: 1rem;">
               ${currentProduct.images.map((img, index) => `
                 <div class="thumbnail ${index === 0 ? 'active' : ''}" data-index="${index}">
-                  <img src=".${img}" alt="${currentProduct.name} view ${index + 1}" />
+                  <img src="${img}" alt="${currentProduct.name} view ${index + 1}" />
                 </div>
               `).join('')}
             </div>

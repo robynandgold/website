@@ -141,9 +141,9 @@
           />
           ${currentProduct.images.length > 1 ? `
             <div class="thumbnail-grid" style="margin-top: 1rem;">
-              ${currentProduct.images.map((img, index) => `
-                <div class="thumbnail ${index === 0 ? 'active' : ''}" data-index="${index}">
-                  <img src="${img}" alt="${currentProduct.name} view ${index + 1}" />
+              ${currentProduct.images.slice(1).map((img, index) => `
+                <div class="thumbnail" data-index="${index + 1}">
+                  <img src="${img}" alt="${currentProduct.name} view ${index + 2}" />
                 </div>
               `).join('')}
             </div>

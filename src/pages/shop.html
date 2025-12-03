@@ -132,14 +132,25 @@
   <script src="../js/products.js"></script>
   <script src="../js/cart.js"></script>
   <script>
+    console.log('Shop page scripts loaded');
+    console.log('ProductsAPI available:', typeof window.ProductsAPI);
+    
     document.getElementById('year').textContent = new Date().getFullYear();
     
     let allProducts = [];
     
     // Load and render products
     async function loadProducts() {
-      allProducts = await window.ProductsAPI.getAllProducts();
-      renderProducts(allProducts);
+      console.log('Loading products...');
+      try {
+        allProducts = await window.ProductsAPI.getAllProducts();
+        console.log('Products loaded:', allProducts.length, allProducts);
+        renderProducts(allProducts);
+      } catch (error) {
+        console.error('Failed to load products:', error);
+        const grid = document.getElementById('product-list');
+        grid.innerHTML = '<p class="cart-empty-message">Failed to load products. Please refresh the page.</p>';
+      }
     }
     
     // Render products to grid

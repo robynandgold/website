@@ -15,9 +15,9 @@
     "style": "Crossover",
     "available": true,
     "images": [
-      "/images/products/9ct-gold-diamond-crossover-1.jpg",
-      "/images/products/9ct-gold-diamond-crossover-2.jpg",
-      "/images/products/9ct-gold-diamond-crossover-3.jpg"
+      "/images/products/9ct-gold-diamond-crossover-ring-1.png",
+      "/images/products/9ct-gold-diamond-crossover-ring-2.png",
+      "/images/products/9ct-gold-diamond-crossover-ring-3.png"
     ]
   },
   {
@@ -36,9 +36,9 @@
     "style": "Crossover",
     "available": true,
     "images": [
-      "/images/products/9ct-gold-diamond-crossover-1.jpg",
-      "/images/products/9ct-gold-diamond-crossover-2.jpg",
-      "/images/products/9ct-gold-diamond-crossover-3.jpg"
+      "/images/products/9ct-gold-diamond-crossover-ring-1.png",
+      "/images/products/9ct-gold-diamond-crossover-ring-2.png",
+      "/images/products/9ct-gold-diamond-crossover-ring-3.png"
     ]
   },
   {
@@ -57,8 +57,8 @@
     "style": "Band",
     "available": true,
     "images": [
-      "/images/products/9ct-gold-diamond-band-1.jpg",
-      "/images/products/9ct-gold-diamond-band-2.jpg"
+      "/images/products/9ct-gold-diamond-band-1.png",
+      "/images/products/9ct-gold-diamond-band-2.png"
     ]
   }
 ]

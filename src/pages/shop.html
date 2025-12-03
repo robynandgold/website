@@ -140,7 +140,7 @@
     let allProducts = [];
     
     // Load and render products
-    async function loadProducts() {
+    async function loadShopProducts() {
       console.log('Loading products...');
       try {
         allProducts = await window.ProductsAPI.getAllProducts();
@@ -224,7 +224,7 @@
     document.getElementById('clear-filters').addEventListener('click', clearFilters);
     
     // Load products on page load
-    document.addEventListener('DOMContentLoaded', loadProducts);
+    document.addEventListener('DOMContentLoaded', loadShopProducts);
   </script>
 </body>
 </html>

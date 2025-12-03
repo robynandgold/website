@@ -18,7 +18,6 @@
   />
 
   <link rel="stylesheet" href="../css/styles.css" />
-  <link rel="icon" type="image/png" href="../images/favicon.png" />
 </head>
 <body class="page">
   <header class="site-header">
@@ -159,7 +158,7 @@
         <article class="product-card">
           <a href="product-detail.html?slug=${product.slug}">
             <img
-              src=".${product.images[0]}"
+              src="${product.images[0]}"
               alt="${product.name}"
               class="product-card-image"
               onerror="this.src='../images/homepage.png'"

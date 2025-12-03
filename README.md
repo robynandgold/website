@@ -116,6 +116,50 @@ All products are stored in **`/src/data/products.json`**. This is the **single s
 3. Edit the `price`, `description`, or any other field
 4. Save the file and deploy
 
+### How to Mark a Product as SOLD
+
+#### Automatic (via Stripe Webhooks) - RECOMMENDED
+
+When a customer completes payment, Stripe automatically sends a webhook that marks products as sold.
+
+**Setup:**
+1. Go to [Stripe Dashboard → Webhooks](https://dashboard.stripe.com/webhooks)
+2. Click "Add endpoint"
+3. Enter your webhook URL: `https://robynandgold.com/api/webhook`
+4. Select event: `checkout.session.completed`
+5. Copy the **webhook signing secret** (starts with `whsec_`)
+6. Add to Vercel environment variables:
+   - Name: `STRIPE_WEBHOOK_SECRET`
+   - Value: `whsec_your_signing_secret`
+7. Redeploy your site
+
+Products will be automatically marked as unavailable when payment succeeds.
+
+#### Manual Override
+
+If you need to manually mark a product as sold:
+
+1. Open `/src/data/products.json`
+2. Find the sold product
+3. Change `"available": true` to `"available": false`
+4. Save and deploy to Vercel
+
+**Example:**
+```json
+{
+  "id": "victorian-ruby-ring",
+  "name": "Victorian Ruby Ring",
+  "available": false,  ← Set to false when sold
+  ...
+}
+```
+
+The product will:
+- ✅ Disappear from shop page
+- ✅ Show "SOLD" badge if accessed directly
+- ✅ Prevent adding to cart
+- ✅ Keep the data for your records
+
 ### How to Feature a Product on Homepage
 
 Set `"featured": true` in the product object. The homepage displays the first 3 featured products.

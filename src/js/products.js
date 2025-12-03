@@ -53,7 +53,9 @@ async function loadProducts() {
  * Get all products
  */
 async function getAllProducts() {
-  return await loadProducts();
+  const products = await loadProducts();
+  // Filter to only show available products
+  return products.filter(product => product.available !== false);
 }
 
 /**
@@ -61,7 +63,9 @@ async function getAllProducts() {
  */
 async function getFeaturedProducts() {
   const products = await loadProducts();
-  return products.filter(product => product.featured === true);
+  return products.filter(product => 
+    product.featured === true && product.available !== false
+  );
 }
 
 /**

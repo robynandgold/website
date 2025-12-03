@@ -25,7 +25,10 @@ module.exports = async (req, res) => {
         currency: item.currency || process.env.STRIPE_CURRENCY || 'eur',
         product_data: {
           name: item.name,
-          description: item.description || undefined
+          description: item.description || undefined,
+          metadata: {
+            product_id: item.id
+          }
         },
         unit_amount: Math.round(item.price * 100)
       },
@@ -38,6 +41,9 @@ module.exports = async (req, res) => {
       line_items,
       success_url: successUrl || `${process.env.SITE_URL}/pages/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: cancelUrl || `${process.env.SITE_URL}/pages/cart.html`,
+      metadata: {
+        product_ids: items.map(item => item.id).join(',')
+      }
     });
 
     res.status(200).json({ url: session.url, id: session.id });

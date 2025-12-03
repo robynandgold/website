@@ -84,7 +84,7 @@
         <a href="/pages/shop.html" class="footer-link">Shop</a>
         <a href="/index.html#about" class="footer-link">About</a>
         <a href="/index.html#ethos" class="footer-link">Ethos</a>
-        <a href="mailto:hello@robynandgold.com" class="footer-link">Contact</a>
+        <a href="/pages/contact.html" class="footer-link">Contact</a>
       </div>
       <p class="footer-meta">© <span id="year"></span> Robyn &amp; Gold. All rights reserved.</p>
     </div>
@@ -129,6 +129,7 @@
     // Render product details
     function renderProduct() {
       const container = document.getElementById('product-detail');
+      const isSold = currentProduct.available === false;
       
       container.innerHTML = `
         <div class="product-detail-image">
@@ -155,10 +156,17 @@
           <p class="product-detail-meta">${currentProduct.metal} · ${currentProduct.stones} · ${currentProduct.size}</p>
           <p class="product-detail-price">${window.ProductsAPI.formatPrice(currentProduct.price, currentProduct.currency)}</p>
           
-          <button id="add-to-cart-btn" class="btn btn-primary" style="margin-top: 1.5rem;">
-            Add to cart
-          </button>
-          <p id="cart-message" style="margin-top: 0.8rem; font-size: 0.9rem; color: var(--muted); display: none;"></p>
+          ${isSold ? `
+            <div style="background: var(--muted); color: white; padding: 1rem; border-radius: var(--radius-md); margin-top: 1.5rem; text-align: center;">
+              <strong style="font-size: 1.1rem;">SOLD</strong>
+              <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">This piece has found its home</p>
+            </div>
+          ` : `
+            <button id="add-to-cart-btn" class="btn btn-primary" style="margin-top: 1.5rem;">
+              Add to cart
+            </button>
+            <p id="cart-message" style="margin-top: 0.8rem; font-size: 0.9rem; color: var(--muted); display: none;"></p>
+          `}
           
           <div class="product-detail-copy" style="margin-top: 1.8rem;">
             <p>${currentProduct.description}</p>
@@ -194,7 +202,9 @@
       
       // Add event listeners
       setupImageGallery();
-      setupAddToCart();
+      if (!isSold) {
+        setupAddToCart();
+      }
     }
     
     // Setup image gallery thumbnails

@@ -1,9 +1,7 @@
 {
   "functions": {
     "api/**/*.js": {
-      "runtime": "@vercel/node@3.0.7"
-    },
-    "api/webhook.js": {
+      "runtime": "@vercel/node@3.0.7",
       "maxDuration": 10
     }
   },

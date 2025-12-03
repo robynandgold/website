@@ -134,7 +134,7 @@
       itemsContainer.innerHTML = cart.map(item => `
         <div class="cart-item" data-id="${item.id}">
           <img 
-            src=".${item.image}" 
+            src="${item.image}" 
             alt="${item.name}" 
             class="product-card-image"
             style="width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-md);"

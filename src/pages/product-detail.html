@@ -38,6 +38,11 @@
           Cart
           <span id="cart-count" class="cart-count">0</span>
         </a>
+        <a href="https://www.instagram.com/robynandgold/" target="_blank" rel="noopener" class="nav-link nav-link--icon" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.9.2 2.3.4.6.2 1 .5 1.5 1 .5.5.8.9 1 1.5.2.4.3 1.1.4 2.3.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.2 1.9-.4 2.3-.2.6-.5 1-1 1.5-.5.5-.9.8-1.5 1-.4.2-1.1.3-2.3.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.9-.2-2.3-.4-.6-.2-1-.5-1.5-1-.5-.5-.8-.9-1-1.5-.2-.4-.3-1.1-.4-2.3C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.9c.1-1.2.2-1.9.4-2.3.2-.6.5-1 1-1.5.5-.5.9-.8 1.5-1 .4-.2 1.1-.3 2.3-.4C8.4 2.2 8.8 2.2 12 2.2zm0 2.2c-3.1 0-3.4 0-4.7.1-1 .1-1.6.2-1.9.3-.5.2-.8.4-1.1.7-.3.3-.5.6-.7 1.1-.1.3-.2.9-.3 1.9-.1 1.3-.1 1.6-.1 4.7s0 3.4.1 4.7c.1 1 .2 1.6.3 1.9.2.5.4.8.7 1.1.3.3.6.5 1.1.7.3.1.9.2 1.9.3 1.3.1 1.6.1 4.7.1s3.4 0 4.7-.1c1-.1 1.6-.2 1.9-.3.5-.2.8-.4 1.1-.7.3-.3.5-.6.7-1.1.1-.3.2-.9.3-1.9.1-1.3.1-1.6.1-4.7s0-3.4-.1-4.7c-.1-1-.2-1.6-.3-1.9-.2-.5-.4-.8-.7-1.1-.3-.3-.6-.5-1.1-.7-.3-.1-.9-.2-1.9-.3-1.3-.1-1.6-.1-4.7-.1zm0 3.4a6.4 6.4 0 1 1 0 12.8 6.4 6.4 0 0 1 0-12.8zm0 2.2a4.2 4.2 0 1 0 0 8.4 4.2 4.2 0 0 0 0-8.4zm6.8-2.5a1.5 1.5 0 1 1-3.1 0 1.5 1.5 0 0 1 3.1 0z"/>
+          </svg>
+        </a>
       </nav>
     </div>
   </header>
@@ -153,13 +158,7 @@
               `).join('')}
             </div>
           </div>
-          ${currentProduct.images.length > 1 ? `
-            <div class="carousel-dots" id="carousel-dots" aria-label="Select image">
-              ${currentProduct.images.map((_, index) => `
-                <button class="carousel-dot${index === 0 ? ' active' : ''}" data-index="${index}" aria-label="Image ${index + 1}"></button>
-              `).join('')}
-            </div>
-          ` : ''}
+          
         </div>
         
         <div class="product-detail-info">
@@ -226,7 +225,7 @@
       const slides = Array.from(track.querySelectorAll('.carousel-slide'));
       const prevBtn = document.getElementById('carousel-prev');
       const nextBtn = document.getElementById('carousel-next');
-      const dots = Array.from(document.querySelectorAll('.carousel-dot'));
+      const dots = [];
       let isAnimating = false;
       const ANIM_MS = 280; // match CSS ~260ms with small buffer
 
@@ -238,7 +237,7 @@
         slides.forEach(s => {
           s.classList.remove('active', 'enter-left', 'enter-right', 'exit-left', 'exit-right');
         });
-        dots.forEach(d => d.classList.remove('active'));
+        // No dots when using icon-only controls
 
         const prevSlide = slides[prevIndex];
         const nextSlide = slides[nextIndex];
@@ -256,8 +255,7 @@
 
         // Activate the next slide and dot
         if (nextSlide) nextSlide.classList.add('active');
-        const activeDot = dots[nextIndex];
-        if (activeDot) activeDot.classList.add('active');
+        // No dot activation
       }
 
       function goTo(index, directionHint) {
@@ -291,13 +289,7 @@
       if (prevBtn) prevBtn.addEventListener('click', () => goTo(currentImageIndex - 1, 'prev'));
       if (nextBtn) nextBtn.addEventListener('click', () => goTo(currentImageIndex + 1, 'next'));
 
-      dots.forEach(dot => {
-        dot.addEventListener('click', () => {
-          const idx = parseInt(dot.dataset.index);
-          const direction = idx > currentImageIndex ? 'next' : 'prev';
-          goTo(idx, direction);
-        });
-      });
+      // No dots listeners
 
       // Touch/Swipe support
       let startX = 0;
@@ -323,15 +315,15 @@
         isDragging = false;
       });
 
-      // Keyboard accessibility
+      // Keyboard accessibility (left/right arrows)
       track.setAttribute('tabindex', '0');
       track.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft') {
           e.preventDefault();
-          goTo(currentImageIndex - 1);
+          goTo(currentImageIndex - 1, 'prev');
         } else if (e.key === 'ArrowRight') {
           e.preventDefault();
-          goTo(currentImageIndex + 1);
+          goTo(currentImageIndex + 1, 'next');
         }
       });
     }

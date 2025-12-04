@@ -194,6 +194,27 @@ a {
   gap: 0.4rem;
 }
 
+.nav-link--icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  margin-left: 0.5rem;
+}
+
+.nav-link--icon:hover {
+  border-color: var(--ink);
+}
+
+.nav-link--icon svg {
+  width: 16px;
+  height: 16px;
+  fill: var(--ink);
+}
+
 .cart-count {
   min-width: 1.6rem;
   padding: 0.1rem 0.3rem;

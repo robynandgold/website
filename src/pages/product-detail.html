@@ -118,6 +118,12 @@
         document.getElementById('product-detail').innerHTML = '<p>Product not found</p>';
         return;
       }
+
+      // Guard: if the product has been sold, redirect back to the collection
+      if (currentProduct.available === false) {
+        window.location.href = '/pages/shop.html';
+        return;
+      }
       
       // Update page title
       document.title = `${currentProduct.name} — Robyn & Gold`;

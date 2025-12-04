@@ -45,12 +45,36 @@ export default async function handler(req, res) {
 
     try {
       // Get product IDs from metadata
-      const productIds = session.metadata.product_ids ? session.metadata.product_ids.split(',') : [];
+      let productIds = session.metadata && session.metadata.product_ids ? session.metadata.product_ids.split(',') : [];
 
       console.log('[Webhook] checkout.session.completed received');
       console.log(`[Webhook] Session ID: ${session.id}`);
       console.log(`[Webhook] Product IDs in metadata: ${productIds.join(', ') || '(none)'}`);
       console.log(`[Webhook] Env check -> STRIPE_WEBHOOK_SECRET set: ${process.env.STRIPE_WEBHOOK_SECRET ? 'yes' : 'no'}, GITHUB_TOKEN set: ${process.env.GITHUB_TOKEN ? 'yes' : 'no'}`);
+
+      // Fallback: if no product IDs in session metadata, fetch line items and collect product IDs
+      if (productIds.length === 0) {
+        try {
+          const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { expand: ['data.price.product'] });
+          const derivedIds = [];
+          for (const li of lineItems.data) {
+            const prod = li.price && li.price.product;
+            // Try product metadata first
+            if (prod && prod.metadata && prod.metadata.product_id) {
+              derivedIds.push(prod.metadata.product_id);
+            }
+            // Or try description/name mapping not ideal; prefer explicit metadata
+          }
+          if (derivedIds.length > 0) {
+            productIds = derivedIds;
+            console.log('[Webhook] Derived product IDs from line items:', productIds.join(', '));
+          } else {
+            console.log('[Webhook] No product IDs found in line items metadata');
+          }
+        } catch (e) {
+          console.error('[Webhook] Failed to list line items for session:', session.id, e);
+        }
+      }
 
       if (productIds.length > 0) {
         // Update products via GitHub API

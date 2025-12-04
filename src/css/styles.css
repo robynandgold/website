@@ -130,6 +130,13 @@ a {
   gap: 0.25rem;
 }
 
+.brand-center img {
+  height: 48px;
+  width: auto;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
 .brand-center .brand-main {
   font-family: "Playfair Display", serif;
   font-size: 1.3rem;
@@ -144,39 +151,7 @@ a {
   text-transform: uppercase;
 }
 
-.brand-arc {
-  position: absolute;
-  width: 220px;
-  height: 220px;
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.brand-arc .arc-mark {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform-origin: center -90px; /* radius offset */
-  width: 26px;
-  height: 26px;
-  opacity: 0.85;
-  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.05));
-}
-
-.arc-mark img {
-  width: 100%;
-  height: 100%;
-}
-
-/* Position 8 logos around arc */
-.arc-mark.pos-0 { transform: rotate(0deg) translate(-50%, -50%); }
-.arc-mark.pos-1 { transform: rotate(45deg) translate(-50%, -50%); }
-.arc-mark.pos-2 { transform: rotate(90deg) translate(-50%, -50%); }
-.arc-mark.pos-3 { transform: rotate(135deg) translate(-50%, -50%); }
-.arc-mark.pos-4 { transform: rotate(180deg) translate(-50%, -50%); }
-.arc-mark.pos-5 { transform: rotate(225deg) translate(-50%, -50%); }
-.arc-mark.pos-6 { transform: rotate(270deg) translate(-50%, -50%); }
-.arc-mark.pos-7 { transform: rotate(315deg) translate(-50%, -50%); }
+/* Removed decorative arc: using a single centered logo for clarity */
 
 .nav {
   display: flex;
@@ -582,6 +557,12 @@ a {
   font-size: 0.96rem;
   line-height: 1.7;
   color: var(--muted);
+}
+
+/* Narrow content helper for page headers */
+.narrow {
+  max-width: 560px;
+  margin: 0 auto;
 }
 
 /* =========================
@@ -1036,6 +1017,6 @@ a {
 }
 
 @media (max-width: 640px) {
-  .brand-arc { display: none; }
+  /* No arc in new design */
   .nav { position: static; justify-content: center; }
 }

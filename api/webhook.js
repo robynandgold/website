@@ -47,14 +47,20 @@ export default async function handler(req, res) {
       // Get product IDs from metadata
       const productIds = session.metadata.product_ids ? session.metadata.product_ids.split(',') : [];
 
+      console.log('[Webhook] checkout.session.completed received');
+      console.log(`[Webhook] Session ID: ${session.id}`);
+      console.log(`[Webhook] Product IDs in metadata: ${productIds.join(', ') || '(none)'}`);
+      console.log(`[Webhook] Env check -> STRIPE_WEBHOOK_SECRET set: ${process.env.STRIPE_WEBHOOK_SECRET ? 'yes' : 'no'}, GITHUB_TOKEN set: ${process.env.GITHUB_TOKEN ? 'yes' : 'no'}`);
+
       if (productIds.length > 0) {
         // Update products via GitHub API
         await markProductsAsSoldViaGitHub(productIds);
+        console.log('[Webhook] GitHub commit flow completed');
       }
 
       return res.status(200).json({ received: true });
     } catch (err) {
-      console.error('Error processing webhook:', err);
+      console.error('[Webhook] Error processing webhook:', err);
       return res.status(500).json({ error: 'Failed to process webhook' });
     }
   }
@@ -84,6 +90,8 @@ async function markProductsAsSoldViaGitHub(productIds) {
     });
 
     if (!fileResponse.ok) {
+      const txt = await fileResponse.text();
+      console.error('[Webhook] GitHub contents fetch failed:', fileResponse.status, txt);
       throw new Error('Failed to fetch products.json from GitHub');
     }
 
@@ -101,7 +109,7 @@ async function markProductsAsSoldViaGitHub(productIds) {
     }
 
     if (!updated) {
-      console.log('No products matched the IDs');
+      console.log('[Webhook] No products matched the IDs. Skipping commit. IDs:', productIds.join(', '));
       return;
     }
 
@@ -125,13 +133,19 @@ async function markProductsAsSoldViaGitHub(productIds) {
     });
 
     if (!commitResponse.ok) {
-      const errorData = await commitResponse.json();
-      throw new Error(`Failed to commit to GitHub: ${errorData.message}`);
+      const errorText = await commitResponse.text();
+      console.error('[Webhook] GitHub commit failed:', commitResponse.status, errorText);
+      let errMsg = 'Failed to commit to GitHub';
+      try {
+        const errorData = JSON.parse(errorText);
+        if (errorData && errorData.message) errMsg = `${errMsg}: ${errorData.message}`;
+      } catch {}
+      throw new Error(errMsg);
     }
 
-    console.log(`Successfully marked products as sold: ${productIds.join(', ')}`);
+    console.log('[Webhook] Successfully marked products as sold:', productIds.join(', '));
   } catch (error) {
-    console.error('Error updating products via GitHub:', error);
+    console.error('[Webhook] Error updating products via GitHub:', error);
     throw error;
   }
 }

@@ -123,6 +123,7 @@ function dispatchCartUpdateEvent() {
 function formatCartForCheckout() {
   const cart = getCart();
   return cart.map(item => ({
+    id: item.id,
     name: item.name,
     description: item.era,
     price: item.price,

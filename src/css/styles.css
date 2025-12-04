@@ -61,6 +61,10 @@ a {
 .section {
   padding: 4.5rem 0;
 }
+/* Compact section spacing for pages where header/content should sit closer */
+.section--compact {
+  padding-top: 1.2rem;
+}
 
 .section--alt {
   background-color: var(--bg-alt);
@@ -659,8 +663,8 @@ a {
 }
 
 /* =========================
-   Carousel (product detail)
-   ========================= */
+  Carousel (product detail)
+  ========================= */
 
 .carousel {
   position: relative;
@@ -672,26 +676,23 @@ a {
 }
 
 .carousel-slide {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
+  display: none;
   opacity: 0;
   transition: opacity 220ms ease-in-out, transform 260ms ease;
-  will-change: opacity, transform;
-  display: block;
 }
 
 .carousel-slide.active {
+  display: block;
   opacity: 1;
-  transform: translateX(0);
 }
 
 .carousel-slide img {
   width: 100%;
   height: auto;
   display: block;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(221, 209, 194, 0.8);
+  box-shadow: var(--shadow-soft);
 }
 
 /* Optional slide animation helpers */

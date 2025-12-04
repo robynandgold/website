@@ -47,7 +47,7 @@ module.exports = async (req, res) => {
           shipping_rate_data: {
             type: 'fixed_amount',
             fixed_amount: {
-              amount: 1000, // €10.00 in cents
+              amount: 0, // €0.00 in cents
               currency: 'eur',
             },
             display_name: 'Ireland Shipping',

@@ -208,7 +208,7 @@ a {
   height: 28px;
   border-radius: 50%;
   border: 1px solid var(--border);
-  margin-left: 0.5rem;
+  margin: 0 0.6rem;
 }
 
 .nav-link--icon:hover {

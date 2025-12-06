@@ -155,7 +155,12 @@
         
         if (!grid || !Array.isArray(products) || products.length === 0) return;
         
-        grid.innerHTML = products.slice(0, 3).map(product => {
+        // Filter for featured and available products only
+        const featuredProducts = products.filter(product => 
+          product.featured === true && product.available === true
+        );
+        
+        grid.innerHTML = featuredProducts.slice(0, 3).map(product => {
           const price = (window?.ProductsAPI?.formatPrice)
             ? window.ProductsAPI.formatPrice(product.price, product.currency)
             : `${product.currency || '€'}${product.price}`;

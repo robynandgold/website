@@ -146,6 +146,7 @@ a {
   font-size: 1.3rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
+  color: var(--accent-soft);
 }
 
 .brand-center .brand-tagline {

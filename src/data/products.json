@@ -32,7 +32,7 @@
     "size": "UK P / US 7.5",
     "price": 0.5,
     "currency": "EUR",
-    "featured": true,
+    "featured": false,
     "period": "Contemporary",
     "style": "Crossover",
     "available": false,

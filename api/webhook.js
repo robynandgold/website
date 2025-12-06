@@ -128,6 +128,7 @@ async function markProductsAsSoldViaGitHub(productIds) {
     for (const product of products) {
       if (productIds.includes(product.id)) {
         product.available = false;
+        product.featured = false;
         updated = true;
       }
     }

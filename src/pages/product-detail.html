@@ -107,36 +107,96 @@
       return params.get('slug');
     }
     
+    // Fallback price formatting function
+    function formatPrice(price, currency = 'EUR') {
+      const symbol = currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
+      return `${symbol}${price.toFixed(2)}`;
+    }
+    
     // Load product details
     async function loadProduct() {
+      console.log('=== PRODUCT DETAIL PAGE STARTING ===');
+      console.log('Current URL:', window.location.href);
+      
       const slug = getSlugFromURL();
+      console.log('Product detail page loaded, slug from URL:', slug);
       
       if (!slug) {
+        console.log('No slug provided, redirecting to shop');
         // If no slug, send users back to the collection
-        window.location.href = '/pages/shop.html';
+        window.location.href = 'shop.html';
         return;
       }
       
+      console.log('Attempting to load product with slug:', slug);
+      
+      // First try direct fetch approach
+      try {
+        console.log('Trying direct fetch of products...');
+        const response = await fetch('../data/products.json');
+        console.log('Direct fetch response:', response.status, response.ok);
+        
+        if (response.ok) {
+          const products = await response.json();
+          console.log('Direct fetch successful, got', products.length, 'products');
+          console.log('All product slugs:', products.map(p => p.slug));
+          
+          // Find product by slug
+          currentProduct = products.find(product => product.slug === slug);
+          console.log('Product found via direct fetch:', currentProduct);
+          
+          if (currentProduct) {
+            console.log('Product found! Rendering...');
+            renderProductDetails();
+            return; // Success, exit here
+          } else {
+            console.log('Product NOT found with slug:', slug);
+            console.log('Available slugs:', products.map(p => `"${p.slug}"`).join(', '));
+          }
+        }
+      } catch (error) {
+        console.log('Direct fetch failed:', error);
+      }
+      
+      // Fallback to ProductsAPI method
+      console.log('Falling back to ProductsAPI method...');
+
+      // Wait for ProductsAPI to be available
+      let attempts = 0;
+      while (!window.ProductsAPI && attempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+      
+      if (!window.ProductsAPI) {
+        console.error('ProductsAPI not available after waiting');
+        return;
+      }
+      
+      console.log('Fetching product with slug:', slug);
       currentProduct = await window.ProductsAPI.getProductBySlug(slug);
+      console.log('Product found:', currentProduct);
       
       if (!currentProduct) {
+        console.log('Product not found for slug:', slug);
         const el = document.getElementById('product-detail');
         el.innerHTML = `
           <div style="padding: 1.2rem; background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius-md); text-align: center;">
             <strong style="font-size: 1.05rem;">Product not found</strong>
             <p style="margin: 0.6rem 0 1rem; color: var(--muted);">The link may be outdated or the piece has been removed.</p>
-            <a href="/pages/shop.html" class="btn btn-ghost">Back to collection</a>
+            <a href="shop.html" class="btn btn-ghost">Back to collection</a>
           </div>
         `;
         return;
       }
 
-      // Guard: if the product has been sold, redirect back to the collection
-      if (currentProduct.available === false) {
-        window.location.href = '/pages/shop.html';
-        return;
-      }
-      
+      renderProductDetails();
+    }
+    
+    function renderProductDetails() {
+      if (!currentProduct) return;
+
+      console.log('Rendering product:', currentProduct.name, 'Available:', currentProduct.available);
       // Update page title
       document.title = `${currentProduct.name} — Robyn & Gold`;
       
@@ -172,7 +232,7 @@
           <p class="eyebrow">${currentProduct.period} · ${currentProduct.era}</p>
           <h1 class="product-detail-title">${currentProduct.name}</h1>
           <p class="product-detail-meta">${currentProduct.metal} · ${currentProduct.stones} · ${currentProduct.size}</p>
-          <p class="product-detail-price">${window.ProductsAPI.formatPrice(currentProduct.price, currentProduct.currency)}</p>
+          <p class="product-detail-price">${formatPrice(currentProduct.price, currentProduct.currency)}</p>
           
           ${isSold ? `
             <div style="background: var(--muted); color: white; padding: 1rem; border-radius: var(--radius-md); margin-top: 1.5rem; text-align: center;">

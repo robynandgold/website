@@ -119,6 +119,11 @@ a {
   padding: 1.2rem 1.5rem;
 }
 
+/* Home page legacy left nav: hide to keep brand centered */
+.nav-left {
+  display: none;
+}
+
 /* LOGO + BRAND BLOCK ---------------------------------------- */
 
 .brand-banner {

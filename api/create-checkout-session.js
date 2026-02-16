@@ -87,7 +87,7 @@ module.exports = async (req, res) => {
           shipping_rate_data: {
             type: 'fixed_amount',
             fixed_amount: {
-              amount: 4500, // €40.00 in cents
+              amount: 4500, // €45.00 in cents
               currency: 'eur',
             },
             display_name: 'USA Shipping',

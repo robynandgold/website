@@ -32,8 +32,10 @@
       </nav>
       <div class="brand-banner">
         <div class="brand-center">
-          <img src="../images/logo.png" alt="Robyn & Gold" />
-          <a href="/" class="brand-main">Robyn &amp; Gold</a>
+          <a href="../index.html">
+            <img src="../images/logo.png" alt="Robyn & Gold" />
+          </a>
+          <a href="../index.html" class="brand-main">Robyn &amp; Gold</a>
           <span class="brand-tagline">Antique Jewellery</span>
         </div>
       </div>
@@ -46,22 +48,26 @@
       </nav>
     </div>
   </header>
-        </nav>
-        <div class="brand-banner" style="flex: 0 0 auto; text-align: center;">
-          <div class="brand-center">
-            <img src="../images/logo.png" alt="Robyn & Gold" />
-            <a href="/" class="brand-main" style="color: var(--accent-soft);">Robyn &amp; Gold</a>
-            <span class="brand-tagline">Antique Jewellery</span>
-          </div>
+
+  <main>
+    <section class="section section--alt">
+      <div class="container" style="max-width: 640px; text-align: center;">
+        <p class="eyebrow">Order confirmed</p>
+        <h1 class="page-title">Thank you for your order</h1>
+        <p class="page-intro">
+          Your piece is on its way. You'll receive a confirmation email shortly with your order details and tracking information.
+        </p>
+        <p style="margin-top: 1rem; font-size: 0.95rem; color: var(--muted); line-height: 1.7;">
+          Each order is carefully packed and shipped fully insured from Ireland. If you have any questions, please reach out via
+          <a href="/pages/contact.html" style="color: var(--ink); text-decoration: underline;">Instagram</a>.
+        </p>
+        <div style="margin-top: 2rem;">
+          <a href="/pages/shop.html" class="btn btn-primary">Continue browsing</a>
         </div>
-        <nav class="nav nav-right" style="flex: 1; justify-content: flex-end;">
-          <a href="/pages/cart.html" class="nav-link nav-link--cart">
-            Cart
-            <span id="cart-count" class="cart-count">0</span>
-          </a>
-        </nav>
       </div>
-  </header>
+    </section>
+  </main>
+
   <footer class="site-footer">
     <div class="container footer-inner">
       <div class="footer-brand">
@@ -81,16 +87,15 @@
   <script src="../js/cart.js"></script>
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
-    
+
     // Clear cart after successful purchase
     window.CartAPI.clearCart();
-    
+
     // Get session ID from URL if present (optional - for tracking)
     const params = new URLSearchParams(window.location.search);
     const sessionId = params.get('session_id');
     if (sessionId) {
       console.log('Stripe session ID:', sessionId);
-      // You could send this to an analytics service if needed
     }
   </script>
 </body>

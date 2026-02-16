@@ -32,8 +32,10 @@
       </nav>
       <div class="brand-banner">
         <div class="brand-center">
-          <img src="../images/logo.png" alt="Robyn & Gold" />
-          <a href="/" class="brand-main">Robyn &amp; Gold</a>
+          <a href="../index.html">
+            <img src="../images/logo.png" alt="Robyn & Gold" />
+          </a>
+          <a href="../index.html" class="brand-main">Robyn &amp; Gold</a>
           <span class="brand-tagline">Antique Jewellery</span>
         </div>
       </div>
@@ -71,7 +73,7 @@
           <h2 class="cart-summary-title">Order summary</h2>
           <div class="cart-summary-row">
             <span>Subtotal</span>
-            <span id="cart-subtotal">£0</span>
+            <span id="cart-subtotal">€0</span>
           </div>
           <p class="cart-summary-note">
             Shipping and any taxes are calculated at checkout.
@@ -160,7 +162,7 @@
       // Add remove button listeners
       document.querySelectorAll('.cart-item-remove').forEach(btn => {
         btn.addEventListener('click', (e) => {
-          const productId = e.target.dataset.id;
+          const productId = e.currentTarget.dataset.id;
           window.CartAPI.removeFromCart(productId);
           renderCart();
         });

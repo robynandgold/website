@@ -42,7 +42,7 @@
 
         <nav class="nav nav-right" aria-label="Utilities">
           <a href="cart.html" class="nav-link nav-link--cart" aria-label="Cart">
-            <svg viewBox="0 0 24 24" aria-hidden="true" class="icon-cart"><path d="M7 4h-2l-1 2h-2v2h2l3.6 7.59-1.35 2.44c-.16 .28-.25 .61-.25 .97 0 1.1.9 2 2 2h12v-2h-11.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.74c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14 .12-.31 .12-.48 0-.55-.45-1-1-1h-16.31l-.94-2zm3 16a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true" class="icon-cart"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
             <span id="cart-count" class="cart-count">0</span>
           </a>
         </nav>
@@ -253,31 +253,28 @@
             <p>${currentProduct.description}</p>
           </div>
           
-          <div style="margin-top: 1.5rem; padding: 1.2rem; background: var(--bg-alt); border-radius: var(--radius-md);">
-            <h3 style="font-size: 0.95rem; margin-bottom: 0.8rem;">Details</h3>
-            <div style="display: grid; gap: 0.5rem; font-size: 0.9rem;">
-              <div style="display: flex; justify-content: space-between;">
-                <span style="color: var(--muted);">Metal:</span>
-                <span>${currentProduct.metal}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between;">
-                <span style="color: var(--muted);">Stones:</span>
-                <span>${currentProduct.stones}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between;">
-                <span style="color: var(--muted);">Size:</span>
-                <span>${currentProduct.size}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between;">
-                <span style="color: var(--muted);">Period:</span>
-                <span>${currentProduct.period}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between;">
-                <span style="color: var(--muted);">Style:</span>
-                <span>${currentProduct.style}</span>
-              </div>
+          <dl style="margin-top: 1.5rem; display: grid; gap: 0.45rem; font-size: 0.88rem; border-top: 1px solid var(--border); padding-top: 1.2rem;">
+            <div style="display: flex; gap: 0.8rem;">
+              <dt style="color: var(--muted); min-width: 5rem;">Metal</dt>
+              <dd style="margin: 0;">${currentProduct.metal}</dd>
             </div>
-          </div>
+            <div style="display: flex; gap: 0.8rem;">
+              <dt style="color: var(--muted); min-width: 5rem;">Stones</dt>
+              <dd style="margin: 0;">${currentProduct.stones}</dd>
+            </div>
+            <div style="display: flex; gap: 0.8rem;">
+              <dt style="color: var(--muted); min-width: 5rem;">Size</dt>
+              <dd style="margin: 0;">${currentProduct.size}</dd>
+            </div>
+            <div style="display: flex; gap: 0.8rem;">
+              <dt style="color: var(--muted); min-width: 5rem;">Period</dt>
+              <dd style="margin: 0;">${currentProduct.period}</dd>
+            </div>
+            <div style="display: flex; gap: 0.8rem;">
+              <dt style="color: var(--muted); min-width: 5rem;">Style</dt>
+              <dd style="margin: 0;">${currentProduct.style}</dd>
+            </div>
+          </dl>
         </div>
       `;
       

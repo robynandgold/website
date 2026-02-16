@@ -10,7 +10,7 @@
     "size": "UK P / US 7.5",
     "price": 275,
     "currency": "EUR",
-    "featured": true,
+    "featured": false,
     "period": "Contemporary",
     "style": "Crossover",
     "category": "rings",
@@ -58,7 +58,7 @@
     "period": "Contemporary",
     "style": "Band",
     "category": "rings",
-    "available": true,
+    "available": false,
     "images": [
       "/images/products/9ct-gold-diamond-band-1.png",
       "/images/products/9ct-gold-diamond-band-2.png"

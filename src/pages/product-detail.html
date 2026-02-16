@@ -50,12 +50,6 @@
     </header>
 
   <main>
-    <section class="section section--alt">
-      <div class="container">
-        <a href="/pages/shop.html" class="breadcrumb-link">← Back to collection</a>
-      </div>
-    </section>
-
     <section class="section">
       <div class="container">
         <!-- JS populates this element -->
@@ -212,6 +206,9 @@
       const isSold = currentProduct.available === false;
       
       container.innerHTML = `
+        <div style="grid-column: 1 / -1; margin-bottom: 0.5rem;">
+          <a href="shop.html" class="btn btn-ghost" style="padding: 0.5rem 1.1rem; font-size: 0.8rem;">← Back to shop</a>
+        </div>
         <div class="product-detail-image" role="region" aria-label="Product images">
           <div class="carousel" id="image-carousel">
             <button class="carousel-control prev" aria-label="Previous image" id="carousel-prev">‹</button>

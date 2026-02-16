@@ -22,7 +22,7 @@ async function initiateCheckout() {
   }
 
   // Show loading state
-  const checkoutButton = document.querySelector('.checkout-btn');
+  const checkoutButton = document.getElementById('checkout-button');
   if (checkoutButton) {
     checkoutButton.disabled = true;
     checkoutButton.textContent = 'Processing...';
@@ -63,7 +63,7 @@ async function initiateCheckout() {
     // Reset button state
     if (checkoutButton) {
       checkoutButton.disabled = false;
-      checkoutButton.textContent = 'Proceed to Checkout';
+      checkoutButton.textContent = 'Proceed to secure checkout';
     }
   }
 }

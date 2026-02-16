@@ -32,39 +32,21 @@ let cachedProducts = null;
  * Load products from JSON file
  */
 async function loadProducts() {
-  if (cachedProducts) {
-    console.log('Products.js: Returning cached products:', cachedProducts.length);
-    return cachedProducts;
-  }
-  
+  if (cachedProducts) return cachedProducts;
+
   try {
-    // Determine the correct path based on current location
     const isInPagesDir = window.location.pathname.includes('/pages/');
     const dataPath = isInPagesDir ? '../data/products.json' : 'data/products.json';
-    
-    console.log('Products.js: Current location:', window.location.pathname);
-    console.log('Products.js: Is in pages dir:', isInPagesDir);
-    console.log('Products.js: Fetching from path:', dataPath);
-    
+
     const response = await fetch(dataPath);
-    console.log('Products.js: Fetch response status:', response.status, 'OK:', response.ok);
-    
     if (!response.ok) {
       throw new Error(`Failed to load products: ${response.status} ${response.statusText}`);
     }
-    
-    const text = await response.text();
-    console.log('Products.js: Response text length:', text.length);
-    console.log('Products.js: Response text preview:', text.substring(0, 200));
-    
-    cachedProducts = JSON.parse(text);
-    console.log('Products.js: Parsed products successfully:', cachedProducts.length, 'products');
-    console.log('Products.js: First product:', cachedProducts[0]);
-    
+
+    cachedProducts = await response.json();
     return cachedProducts;
   } catch (error) {
-    console.error('Products.js: Error loading products:', error);
-    console.error('Products.js: Error details:', error.message, error.stack);
+    console.error('Error loading products:', error);
     return [];
   }
 }
@@ -73,16 +55,8 @@ async function loadProducts() {
  * Get all products
  */
 async function getAllProducts() {
-  console.log('Products.js: getAllProducts() called');
   const products = await loadProducts();
-  console.log('Products.js: loadProducts() returned:', products.length, 'products');
-  
-  // Filter to only show available products
-  const availableProducts = products.filter(product => product.available !== false);
-  console.log('Products.js: After filtering for available:', availableProducts.length, 'products');
-  console.log('Products.js: Available products:', availableProducts.map(p => `${p.name} (available: ${p.available})`));
-  
-  return availableProducts;
+  return products.filter(product => product.available !== false);
 }
 
 /**
@@ -99,14 +73,8 @@ async function getFeaturedProducts() {
  * Get product by slug
  */
 async function getProductBySlug(slug) {
-  console.log('Products.js: getProductBySlug() called with slug:', slug);
   const products = await loadProducts();
-  console.log('Products.js: Searching through', products.length, 'products for slug:', slug);
-  
-  const product = products.find(product => product.slug === slug);
-  console.log('Products.js: Found product:', product ? product.name : 'null');
-  
-  return product;
+  return products.find(product => product.slug === slug);
 }
 
 /**

@@ -2,13 +2,6 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const fs = require('fs').promises;
 const path = require('path');
 
-// Disable body parsing to get raw body for Stripe signature verification
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
 async function buffer(readable) {
   const chunks = [];
   for await (const chunk of readable) {
@@ -17,7 +10,7 @@ async function buffer(readable) {
   return Buffer.concat(chunks);
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }

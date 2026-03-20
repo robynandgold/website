@@ -7,7 +7,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="src/css/styles.css" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png" />
   <style>
     /* ── Auth gate ─────────────────────────────── */
     #auth-gate {
@@ -150,18 +153,19 @@
   <header class="site-header">
     <div class="container header-inner">
       <nav class="nav nav-left" aria-label="Primary">
-        <a href="src/pages/shop.html" class="nav-link">Shop</a>
-        <a href="src/index.html#about" class="nav-link">Our story</a>
+        <a href="shop.html" class="nav-link">Shop</a>
+        <a href="../index.html#about" class="nav-link">Our story</a>
+        <a href="../index.html#ethos" class="nav-link">Ethos</a>
       </nav>
       <div class="brand-banner">
         <div class="brand-center">
-          <a href="src/index.html"><img src="src/images/logo.png" alt="Robyn & Gold" /></a>
-          <a href="src/index.html" class="brand-main">Robyn &amp; Gold</a>
+          <a href="../index.html"><img src="../images/logo.png" alt="Robyn & Gold" /></a>
+          <a href="../index.html" class="brand-main">Robyn &amp; Gold</a>
           <span class="brand-tagline">Antique Jewellery</span>
         </div>
       </div>
       <nav class="nav nav-right" aria-label="Utilities">
-        <a href="src/pages/cart.html" class="nav-link nav-link--cart" aria-label="Cart">
+        <a href="cart.html" class="nav-link nav-link--cart" aria-label="Cart">
           <svg viewBox="0 0 24 24" aria-hidden="true" class="icon-cart"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.98 1.61h9.72a2 2 0 001.98-1.61L23 6H6"/></svg>
           <span id="cart-count" class="cart-count">0</span>
         </a>
@@ -216,10 +220,6 @@
           </div>
 
           <div class="form-grid" style="margin-bottom:1.4rem;">
-            <div class="field">
-              <label for="f-era">Era description *</label>
-              <input type="text" id="f-era" placeholder="e.g. Victorian, c.1885" />
-            </div>
             <div class="field">
               <label for="f-period">Period *</label>
               <select id="f-period">
@@ -326,7 +326,7 @@
     </div>
   </footer>
 
-  <script src="src/js/cart.js"></script>
+  <script src="../js/cart.js"></script>
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -552,7 +552,6 @@
           id: slug,
           name,
           slug,
-          era:         document.getElementById('f-era').value.trim() || 'Contemporary',
           description: document.getElementById('f-description').value.trim(),
           metal:       document.getElementById('f-metal').value.trim(),
           stones:      document.getElementById('f-stones').value.trim(),

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ffprobe -v quiet -print_format json -show_streams src/images/products/18ct-gold-old-mine-cut-diamond-gypsy-ring-v1.mp4)"
+    ]
+  }
+}

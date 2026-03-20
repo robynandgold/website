@@ -304,6 +304,7 @@
           isAnimating = false;
           if (prevBtn) prevBtn.disabled = false;
           if (nextBtn) nextBtn.disabled = false;
+          slides.forEach(s => s.classList.remove('enter-left', 'enter-right', 'exit-left', 'exit-right'));
         }, ANIM_MS);
       }
 

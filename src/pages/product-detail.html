@@ -182,8 +182,8 @@
         <div class="product-detail-image" role="region" aria-label="Product media">
           <div class="carousel" id="image-carousel">
             ${slides.length > 1 ? `
-            <button class="carousel-control prev" aria-label="Previous" id="carousel-prev">‹</button>
-            <button class="carousel-control next" aria-label="Next" id="carousel-next">›</button>` : ''}
+            <button class="carousel-control prev" aria-label="Previous" id="carousel-prev"><svg width="10" height="18" viewBox="0 0 10 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,1 1,9 9,17"/></svg></button>
+            <button class="carousel-control next" aria-label="Next" id="carousel-next"><svg width="10" height="18" viewBox="0 0 10 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 9,9 1,17"/></svg></button>` : ''}
             <div class="carousel-track" id="carousel-track">
               ${slidesHTML}
             </div>
@@ -198,7 +198,7 @@
         </div>
         
         <div class="product-detail-info">
-          <p class="eyebrow">${currentProduct.period} · ${currentProduct.era}</p>
+          <p class="eyebrow">${currentProduct.period}</p>
           <h1 class="product-detail-title">${currentProduct.name}</h1>
           <p class="product-detail-meta">${currentProduct.metal} · ${currentProduct.stones} · ${currentProduct.size}</p>
           <p class="product-detail-price">${formatPrice(currentProduct.price, currentProduct.currency)}</p>

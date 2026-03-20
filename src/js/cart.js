@@ -51,7 +51,7 @@ function addToCart(product) {
     id: product.id,
     name: product.name,
     slug: product.slug,
-    era: product.era,
+    period: product.period,
     price: product.price,
     currency: product.currency || 'EUR',
     image: product.images[0], // First image for cart display
@@ -125,7 +125,7 @@ function formatCartForCheckout() {
   return cart.map(item => ({
     id: item.id,
     name: item.name,
-    description: item.era,
+    description: item.period,
     price: item.price,
     quantity: item.quantity,
     currency: item.currency || 'EUR'

@@ -752,13 +752,18 @@ a {
   opacity: 1;
 }
 
-.carousel-slide img {
+.carousel-slide img,
+.carousel-slide video {
   width: 100%;
   height: auto;
   display: block;
   border-radius: var(--radius-lg);
   border: 1px solid rgba(221, 209, 194, 0.8);
   box-shadow: var(--shadow-soft);
+}
+
+.carousel-slide video {
+  background: #000;
 }
 
 /* Optional slide animation helpers */
@@ -810,10 +815,26 @@ a {
   background: rgba(34, 28, 21, 0.25);
   border: none;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition: background 0.2s ease;
+}
+
+.carousel-dot svg {
+  width: 6px;
+  height: 6px;
+}
+
+.carousel-dot:has(svg) {
+  width: 16px;
+  border-radius: var(--radius-pill);
 }
 
 .carousel-dot.active {
   background: var(--accent-soft);
+  color: var(--ink);
 }
 
 @media (max-width: 640px) {

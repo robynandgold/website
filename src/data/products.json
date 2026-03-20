@@ -19,7 +19,8 @@
       "/images/products/9ct-gold-diamond-crossover-ring-1.png",
       "/images/products/9ct-gold-diamond-crossover-ring-2.png",
       "/images/products/9ct-gold-diamond-crossover-ring-3.png"
-    ]
+    ],
+    "videos": []
   },
   {
     "id": "9ct-gold-diamond-crossover-ring-2",
@@ -41,7 +42,8 @@
       "/images/products/9ct-gold-diamond-crossover-ring-1.png",
       "/images/products/9ct-gold-diamond-crossover-ring-2.png",
       "/images/products/9ct-gold-diamond-crossover-ring-3.png"
-    ]
+    ],
+    "videos": []
   },
   {
     "id": "9ct-gold-diamond-band",
@@ -62,6 +64,7 @@
     "images": [
       "/images/products/9ct-gold-diamond-band-1.png",
       "/images/products/9ct-gold-diamond-band-2.png"
-    ]
+    ],
+    "videos": []
   }
 ]

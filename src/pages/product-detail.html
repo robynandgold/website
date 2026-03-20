@@ -96,136 +96,105 @@
     document.getElementById('year').textContent = new Date().getFullYear();
     
     let currentProduct = null;
-    let currentImageIndex = 0;
-    
-    // Get slug from URL
+    let currentSlideIndex = 0;
+
     function getSlugFromURL() {
-      const params = new URLSearchParams(window.location.search);
-      return params.get('slug');
+      return new URLSearchParams(window.location.search).get('slug');
     }
-    
-    // Fallback price formatting function
+
     function formatPrice(price, currency = 'EUR') {
       const symbol = currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
       return `${symbol}${price.toFixed(2)}`;
     }
-    
-    // Load product details
+
     async function loadProduct() {
-      console.log('=== PRODUCT DETAIL PAGE STARTING ===');
-      console.log('Current URL:', window.location.href);
-      
       const slug = getSlugFromURL();
-      console.log('Product detail page loaded, slug from URL:', slug);
-      
-      if (!slug) {
-        console.log('No slug provided, redirecting to shop');
-        // If no slug, send users back to the collection
-        window.location.href = 'shop.html';
-        return;
-      }
-      
-      console.log('Attempting to load product with slug:', slug);
-      
-      // First try direct fetch approach
+      if (!slug) { window.location.href = 'shop.html'; return; }
+
       try {
-        console.log('Trying direct fetch of products...');
         const response = await fetch('../data/products.json');
-        console.log('Direct fetch response:', response.status, response.ok);
-        
         if (response.ok) {
           const products = await response.json();
-          console.log('Direct fetch successful, got', products.length, 'products');
-          console.log('All product slugs:', products.map(p => p.slug));
-          
-          // Find product by slug
-          currentProduct = products.find(product => product.slug === slug);
-          console.log('Product found via direct fetch:', currentProduct);
-          
-          if (currentProduct) {
-            console.log('Product found! Rendering...');
-            renderProductDetails();
-            return; // Success, exit here
-          } else {
-            console.log('Product NOT found with slug:', slug);
-            console.log('Available slugs:', products.map(p => `"${p.slug}"`).join(', '));
-          }
+          currentProduct = products.find(p => p.slug === slug);
+          if (currentProduct) { renderProductDetails(); return; }
         }
-      } catch (error) {
-        console.log('Direct fetch failed:', error);
-      }
-      
-      // Fallback to ProductsAPI method
-      console.log('Falling back to ProductsAPI method...');
+      } catch (e) {}
 
-      // Wait for ProductsAPI to be available
+      // Fallback to ProductsAPI
       let attempts = 0;
       while (!window.ProductsAPI && attempts < 50) {
         await new Promise(resolve => setTimeout(resolve, 100));
         attempts++;
       }
-      
-      if (!window.ProductsAPI) {
-        console.error('ProductsAPI not available after waiting');
-        return;
-      }
-      
-      console.log('Fetching product with slug:', slug);
+      if (!window.ProductsAPI) return;
+
       currentProduct = await window.ProductsAPI.getProductBySlug(slug);
-      console.log('Product found:', currentProduct);
-      
+
       if (!currentProduct) {
-        console.log('Product not found for slug:', slug);
-        const el = document.getElementById('product-detail');
-        el.innerHTML = `
+        document.getElementById('product-detail').innerHTML = `
           <div style="padding: 1.2rem; background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius-md); text-align: center;">
             <strong style="font-size: 1.05rem;">Product not found</strong>
             <p style="margin: 0.6rem 0 1rem; color: var(--muted);">The link may be outdated or the piece has been removed.</p>
             <a href="shop.html" class="btn btn-ghost">Back to collection</a>
-          </div>
-        `;
+          </div>`;
         return;
       }
 
       renderProductDetails();
     }
-    
+
     function renderProductDetails() {
       if (!currentProduct) return;
-
-      console.log('Rendering product:', currentProduct.name, 'Available:', currentProduct.available);
-      // Update page title
       document.title = `${currentProduct.name} — Robyn & Gold`;
-      
       renderProduct();
     }
-    
+
+    function buildSlides() {
+      const images = (currentProduct.images || []).map(src => ({ type: 'image', src }));
+      const videos = (currentProduct.videos || []).map(src => ({ type: 'video', src }));
+      return [...images, ...videos];
+    }
+
     // Render product details
     function renderProduct() {
       const container = document.getElementById('product-detail');
       const isSold = currentProduct.available === false;
-      
+      const slides = buildSlides();
+
+      const slidesHTML = slides.map((item, index) => {
+        const activeClass = index === 0 ? ' active' : '';
+        if (item.type === 'video') {
+          return `
+            <div class="carousel-slide${activeClass}" data-index="${index}">
+              <video src="${item.src}" autoplay muted loop playsinline class="carousel-video"></video>
+            </div>`;
+        }
+        return `
+          <div class="carousel-slide${activeClass}" data-index="${index}">
+            <img src="${item.src}" alt="${currentProduct.name} view ${index + 1}" onerror="this.src='../images/homepage.png'" />
+          </div>`;
+      }).join('');
+
       container.innerHTML = `
         <div style="grid-column: 1 / -1; margin-bottom: 0.5rem;">
           <a href="shop.html" class="btn btn-ghost" style="padding: 0.5rem 1.1rem; font-size: 0.8rem;">← Back to shop</a>
         </div>
-        <div class="product-detail-image" role="region" aria-label="Product images">
+        <div class="product-detail-image" role="region" aria-label="Product media">
           <div class="carousel" id="image-carousel">
-            <button class="carousel-control prev" aria-label="Previous image" id="carousel-prev">‹</button>
-            <button class="carousel-control next" aria-label="Next image" id="carousel-next">›</button>
+            ${slides.length > 1 ? `
+            <button class="carousel-control prev" aria-label="Previous" id="carousel-prev">‹</button>
+            <button class="carousel-control next" aria-label="Next" id="carousel-next">›</button>` : ''}
             <div class="carousel-track" id="carousel-track">
-              ${currentProduct.images.map((img, index) => `
-                <div class="carousel-slide${index === 0 ? ' active' : ''}" data-index="${index}">
-                  <img 
-                    src="${img}" 
-                    alt="${currentProduct.name} view ${index + 1}"
-                    onerror="this.src='../images/homepage.png'"
-                  />
-                </div>
-              `).join('')}
+              ${slidesHTML}
             </div>
+            ${slides.length > 1 ? `
+            <div class="carousel-dots" id="carousel-dots">
+              ${slides.map((item, i) => `
+                <button class="carousel-dot${i === 0 ? ' active' : ''}" data-index="${i}" aria-label="${item.type === 'video' ? 'Video' : 'Image ' + (i + 1)}">
+                  ${item.type === 'video' ? '<svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><polygon points="1,0 7,4 1,8"/></svg>' : ''}
+                </button>`).join('')}
+            </div>` : ''}
           </div>
-          
         </div>
         
         <div class="product-detail-info">
@@ -282,113 +251,79 @@
       }
     }
     
-    // Setup image carousel (buttons, dots, and swipe)
+    // Setup carousel (images + videos)
     function setupCarousel() {
       const track = document.getElementById('carousel-track');
       if (!track) return;
       const slides = Array.from(track.querySelectorAll('.carousel-slide'));
+      if (slides.length <= 1) return;
+
       const prevBtn = document.getElementById('carousel-prev');
       const nextBtn = document.getElementById('carousel-next');
-      const dots = [];
+      const dotBtns = Array.from(document.querySelectorAll('#carousel-dots .carousel-dot'));
       let isAnimating = false;
-      const ANIM_MS = 280; // match CSS ~260ms with small buffer
+      const ANIM_MS = 280;
 
       function updateActive(nextIndex, direction) {
-        const prevIndex = currentImageIndex;
-        currentImageIndex = nextIndex;
+        const prevIndex = currentSlideIndex;
+        currentSlideIndex = nextIndex;
 
-        // Clear classes
-        slides.forEach(s => {
-          s.classList.remove('active', 'enter-left', 'enter-right', 'exit-left', 'exit-right');
-        });
-        // No dots when using icon-only controls
+        slides.forEach(s => s.classList.remove('active', 'enter-left', 'enter-right', 'exit-left', 'exit-right'));
+        dotBtns.forEach((d, i) => d.classList.toggle('active', i === nextIndex));
 
         const prevSlide = slides[prevIndex];
         const nextSlide = slides[nextIndex];
 
-        // Apply directional classes for a subtle slide
-        if (prevSlide && nextSlide) {
-          if (direction === 'next') {
-            prevSlide.classList.add('exit-left');
-            nextSlide.classList.add('enter-right');
-          } else if (direction === 'prev') {
-            prevSlide.classList.add('exit-right');
-            nextSlide.classList.add('enter-left');
-          }
-        }
+        // Pause any playing video on the outgoing slide
+        const outVideo = prevSlide && prevSlide.querySelector('video');
+        if (outVideo) outVideo.pause();
 
-        // Activate the next slide and dot
-        if (nextSlide) nextSlide.classList.add('active');
-        // No dot activation
+        if (prevSlide && nextSlide) {
+          prevSlide.classList.add(direction === 'next' ? 'exit-left' : 'exit-right');
+          nextSlide.classList.add(direction === 'next' ? 'enter-right' : 'enter-left');
+        }
+        if (nextSlide) {
+          nextSlide.classList.add('active');
+          // Play video when it becomes active
+          const inVideo = nextSlide.querySelector('video');
+          if (inVideo) inVideo.play();
+        }
       }
 
       function goTo(index, directionHint) {
         if (isAnimating) return;
         isAnimating = true;
-        // Disable controls during animation for UX clarity
-        if (prevBtn) { prevBtn.disabled = true; prevBtn.setAttribute('aria-disabled', 'true'); }
-        if (nextBtn) { nextBtn.disabled = true; nextBtn.setAttribute('aria-disabled', 'true'); }
-        let nextIndex = index;
-        if (nextIndex < 0) nextIndex = slides.length - 1;
-        if (nextIndex >= slides.length) nextIndex = 0;
+        if (prevBtn) prevBtn.disabled = true;
+        if (nextBtn) nextBtn.disabled = true;
 
-        // Infer direction if not provided
-        let direction = directionHint;
-        if (!direction) {
-          if ((nextIndex === 0 && currentImageIndex === slides.length - 1) || nextIndex > currentImageIndex) {
-            direction = 'next';
-          } else {
-            direction = 'prev';
-          }
-        }
+        let nextIndex = (index + slides.length) % slides.length;
+        const direction = directionHint || (nextIndex > currentSlideIndex ? 'next' : 'prev');
 
         updateActive(nextIndex, direction);
         setTimeout(() => {
           isAnimating = false;
-          if (prevBtn) { prevBtn.disabled = false; prevBtn.setAttribute('aria-disabled', 'false'); }
-          if (nextBtn) { nextBtn.disabled = false; nextBtn.setAttribute('aria-disabled', 'false'); }
+          if (prevBtn) prevBtn.disabled = false;
+          if (nextBtn) nextBtn.disabled = false;
         }, ANIM_MS);
       }
 
-      if (prevBtn) prevBtn.addEventListener('click', () => goTo(currentImageIndex - 1, 'prev'));
-      if (nextBtn) nextBtn.addEventListener('click', () => goTo(currentImageIndex + 1, 'next'));
+      if (prevBtn) prevBtn.addEventListener('click', () => goTo(currentSlideIndex - 1, 'prev'));
+      if (nextBtn) nextBtn.addEventListener('click', () => goTo(currentSlideIndex + 1, 'next'));
+      dotBtns.forEach(d => d.addEventListener('click', () => goTo(parseInt(d.dataset.index))));
 
-      // No dots listeners
-
-      // Touch/Swipe support
+      // Touch/swipe
       let startX = 0;
-      let isDragging = false;
-      track.addEventListener('touchstart', (e) => {
-        startX = e.touches[0].clientX;
-        isDragging = true;
-      }, { passive: true });
-      track.addEventListener('touchmove', (e) => {
-        if (!isDragging) return;
-      }, { passive: true });
+      track.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
       track.addEventListener('touchend', (e) => {
-        if (!isDragging) return;
-        const endX = e.changedTouches[0].clientX;
-        const delta = endX - startX;
-        if (Math.abs(delta) > 30) {
-          if (delta > 0) {
-            goTo(currentImageIndex - 1, 'prev');
-          } else {
-            goTo(currentImageIndex + 1, 'next');
-          }
-        }
-        isDragging = false;
+        const delta = e.changedTouches[0].clientX - startX;
+        if (Math.abs(delta) > 30) goTo(currentSlideIndex + (delta > 0 ? -1 : 1));
       });
 
-      // Keyboard accessibility (left/right arrows)
+      // Keyboard
       track.setAttribute('tabindex', '0');
       track.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft') {
-          e.preventDefault();
-          goTo(currentImageIndex - 1, 'prev');
-        } else if (e.key === 'ArrowRight') {
-          e.preventDefault();
-          goTo(currentImageIndex + 1, 'next');
-        }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(currentSlideIndex - 1, 'prev'); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); goTo(currentSlideIndex + 1, 'next'); }
       });
     }
     

@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Add Product — Robyn &amp; Gold</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <style>
+    #auth-gate {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #auth-gate .auth-card {
+      background: #fdfbf8;
+      border: 1px solid rgba(221,209,194,0.9);
+      border-radius: var(--radius-lg);
+      padding: 2.4rem 2.2rem;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: var(--shadow-soft);
+    }
+    #auth-gate h2 {
+      font-family: "Playfair Display", serif;
+      font-size: 1.4rem;
+      margin: 0 0 0.4rem;
+    }
+    #auth-gate p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin: 0 0 1.4rem;
+    }
+    #auth-gate input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.65rem 0.9rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      color: var(--ink);
+      background: var(--bg);
+      text-align: center;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.9rem;
+      box-sizing: border-box;
+    }
+    #auth-gate input:focus { outline: none; border-color: var(--ink); }
+    #auth-gate .auth-error {
+      font-size: 0.82rem;
+      color: #b04040;
+      margin-bottom: 0.8rem;
+      display: none;
+    }
+  </style>
+  <style>
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+    .form-grid .full {
+      grid-column: 1 / -1;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .field label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+    }
+    .field input,
+    .field textarea,
+    .field select {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.6rem 0.8rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: var(--ink);
+      background: #fdfbf8;
+      transition: border-color 0.15s ease;
+    }
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      outline: none;
+      border-color: var(--ink);
+    }
+    .field textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+    .field .hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .media-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .media-entry {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .media-entry input {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.5rem 0.8rem;
+      font-family: inherit;
+      font-size: 0.88rem;
+      color: var(--ink);
+      background: #fdfbf8;
+    }
+    .media-entry input:focus { outline: none; border-color: var(--ink); }
+    .btn-remove {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 0 0.2rem;
+      line-height: 1;
+    }
+    .btn-remove:hover { color: var(--ink); }
+    .btn-add-media {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      background: none;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.5rem 0.8rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      margin-top: 0.3rem;
+      width: 100%;
+    }
+    .btn-add-media:hover { border-color: var(--ink); color: var(--ink); }
+    .output-card {
+      background: var(--ink);
+      color: #fdfbf8;
+      border-radius: var(--radius-lg);
+      padding: 1.4rem 1.5rem;
+      margin-top: 2rem;
+    }
+    .output-card pre {
+      font-family: "Courier New", monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin: 0;
+      color: #e8dfc8;
+    }
+    .output-actions {
+      display: flex;
+      gap: 0.7rem;
+      margin-top: 1rem;
+    }
+    .btn-copy {
+      background: var(--accent-soft);
+      color: var(--ink);
+      border: none;
+      border-radius: var(--radius-pill);
+      padding: 0.55rem 1.2rem;
+      font-family: inherit;
+      font-size: 0.82rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-copy:hover { opacity: 0.85; }
+    .section-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      margin: 0 0 0.7rem;
+    }
+    .toggle-row {
+      display: flex;
+      gap: 1.5rem;
+    }
+    .toggle-field {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.88rem;
+      cursor: pointer;
+    }
+    .toggle-field input[type="checkbox"] {
+      width: 1rem;
+      height: 1rem;
+      accent-color: var(--ink);
+      cursor: pointer;
+    }
+    @media (max-width: 640px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .form-grid .full { grid-column: 1; }
+    }
+  </style>
+</head>
+<body class="page">
+
+  <!-- Admin password gate -->
+  <div id="auth-gate">
+    <div class="auth-card">
+      <h2>Robyn &amp; Gold</h2>
+      <p>Enter the admin password to continue.</p>
+      <p class="auth-error" id="auth-error">Incorrect password — try again.</p>
+      <input type="password" id="auth-input" placeholder="Password" autocomplete="current-password" />
+      <button class="btn btn-primary" id="auth-submit" style="width:100%;">Continue</button>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <nav class="nav nav-left" aria-label="Primary">
+        <a href="shop.html" class="nav-link">Shop</a>
+        <a href="../index.html#about" class="nav-link">Our story</a>
+      </nav>
+      <div class="brand-banner">
+        <div class="brand-center">
+          <a href="../index.html">
+            <img src="../images/logo.png" alt="Robyn & Gold" />
+          </a>
+          <a href="../index.html" class="brand-main">Robyn &amp; Gold</a>
+          <span class="brand-tagline">Antique Jewellery</span>
+        </div>
+      </div>
+      <nav class="nav nav-right" aria-label="Utilities">
+        <a href="cart.html" class="nav-link nav-link--cart" aria-label="Cart">
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="icon-cart"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.98 1.61h9.72a2 2 0 001.98-1.61L23 6H6"/></svg>
+          <span id="cart-count" class="cart-count">0</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="container" style="max-width: 780px;">
+        <p class="eyebrow">Internal tool</p>
+        <h1 class="page-title">Add a new piece</h1>
+        <p class="page-intro" style="margin-bottom: 2.5rem;">Fill in the details below and copy the generated JSON into <code style="font-size:0.85em; background:var(--bg-alt); padding:0.1rem 0.4rem; border-radius:4px;">src/data/products.json</code>.</p>
+
+        <div style="background:#fdfbf8; border:1px solid rgba(221,209,194,0.9); border-radius:var(--radius-lg); padding:2rem 2rem 2.2rem;">
+
+          <!-- Name + Slug -->
+          <div class="form-grid" style="margin-bottom:1.4rem;">
+            <div class="field full">
+              <label for="f-name">Name *</label>
+              <input type="text" id="f-name" placeholder="e.g. Victorian Diamond Cluster Ring" />
+            </div>
+            <div class="field full">
+              <label for="f-slug">Slug <span style="font-size:0.75rem; text-transform:none; letter-spacing:0;">(auto-generated, edit if needed)</span></label>
+              <input type="text" id="f-slug" placeholder="e.g. victorian-diamond-cluster-ring" />
+            </div>
+          </div>
+
+          <!-- Era + Period -->
+          <div class="form-grid" style="margin-bottom:1.4rem;">
+            <div class="field">
+              <label for="f-era">Era description *</label>
+              <input type="text" id="f-era" placeholder="e.g. Victorian, c.1885" />
+            </div>
+            <div class="field">
+              <label for="f-period">Period *</label>
+              <select id="f-period">
+                <option value="Victorian">Victorian</option>
+                <option value="Edwardian">Edwardian</option>
+                <option value="Art Deco">Art Deco</option>
+                <option value="Art Nouveau">Art Nouveau</option>
+                <option value="Georgian">Georgian</option>
+                <option value="Retro">Retro</option>
+                <option value="Contemporary" selected>Contemporary</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="form-grid" style="margin-bottom:1.4rem;">
+            <div class="field full">
+              <label for="f-description">Description *</label>
+              <textarea id="f-description" placeholder="Describe the piece — history, craftsmanship, character..."></textarea>
+            </div>
+          </div>
+
+          <!-- Metal + Stones + Size -->
+          <div class="form-grid" style="margin-bottom:1.4rem;">
+            <div class="field">
+              <label for="f-metal">Metal *</label>
+              <input type="text" id="f-metal" placeholder="e.g. 18ct Yellow Gold" />
+            </div>
+            <div class="field">
+              <label for="f-stones">Stones *</label>
+              <input type="text" id="f-stones" placeholder="e.g. Old Cut Diamonds (0.45ct)" />
+            </div>
+            <div class="field">
+              <label for="f-size">Size *</label>
+              <input type="text" id="f-size" placeholder="e.g. UK N / US 6.5" />
+            </div>
+            <div class="field">
+              <label for="f-style">Style *</label>
+              <input type="text" id="f-style" placeholder="e.g. Cluster, Solitaire, Band..." />
+            </div>
+          </div>
+
+          <!-- Price + Category -->
+          <div class="form-grid" style="margin-bottom:1.4rem;">
+            <div class="field">
+              <label for="f-price">Price (EUR) *</label>
+              <input type="number" id="f-price" placeholder="e.g. 1200" min="0" step="1" />
+            </div>
+            <div class="field">
+              <label for="f-category">Category *</label>
+              <select id="f-category">
+                <option value="rings" selected>Rings</option>
+                <option value="necklaces">Necklaces</option>
+                <option value="bracelets">Bracelets</option>
+                <option value="earrings">Earrings</option>
+                <option value="brooches">Brooches</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Toggles -->
+          <div style="margin-bottom:1.6rem;">
+            <p class="section-label">Listing options</p>
+            <div class="toggle-row">
+              <label class="toggle-field">
+                <input type="checkbox" id="f-available" checked />
+                Available for purchase
+              </label>
+              <label class="toggle-field">
+                <input type="checkbox" id="f-featured" />
+                Featured on homepage
+              </label>
+            </div>
+          </div>
+
+          <!-- Images -->
+          <div style="margin-bottom:1.4rem;">
+            <p class="section-label">Images</p>
+            <div class="media-list" id="image-list"></div>
+            <button class="btn-add-media" id="add-image-btn">+ Add image path</button>
+            <p class="hint" style="font-size:0.75rem; color:var(--muted); margin-top:0.4rem;">Upload images to <code style="font-size:0.85em;">/src/images/products/</code> then enter the path, e.g. <code style="font-size:0.85em;">/images/products/my-ring-1.jpg</code></p>
+          </div>
+
+          <!-- Videos -->
+          <div style="margin-bottom:2rem;">
+            <p class="section-label">Videos <span style="font-size:0.75rem; text-transform:none; letter-spacing:0; color:var(--muted);">(optional)</span></p>
+            <div class="media-list" id="video-list"></div>
+            <button class="btn-add-media" id="add-video-btn">+ Add video path</button>
+            <p class="hint" style="font-size:0.75rem; color:var(--muted); margin-top:0.4rem;">Accepts .mp4, .mov or .webm. Upload to <code style="font-size:0.85em;">/src/images/products/</code></p>
+          </div>
+
+          <!-- Generate -->
+          <button class="btn btn-primary" id="generate-btn" style="width:100%;">Generate JSON</button>
+        </div>
+
+        <!-- Output -->
+        <div class="output-card" id="output-card" style="display:none;">
+          <p style="font-size:0.78rem; text-transform:uppercase; letter-spacing:0.16em; color:var(--accent-soft); margin:0 0 0.8rem;">Generated JSON — copy this into products.json</p>
+          <pre id="output-pre"></pre>
+          <div class="output-actions">
+            <button class="btn-copy" id="copy-btn">Copy to clipboard</button>
+            <span id="copy-confirm" style="font-size:0.82rem; color:var(--accent-soft); align-self:center; opacity:0; transition:opacity 0.3s;"></span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="brand-main">Robyn &amp; Gold</span>
+        <span class="brand-tagline">Antique Jewellery</span>
+      </div>
+      <div class="footer-links">
+        <a href="/pages/shop.html" class="footer-link">Shop</a>
+        <a href="/index.html#about" class="footer-link">About</a>
+        <a href="/pages/contact.html" class="footer-link">Contact</a>
+      </div>
+      <p class="footer-meta">© <span id="year"></span> Robyn &amp; Gold. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="../js/cart.js"></script>
+  <script>
+    // ── Admin password gate ──────────────────────────────────────
+    const ADMIN_PASSWORD = 'robyngold2025';
+    const SESSION_KEY = 'rg_admin_auth';
+
+    function showPage() {
+      document.getElementById('auth-gate').style.display = 'none';
+    }
+
+    if (sessionStorage.getItem(SESSION_KEY) === '1') {
+      showPage();
+    }
+
+    function tryAuth() {
+      const val = document.getElementById('auth-input').value;
+      if (val === ADMIN_PASSWORD) {
+        sessionStorage.setItem(SESSION_KEY, '1');
+        showPage();
+      } else {
+        document.getElementById('auth-error').style.display = 'block';
+        document.getElementById('auth-input').value = '';
+        document.getElementById('auth-input').focus();
+      }
+    }
+
+    document.getElementById('auth-submit').addEventListener('click', tryAuth);
+    document.getElementById('auth-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') tryAuth();
+    });
+    // ─────────────────────────────────────────────────────────────
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Auto-generate slug from name
+    document.getElementById('f-name').addEventListener('input', function () {
+      const slug = this.value
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+      document.getElementById('f-slug').value = slug;
+    });
+
+    // Media list helpers
+    function addMediaEntry(listId, placeholder) {
+      const list = document.getElementById(listId);
+      const entry = document.createElement('div');
+      entry.className = 'media-entry';
+      entry.innerHTML = `
+        <input type="text" placeholder="${placeholder}" />
+        <button class="btn-remove" title="Remove" aria-label="Remove">×</button>
+      `;
+      entry.querySelector('.btn-remove').addEventListener('click', () => entry.remove());
+      list.appendChild(entry);
+      entry.querySelector('input').focus();
+    }
+
+    document.getElementById('add-image-btn').addEventListener('click', () =>
+      addMediaEntry('image-list', '/images/products/my-ring-1.jpg'));
+    document.getElementById('add-video-btn').addEventListener('click', () =>
+      addMediaEntry('video-list', '/images/products/my-ring.mp4'));
+
+    // Add one image row by default
+    addMediaEntry('image-list', '/images/products/my-ring-1.jpg');
+
+    function getMediaPaths(listId) {
+      return Array.from(document.querySelectorAll(`#${listId} .media-entry input`))
+        .map(i => i.value.trim())
+        .filter(Boolean);
+    }
+
+    function generateId(slug) {
+      return slug || 'new-product-' + Date.now();
+    }
+
+    document.getElementById('generate-btn').addEventListener('click', function () {
+      const name = document.getElementById('f-name').value.trim();
+      const slug = document.getElementById('f-slug').value.trim();
+
+      if (!name || !slug) {
+        alert('Please enter at least a name and slug.');
+        return;
+      }
+
+      const product = {
+        id: generateId(slug),
+        name,
+        slug,
+        era: document.getElementById('f-era').value.trim() || 'Contemporary',
+        description: document.getElementById('f-description').value.trim(),
+        metal: document.getElementById('f-metal').value.trim(),
+        stones: document.getElementById('f-stones').value.trim(),
+        size: document.getElementById('f-size').value.trim(),
+        price: parseFloat(document.getElementById('f-price').value) || 0,
+        currency: 'EUR',
+        featured: document.getElementById('f-featured').checked,
+        period: document.getElementById('f-period').value,
+        style: document.getElementById('f-style').value.trim(),
+        category: document.getElementById('f-category').value,
+        available: document.getElementById('f-available').checked,
+        images: getMediaPaths('image-list'),
+        videos: getMediaPaths('video-list'),
+      };
+
+      const json = JSON.stringify(product, null, 2);
+      document.getElementById('output-pre').textContent = json;
+      document.getElementById('output-card').style.display = 'block';
+      document.getElementById('output-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    document.getElementById('copy-btn').addEventListener('click', function () {
+      const text = document.getElementById('output-pre').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const confirm = document.getElementById('copy-confirm');
+        confirm.textContent = 'Copied!';
+        confirm.style.opacity = '1';
+        setTimeout(() => { confirm.style.opacity = '0'; }, 2000);
+      });
+    });
+  </script>
+</body>
+</html>

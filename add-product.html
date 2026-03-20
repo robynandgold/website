@@ -9,208 +9,125 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="src/css/styles.css" />
   <style>
+    /* ── Auth gate ─────────────────────────────── */
     #auth-gate {
-      position: fixed;
-      inset: 0;
-      z-index: 100;
+      position: fixed; inset: 0; z-index: 100;
       background: var(--bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
     }
-    #auth-gate .auth-card {
+    .auth-card {
       background: #fdfbf8;
       border: 1px solid rgba(221,209,194,0.9);
       border-radius: var(--radius-lg);
       padding: 2.4rem 2.2rem;
-      width: 100%;
-      max-width: 360px;
+      width: 100%; max-width: 360px;
       text-align: center;
       box-shadow: var(--shadow-soft);
     }
-    #auth-gate h2 {
-      font-family: "Playfair Display", serif;
-      font-size: 1.4rem;
-      margin: 0 0 0.4rem;
+    .auth-card h2 { font-family: "Playfair Display", serif; font-size: 1.4rem; margin: 0 0 0.4rem; }
+    .auth-card p  { font-size: 0.88rem; color: var(--muted); margin: 0 0 1.4rem; }
+    .auth-card input {
+      width: 100%; border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 0.65rem 0.9rem; font-family: inherit; font-size: 0.95rem;
+      color: var(--ink); background: var(--bg); text-align: center;
+      letter-spacing: 0.1em; margin-bottom: 0.9rem; box-sizing: border-box;
     }
-    #auth-gate p {
-      font-size: 0.88rem;
-      color: var(--muted);
-      margin: 0 0 1.4rem;
-    }
-    #auth-gate input {
-      width: 100%;
-      border: 1px solid var(--border);
+    .auth-card input:focus { outline: none; border-color: var(--ink); }
+    .auth-error { font-size: 0.82rem; color: #b04040; margin-bottom: 0.8rem; display: none; }
+
+    /* ── Setup banner ───────────────────────────── */
+    .setup-banner {
+      background: rgba(198,168,120,0.1);
+      border: 1px solid var(--accent-soft);
       border-radius: var(--radius-md);
-      padding: 0.65rem 0.9rem;
-      font-family: inherit;
-      font-size: 0.95rem;
-      color: var(--ink);
-      background: var(--bg);
-      text-align: center;
-      letter-spacing: 0.1em;
-      margin-bottom: 0.9rem;
-      box-sizing: border-box;
+      padding: 1rem 1.2rem;
+      margin-bottom: 2rem;
+      font-size: 0.88rem;
     }
-    #auth-gate input:focus { outline: none; border-color: var(--ink); }
-    #auth-gate .auth-error {
-      font-size: 0.82rem;
-      color: #b04040;
-      margin-bottom: 0.8rem;
-      display: none;
+    .setup-banner p { margin: 0 0 0.7rem; color: var(--muted); }
+    .setup-banner p:last-child { margin: 0; }
+    .setup-row { display: flex; gap: 0.6rem; align-items: center; margin-bottom: 0.6rem; }
+    .setup-row input {
+      flex: 1; border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 0.5rem 0.7rem; font-family: inherit; font-size: 0.85rem;
+      color: var(--ink); background: #fdfbf8;
     }
-  </style>
-  <style>
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.2rem;
-    }
-    .form-grid .full {
-      grid-column: 1 / -1;
-    }
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-    .field label {
+    .setup-row input:focus { outline: none; border-color: var(--ink); }
+    .setup-status {
       font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: var(--muted);
+      display: flex; align-items: center; gap: 0.4rem;
     }
-    .field input,
-    .field textarea,
-    .field select {
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 0.6rem 0.8rem;
-      font-family: inherit;
-      font-size: 0.9rem;
-      color: var(--ink);
+    .setup-status .dot {
+      width: 8px; height: 8px; border-radius: 50%; background: #ccc; flex-shrink: 0;
+    }
+    .setup-status .dot.ok  { background: #5a9e6f; }
+    .setup-status .dot.err { background: #b04040; }
+
+    /* ── Form ───────────────────────────────────── */
+    .form-card {
       background: #fdfbf8;
-      transition: border-color 0.15s ease;
+      border: 1px solid rgba(221,209,194,0.9);
+      border-radius: var(--radius-lg);
+      padding: 2rem 2rem 2.2rem;
     }
-    .field input:focus,
-    .field textarea:focus,
-    .field select:focus {
-      outline: none;
-      border-color: var(--ink);
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+    .form-grid .full { grid-column: 1 / -1; }
+    .field { display: flex; flex-direction: column; gap: 0.4rem; }
+    .field label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.16em; color: var(--muted); }
+    .field input, .field textarea, .field select {
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 0.6rem 0.8rem; font-family: inherit; font-size: 0.9rem;
+      color: var(--ink); background: #fdfbf8; transition: border-color 0.15s;
     }
-    .field textarea {
-      resize: vertical;
-      min-height: 90px;
-    }
-    .field .hint {
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-    .media-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
+    .field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--ink); }
+    .field textarea { resize: vertical; min-height: 90px; }
+    .section-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.18em; color: var(--muted); margin: 0 0 0.7rem; }
+    .toggle-row { display: flex; gap: 1.5rem; }
+    .toggle-field { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; cursor: pointer; }
+    .toggle-field input[type="checkbox"] { width: 1rem; height: 1rem; accent-color: var(--ink); cursor: pointer; }
+
+    /* ── Media entries ──────────────────────────── */
+    .media-list { display: flex; flex-direction: column; gap: 0.5rem; }
     .media-entry {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
+      display: grid; grid-template-columns: 72px 1fr auto;
+      gap: 0.7rem; align-items: center;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 0.5rem 0.6rem;
     }
-    .media-entry input {
-      flex: 1;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 0.5rem 0.8rem;
-      font-family: inherit;
-      font-size: 0.88rem;
-      color: var(--ink);
-      background: #fdfbf8;
+    .media-thumb {
+      width: 72px; height: 56px; border-radius: 6px; overflow: hidden;
+      background: #e8e0d4; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0;
     }
-    .media-entry input:focus { outline: none; border-color: var(--ink); }
-    .btn-remove {
-      background: none;
-      border: none;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 1.1rem;
-      padding: 0 0.2rem;
-      line-height: 1;
+    .media-thumb img, .media-thumb video { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .media-thumb .thumb-placeholder {
+      font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--muted); text-align: center; padding: 0.3rem; line-height: 1.4;
     }
+    .media-entry-right { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+    .media-filename { font-size: 0.8rem; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .media-filename.empty { color: var(--muted); font-style: italic; }
+    .media-path { font-size: 0.72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .btn-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.1rem; padding: 0 0.2rem; line-height: 1; flex-shrink: 0; }
     .btn-remove:hover { color: var(--ink); }
     .btn-add-media {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--muted);
-      background: none;
-      border: 1px dashed var(--border);
-      border-radius: var(--radius-md);
-      padding: 0.5rem 0.8rem;
-      cursor: pointer;
-      transition: border-color 0.15s, color 0.15s;
-      margin-top: 0.3rem;
-      width: 100%;
+      font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--muted); background: none; border: 1px dashed var(--border);
+      border-radius: var(--radius-md); padding: 0.5rem 0.8rem; cursor: pointer;
+      transition: border-color 0.15s, color 0.15s; margin-top: 0.5rem; width: 100%;
     }
     .btn-add-media:hover { border-color: var(--ink); color: var(--ink); }
-    .output-card {
-      background: var(--ink);
-      color: #fdfbf8;
-      border-radius: var(--radius-lg);
-      padding: 1.4rem 1.5rem;
-      margin-top: 2rem;
+
+    /* ── Publish button + status ────────────────── */
+    .publish-status {
+      margin-top: 1rem; padding: 0.9rem 1.1rem;
+      border-radius: var(--radius-md); font-size: 0.88rem;
+      display: none;
     }
-    .output-card pre {
-      font-family: "Courier New", monospace;
-      font-size: 0.82rem;
-      line-height: 1.6;
-      white-space: pre-wrap;
-      word-break: break-word;
-      margin: 0;
-      color: #e8dfc8;
-    }
-    .output-actions {
-      display: flex;
-      gap: 0.7rem;
-      margin-top: 1rem;
-    }
-    .btn-copy {
-      background: var(--accent-soft);
-      color: var(--ink);
-      border: none;
-      border-radius: var(--radius-pill);
-      padding: 0.55rem 1.2rem;
-      font-family: inherit;
-      font-size: 0.82rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: opacity 0.15s;
-    }
-    .btn-copy:hover { opacity: 0.85; }
-    .section-label {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-      color: var(--muted);
-      margin: 0 0 0.7rem;
-    }
-    .toggle-row {
-      display: flex;
-      gap: 1.5rem;
-    }
-    .toggle-field {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.88rem;
-      cursor: pointer;
-    }
-    .toggle-field input[type="checkbox"] {
-      width: 1rem;
-      height: 1rem;
-      accent-color: var(--ink);
-      cursor: pointer;
-    }
+    .publish-status.info    { display: block; background: var(--bg-alt); color: var(--muted); border: 1px solid var(--border); }
+    .publish-status.success { display: block; background: #edf7f0; color: #3a7a52; border: 1px solid #a8d5b5; }
+    .publish-status.error   { display: block; background: #fdf0f0; color: #b04040; border: 1px solid #e8b0b0; }
+
     @media (max-width: 640px) {
       .form-grid { grid-template-columns: 1fr; }
       .form-grid .full { grid-column: 1; }
@@ -219,7 +136,7 @@
 </head>
 <body class="page">
 
-  <!-- Admin password gate -->
+  <!-- Auth gate -->
   <div id="auth-gate">
     <div class="auth-card">
       <h2>Robyn &amp; Gold</h2>
@@ -238,9 +155,7 @@
       </nav>
       <div class="brand-banner">
         <div class="brand-center">
-          <a href="src/index.html">
-            <img src="src/images/logo.png" alt="Robyn & Gold" />
-          </a>
+          <a href="src/index.html"><img src="src/images/logo.png" alt="Robyn & Gold" /></a>
           <a href="src/index.html" class="brand-main">Robyn &amp; Gold</a>
           <span class="brand-tagline">Antique Jewellery</span>
         </div>
@@ -259,23 +174,47 @@
       <div class="container" style="max-width: 780px;">
         <p class="eyebrow">Internal tool</p>
         <h1 class="page-title">Add a new piece</h1>
-        <p class="page-intro" style="margin-bottom: 2.5rem;">Fill in the details below and copy the generated JSON into <code style="font-size:0.85em; background:var(--bg-alt); padding:0.1rem 0.4rem; border-radius:4px;">src/data/products.json</code>.</p>
+        <p class="page-intro" style="margin-bottom: 2rem;">Fill in the details and click <strong>Publish to site</strong> — images are saved locally and the product is committed to GitHub automatically.</p>
 
-        <div style="background:#fdfbf8; border:1px solid rgba(221,209,194,0.9); border-radius:var(--radius-lg); padding:2rem 2rem 2.2rem;">
+        <!-- Setup -->
+        <div class="setup-banner" id="setup-banner">
+          <p><strong>One-time setup</strong> — configure your GitHub token and local images folder before publishing.</p>
 
-          <!-- Name + Slug -->
+          <div class="setup-row">
+            <input type="password" id="cfg-token" placeholder="GitHub personal access token (repo scope)" autocomplete="off" />
+            <button class="btn btn-ghost" id="save-token-btn" style="white-space:nowrap; padding:0.5rem 1rem; font-size:0.8rem;">Save token</button>
+          </div>
+          <div class="setup-status" id="token-status">
+            <span class="dot" id="token-dot"></span>
+            <span id="token-label">No token saved</span>
+          </div>
+
+          <div style="margin-top:1rem; border-top:1px solid var(--border); padding-top:1rem;">
+            <div class="setup-row">
+              <button class="btn btn-ghost" id="pick-folder-btn" style="padding:0.5rem 1rem; font-size:0.8rem;">Pick images folder</button>
+              <span style="font-size:0.78rem; color:var(--muted);">Select <code>src/images/products/</code> from your local repo</span>
+            </div>
+            <div class="setup-status" id="folder-status">
+              <span class="dot" id="folder-dot"></span>
+              <span id="folder-label">No folder selected</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form -->
+        <div class="form-card">
+
           <div class="form-grid" style="margin-bottom:1.4rem;">
             <div class="field full">
               <label for="f-name">Name *</label>
               <input type="text" id="f-name" placeholder="e.g. Victorian Diamond Cluster Ring" />
             </div>
             <div class="field full">
-              <label for="f-slug">Slug <span style="font-size:0.75rem; text-transform:none; letter-spacing:0;">(auto-generated, edit if needed)</span></label>
+              <label for="f-slug">Slug <span style="font-size:0.75rem;text-transform:none;letter-spacing:0;">(auto-generated)</span></label>
               <input type="text" id="f-slug" placeholder="e.g. victorian-diamond-cluster-ring" />
             </div>
           </div>
 
-          <!-- Era + Period -->
           <div class="form-grid" style="margin-bottom:1.4rem;">
             <div class="field">
               <label for="f-era">Era description *</label>
@@ -295,7 +234,6 @@
             </div>
           </div>
 
-          <!-- Description -->
           <div class="form-grid" style="margin-bottom:1.4rem;">
             <div class="field full">
               <label for="f-description">Description *</label>
@@ -303,7 +241,6 @@
             </div>
           </div>
 
-          <!-- Metal + Stones + Size -->
           <div class="form-grid" style="margin-bottom:1.4rem;">
             <div class="field">
               <label for="f-metal">Metal *</label>
@@ -319,11 +256,10 @@
             </div>
             <div class="field">
               <label for="f-style">Style *</label>
-              <input type="text" id="f-style" placeholder="e.g. Cluster, Solitaire, Band..." />
+              <input type="text" id="f-style" placeholder="e.g. Cluster, Solitaire, Band" />
             </div>
           </div>
 
-          <!-- Price + Category -->
           <div class="form-grid" style="margin-bottom:1.4rem;">
             <div class="field">
               <label for="f-price">Price (EUR) *</label>
@@ -341,7 +277,6 @@
             </div>
           </div>
 
-          <!-- Toggles -->
           <div style="margin-bottom:1.6rem;">
             <p class="section-label">Listing options</p>
             <div class="toggle-row">
@@ -356,34 +291,20 @@
             </div>
           </div>
 
-          <!-- Images -->
           <div style="margin-bottom:1.4rem;">
             <p class="section-label">Images</p>
             <div class="media-list" id="image-list"></div>
-            <button class="btn-add-media" id="add-image-btn">+ Add image path</button>
-            <p class="hint" style="font-size:0.75rem; color:var(--muted); margin-top:0.4rem;">Upload images to <code style="font-size:0.85em;">/src/images/products/</code> then enter the path, e.g. <code style="font-size:0.85em;">/images/products/my-ring-1.jpg</code></p>
+            <button class="btn-add-media" id="add-image-btn">+ Add image</button>
           </div>
 
-          <!-- Videos -->
           <div style="margin-bottom:2rem;">
-            <p class="section-label">Videos <span style="font-size:0.75rem; text-transform:none; letter-spacing:0; color:var(--muted);">(optional)</span></p>
+            <p class="section-label">Videos <span style="font-size:0.75rem;text-transform:none;letter-spacing:0;color:var(--muted);">(optional)</span></p>
             <div class="media-list" id="video-list"></div>
-            <button class="btn-add-media" id="add-video-btn">+ Add video path</button>
-            <p class="hint" style="font-size:0.75rem; color:var(--muted); margin-top:0.4rem;">Accepts .mp4, .mov or .webm. Upload to <code style="font-size:0.85em;">/src/images/products/</code></p>
+            <button class="btn-add-media" id="add-video-btn">+ Add video</button>
           </div>
 
-          <!-- Generate -->
-          <button class="btn btn-primary" id="generate-btn" style="width:100%;">Generate JSON</button>
-        </div>
-
-        <!-- Output -->
-        <div class="output-card" id="output-card" style="display:none;">
-          <p style="font-size:0.78rem; text-transform:uppercase; letter-spacing:0.16em; color:var(--accent-soft); margin:0 0 0.8rem;">Generated JSON — copy this into products.json</p>
-          <pre id="output-pre"></pre>
-          <div class="output-actions">
-            <button class="btn-copy" id="copy-btn">Copy to clipboard</button>
-            <span id="copy-confirm" style="font-size:0.82rem; color:var(--accent-soft); align-self:center; opacity:0; transition:opacity 0.3s;"></span>
-          </div>
+          <button class="btn btn-primary" id="publish-btn" style="width:100%;">Publish to site</button>
+          <div class="publish-status" id="publish-status"></div>
         </div>
 
       </div>
@@ -407,21 +328,17 @@
 
   <script src="src/js/cart.js"></script>
   <script>
-    // ── Admin password gate ──────────────────────────────────────
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // ── Auth ─────────────────────────────────────────────────────
     const ADMIN_PASSWORD = 'RobynRooney12225';
     const SESSION_KEY = 'rg_admin_auth';
 
-    function showPage() {
-      document.getElementById('auth-gate').style.display = 'none';
-    }
-
-    if (sessionStorage.getItem(SESSION_KEY) === '1') {
-      showPage();
-    }
+    function showPage() { document.getElementById('auth-gate').style.display = 'none'; }
+    if (sessionStorage.getItem(SESSION_KEY) === '1') showPage();
 
     function tryAuth() {
-      const val = document.getElementById('auth-input').value;
-      if (val === ADMIN_PASSWORD) {
+      if (document.getElementById('auth-input').value === ADMIN_PASSWORD) {
         sessionStorage.setItem(SESSION_KEY, '1');
         showPage();
       } else {
@@ -430,102 +347,284 @@
         document.getElementById('auth-input').focus();
       }
     }
-
     document.getElementById('auth-submit').addEventListener('click', tryAuth);
-    document.getElementById('auth-input').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') tryAuth();
+    document.getElementById('auth-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryAuth(); });
+
+    // ── IndexedDB (stores directory handle) ──────────────────────
+    const DB_NAME = 'rg_admin', STORE = 'settings';
+    function openDB() {
+      return new Promise((res, rej) => {
+        const r = indexedDB.open(DB_NAME, 1);
+        r.onupgradeneeded = e => e.target.result.createObjectStore(STORE);
+        r.onsuccess = e => res(e.target.result);
+        r.onerror = rej;
+      });
+    }
+    async function dbGet(key) {
+      const db = await openDB();
+      return new Promise((res, rej) => {
+        const r = db.transaction(STORE, 'readonly').objectStore(STORE).get(key);
+        r.onsuccess = e => res(e.target.result);
+        r.onerror = rej;
+      });
+    }
+    async function dbSet(key, val) {
+      const db = await openDB();
+      return new Promise((res, rej) => {
+        const tx = db.transaction(STORE, 'readwrite');
+        tx.objectStore(STORE).put(val, key);
+        tx.oncomplete = res; tx.onerror = rej;
+      });
+    }
+
+    // ── GitHub token ─────────────────────────────────────────────
+    const TOKEN_KEY = 'rg_github_token';
+    let githubToken = localStorage.getItem(TOKEN_KEY) || '';
+
+    function updateTokenStatus() {
+      const dot = document.getElementById('token-dot');
+      const label = document.getElementById('token-label');
+      if (githubToken) {
+        dot.className = 'dot ok';
+        label.textContent = 'Token saved';
+        document.getElementById('cfg-token').value = '••••••••••••••••';
+      } else {
+        dot.className = 'dot';
+        label.textContent = 'No token saved';
+      }
+    }
+
+    document.getElementById('save-token-btn').addEventListener('click', () => {
+      const val = document.getElementById('cfg-token').value.trim();
+      if (val && !val.startsWith('•')) {
+        githubToken = val;
+        localStorage.setItem(TOKEN_KEY, val);
+      }
+      updateTokenStatus();
     });
-    // ─────────────────────────────────────────────────────────────
 
-    document.getElementById('year').textContent = new Date().getFullYear();
+    // ── Images folder handle ──────────────────────────────────────
+    let dirHandle = null;
 
-    // Auto-generate slug from name
+    async function loadSavedFolder() {
+      try {
+        const saved = await dbGet('dirHandle');
+        if (saved) {
+          const perm = await saved.queryPermission({ mode: 'readwrite' });
+          if (perm === 'granted') { dirHandle = saved; updateFolderStatus(); return; }
+          // Permission needs re-granting — keep handle, let user click pick button
+          dirHandle = saved;
+          updateFolderStatus(true);
+        }
+      } catch (e) {}
+    }
+
+    function updateFolderStatus(needsGrant = false) {
+      const dot = document.getElementById('folder-dot');
+      const label = document.getElementById('folder-label');
+      if (!dirHandle) {
+        dot.className = 'dot'; label.textContent = 'No folder selected';
+      } else if (needsGrant) {
+        dot.className = 'dot err'; label.textContent = `"${dirHandle.name}" — click to re-grant permission`;
+      } else {
+        dot.className = 'dot ok'; label.textContent = `"${dirHandle.name}" ready`;
+      }
+    }
+
+    document.getElementById('pick-folder-btn').addEventListener('click', async () => {
+      try {
+        const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
+        dirHandle = handle;
+        await dbSet('dirHandle', handle);
+        updateFolderStatus();
+      } catch (e) {
+        if (e.name !== 'AbortError') updateFolderStatus();
+      }
+    });
+
+    // Re-request permission if needed before saving files
+    async function ensureFolderPermission() {
+      if (!dirHandle) return false;
+      const perm = await dirHandle.requestPermission({ mode: 'readwrite' });
+      return perm === 'granted';
+    }
+
+    // ── Media entries ─────────────────────────────────────────────
+    const pendingFiles = new Map(); // filename → File
+
+    function addMediaEntry(listId, type) {
+      const list = document.getElementById(listId);
+      const accept = type === 'video' ? 'video/*' : 'image/*';
+      const entry = document.createElement('div');
+      entry.className = 'media-entry';
+      entry._path = '';
+      entry.innerHTML = `
+        <div class="media-thumb">
+          <div class="thumb-placeholder">Click to<br>choose</div>
+        </div>
+        <div class="media-entry-right">
+          <span class="media-filename empty">No file chosen</span>
+          <span class="media-path"></span>
+        </div>
+        <button class="btn-remove" aria-label="Remove">×</button>
+        <input type="file" accept="${accept}" style="display:none" />
+      `;
+      const thumb = entry.querySelector('.media-thumb');
+      const fileInput = entry.querySelector('input[type="file"]');
+      const filenameEl = entry.querySelector('.media-filename');
+      const pathEl = entry.querySelector('.media-path');
+
+      thumb.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+        const path = `/images/products/${file.name}`;
+        entry._path = path;
+        filenameEl.textContent = file.name;
+        filenameEl.classList.remove('empty');
+        pathEl.textContent = path;
+        const url = URL.createObjectURL(file);
+        thumb.innerHTML = type === 'video'
+          ? `<video src="${url}" muted autoplay loop playsinline></video>`
+          : `<img src="${url}" alt="${file.name}" />`;
+        pendingFiles.set(file.name, file);
+      });
+      entry.querySelector('.btn-remove').addEventListener('click', () => {
+        if (entry._path) pendingFiles.delete(entry._path.split('/').pop());
+        entry.remove();
+      });
+      list.appendChild(entry);
+      fileInput.click();
+    }
+
+    document.getElementById('add-image-btn').addEventListener('click', () => addMediaEntry('image-list', 'image'));
+    document.getElementById('add-video-btn').addEventListener('click', () => addMediaEntry('video-list', 'video'));
+
+    // ── Slug generation ───────────────────────────────────────────
     document.getElementById('f-name').addEventListener('input', function () {
-      const slug = this.value
-        .toLowerCase()
-        .trim()
+      document.getElementById('f-slug').value = this.value
+        .toLowerCase().trim()
         .replace(/[^a-z0-9\s-]/g, '')
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-');
-      document.getElementById('f-slug').value = slug;
     });
 
-    // Media list helpers
-    function addMediaEntry(listId, placeholder) {
-      const list = document.getElementById(listId);
-      const entry = document.createElement('div');
-      entry.className = 'media-entry';
-      entry.innerHTML = `
-        <input type="text" placeholder="${placeholder}" />
-        <button class="btn-remove" title="Remove" aria-label="Remove">×</button>
-      `;
-      entry.querySelector('.btn-remove').addEventListener('click', () => entry.remove());
-      list.appendChild(entry);
-      entry.querySelector('input').focus();
-    }
-
-    document.getElementById('add-image-btn').addEventListener('click', () =>
-      addMediaEntry('image-list', '/images/products/my-ring-1.jpg'));
-    document.getElementById('add-video-btn').addEventListener('click', () =>
-      addMediaEntry('video-list', '/images/products/my-ring.mp4'));
-
-    // Add one image row by default
-    addMediaEntry('image-list', '/images/products/my-ring-1.jpg');
-
+    // ── Helpers ───────────────────────────────────────────────────
     function getMediaPaths(listId) {
-      return Array.from(document.querySelectorAll(`#${listId} .media-entry input`))
-        .map(i => i.value.trim())
-        .filter(Boolean);
+      return Array.from(document.querySelectorAll(`#${listId} .media-entry`))
+        .map(e => e._path).filter(Boolean);
     }
 
-    function generateId(slug) {
-      return slug || 'new-product-' + Date.now();
+    function setStatus(type, msg) {
+      const el = document.getElementById('publish-status');
+      el.className = 'publish-status ' + type;
+      el.textContent = msg;
     }
 
-    document.getElementById('generate-btn').addEventListener('click', function () {
+    // ── Publish ───────────────────────────────────────────────────
+    document.getElementById('publish-btn').addEventListener('click', async () => {
       const name = document.getElementById('f-name').value.trim();
       const slug = document.getElementById('f-slug').value.trim();
 
-      if (!name || !slug) {
-        alert('Please enter at least a name and slug.');
-        return;
+      if (!name || !slug) { setStatus('error', 'Please enter at least a name.'); return; }
+      if (!githubToken)   { setStatus('error', 'No GitHub token saved. Add it in the setup section above.'); return; }
+
+      const btn = document.getElementById('publish-btn');
+      btn.disabled = true;
+      btn.textContent = 'Publishing…';
+
+      try {
+        // 1. Save media files to local folder
+        if (pendingFiles.size > 0) {
+          setStatus('info', 'Saving media files…');
+          if (!dirHandle) throw new Error('No images folder selected. Pick it in the setup section above.');
+          const ok = await ensureFolderPermission();
+          if (!ok) throw new Error('Permission denied for images folder. Click "Pick images folder" again.');
+          for (const [filename, file] of pendingFiles) {
+            const fh = await dirHandle.getFileHandle(filename, { create: true });
+            const w  = await fh.createWritable();
+            await w.write(file); await w.close();
+          }
+        }
+
+        // 2. Build product object
+        const product = {
+          id: slug,
+          name,
+          slug,
+          era:         document.getElementById('f-era').value.trim() || 'Contemporary',
+          description: document.getElementById('f-description').value.trim(),
+          metal:       document.getElementById('f-metal').value.trim(),
+          stones:      document.getElementById('f-stones').value.trim(),
+          size:        document.getElementById('f-size').value.trim(),
+          price:       parseFloat(document.getElementById('f-price').value) || 0,
+          currency:    'EUR',
+          featured:    document.getElementById('f-featured').checked,
+          period:      document.getElementById('f-period').value,
+          style:       document.getElementById('f-style').value.trim(),
+          category:    document.getElementById('f-category').value,
+          available:   document.getElementById('f-available').checked,
+          images:      getMediaPaths('image-list'),
+          videos:      getMediaPaths('video-list'),
+        };
+
+        // 3. Fetch current products.json from GitHub
+        setStatus('info', 'Fetching products from GitHub…');
+        const owner = 'robynandgold', repo = 'website', branch = 'main';
+        const apiPath = 'src/data/products.json';
+        const headers = {
+          'Authorization': `Bearer ${githubToken}`,
+          'Accept': 'application/vnd.github.v3+json',
+        };
+
+        const fetchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, { headers });
+        if (!fetchRes.ok) {
+          const err = await fetchRes.json();
+          throw new Error(err.message || 'Failed to fetch products.json from GitHub');
+        }
+        const fileData = await fetchRes.json();
+        const existing = JSON.parse(atob(fileData.content.replace(/\n/g, '')));
+
+        // 4. Check for duplicate slug
+        if (existing.find(p => p.id === product.id)) {
+          throw new Error(`A product with slug "${slug}" already exists.`);
+        }
+
+        // 5. Commit updated file
+        setStatus('info', 'Committing to GitHub…');
+        existing.push(product);
+        const newContent = btoa(unescape(encodeURIComponent(JSON.stringify(existing, null, 2))));
+        const commitRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, {
+          method: 'PUT',
+          headers: { ...headers, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: `Add product: ${name}`,
+            content: newContent,
+            sha: fileData.sha,
+            branch,
+          }),
+        });
+        if (!commitRes.ok) {
+          const err = await commitRes.json();
+          throw new Error(err.message || 'Failed to commit to GitHub');
+        }
+
+        // 6. Done
+        pendingFiles.clear();
+        setStatus('success', `✓ "${name}" published successfully. Vercel will redeploy in ~30 seconds.`);
+        btn.textContent = 'Published!';
+        setTimeout(() => { btn.disabled = false; btn.textContent = 'Publish to site'; }, 4000);
+
+      } catch (err) {
+        setStatus('error', err.message);
+        btn.disabled = false;
+        btn.textContent = 'Publish to site';
       }
-
-      const product = {
-        id: generateId(slug),
-        name,
-        slug,
-        era: document.getElementById('f-era').value.trim() || 'Contemporary',
-        description: document.getElementById('f-description').value.trim(),
-        metal: document.getElementById('f-metal').value.trim(),
-        stones: document.getElementById('f-stones').value.trim(),
-        size: document.getElementById('f-size').value.trim(),
-        price: parseFloat(document.getElementById('f-price').value) || 0,
-        currency: 'EUR',
-        featured: document.getElementById('f-featured').checked,
-        period: document.getElementById('f-period').value,
-        style: document.getElementById('f-style').value.trim(),
-        category: document.getElementById('f-category').value,
-        available: document.getElementById('f-available').checked,
-        images: getMediaPaths('image-list'),
-        videos: getMediaPaths('video-list'),
-      };
-
-      const json = JSON.stringify(product, null, 2);
-      document.getElementById('output-pre').textContent = json;
-      document.getElementById('output-card').style.display = 'block';
-      document.getElementById('output-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
-    document.getElementById('copy-btn').addEventListener('click', function () {
-      const text = document.getElementById('output-pre').textContent;
-      navigator.clipboard.writeText(text).then(() => {
-        const confirm = document.getElementById('copy-confirm');
-        confirm.textContent = 'Copied!';
-        confirm.style.opacity = '1';
-        setTimeout(() => { confirm.style.opacity = '0'; }, 2000);
-      });
-    });
+    // ── Init ──────────────────────────────────────────────────────
+    updateTokenStatus();
+    loadSavedFolder();
   </script>
 </body>
 </html>

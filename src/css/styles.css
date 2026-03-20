@@ -722,9 +722,6 @@ a {
   align-items: flex-start;
 }
 
-.product-detail-image img {
-  border-radius: var(--radius-lg);
-}
 
 /* =========================
   Carousel (product detail)
@@ -748,6 +745,8 @@ a {
   opacity: 0;
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   transition: opacity 220ms ease-in-out, transform 260ms ease;
 }
 
@@ -762,7 +761,6 @@ a {
   height: 100%;
   display: block;
   object-fit: cover;
-  border-radius: var(--radius-lg);
 }
 
 .carousel-slide video {

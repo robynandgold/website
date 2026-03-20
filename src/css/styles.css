@@ -776,6 +776,7 @@ a {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
+  z-index: 2;
   background: rgba(253, 251, 248, 0.92);
   color: rgba(34, 28, 21, 0.85);
   border: 1px solid rgba(34, 28, 21, 0.15);

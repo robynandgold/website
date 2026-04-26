@@ -78,7 +78,7 @@
     "period": "Victorian",
     "style": "Band",
     "category": "rings",
-    "available": true,
+    "available": false,
     "images": [
       "/images/products/18ct-gold-old-mine-cut-diamond-gypsy-ring-1.jpeg",
       "/images/products/18ct-gold-old-mine-cut-diamond-gypsy-ring-2.jpeg"
@@ -101,7 +101,7 @@
     "period": "Contemporary",
     "style": "Solitaire",
     "category": "rings",
-    "available": true,
+    "available": false,
     "images": [
       "/images/products/ef204d74-8d28-48c8-b77d-d4a24bbde510.jpeg",
       "/images/products/3dec6319-cf83-4b2f-84ae-9d267dabd9af.jpeg",

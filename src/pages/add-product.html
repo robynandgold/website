@@ -65,6 +65,7 @@
     }
     .setup-status .dot.ok  { background: #5a9e6f; }
     .setup-status .dot.err { background: #b04040; }
+    .setup-status.hidden { display: none; }
 
     /* ── Form ───────────────────────────────────── */
     .form-card {
@@ -182,8 +183,7 @@
 
         <!-- Setup -->
         <div class="setup-banner" id="setup-banner">
-          <p><strong>One-time setup</strong> — configure your GitHub token and local images folder before publishing.</p>
-
+          <p><strong>One-time setup</strong> — add your GitHub token to enable publishing.</p>
           <div class="setup-row">
             <input type="password" id="cfg-token" placeholder="GitHub personal access token (repo scope)" autocomplete="off" />
             <button class="btn btn-ghost" id="save-token-btn" style="white-space:nowrap; padding:0.5rem 1rem; font-size:0.8rem;">Save token</button>
@@ -191,17 +191,6 @@
           <div class="setup-status" id="token-status">
             <span class="dot" id="token-dot"></span>
             <span id="token-label">No token saved</span>
-          </div>
-
-          <div style="margin-top:1rem; border-top:1px solid var(--border); padding-top:1rem;">
-            <div class="setup-row">
-              <button class="btn btn-ghost" id="pick-folder-btn" style="padding:0.5rem 1rem; font-size:0.8rem;">Pick images folder</button>
-              <span style="font-size:0.78rem; color:var(--muted);">Select <code>src/images/products/</code> from your local repo</span>
-            </div>
-            <div class="setup-status" id="folder-status">
-              <span class="dot" id="folder-dot"></span>
-              <span id="folder-label">No folder selected</span>
-            </div>
           </div>
         </div>
 
@@ -350,33 +339,6 @@
     document.getElementById('auth-submit').addEventListener('click', tryAuth);
     document.getElementById('auth-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryAuth(); });
 
-    // ── IndexedDB (stores directory handle) ──────────────────────
-    const DB_NAME = 'rg_admin', STORE = 'settings';
-    function openDB() {
-      return new Promise((res, rej) => {
-        const r = indexedDB.open(DB_NAME, 1);
-        r.onupgradeneeded = e => e.target.result.createObjectStore(STORE);
-        r.onsuccess = e => res(e.target.result);
-        r.onerror = rej;
-      });
-    }
-    async function dbGet(key) {
-      const db = await openDB();
-      return new Promise((res, rej) => {
-        const r = db.transaction(STORE, 'readonly').objectStore(STORE).get(key);
-        r.onsuccess = e => res(e.target.result);
-        r.onerror = rej;
-      });
-    }
-    async function dbSet(key, val) {
-      const db = await openDB();
-      return new Promise((res, rej) => {
-        const tx = db.transaction(STORE, 'readwrite');
-        tx.objectStore(STORE).put(val, key);
-        tx.oncomplete = res; tx.onerror = rej;
-      });
-    }
-
     // ── GitHub token ─────────────────────────────────────────────
     const TOKEN_KEY = 'rg_github_token';
     let githubToken = localStorage.getItem(TOKEN_KEY) || '';
@@ -384,13 +346,16 @@
     function updateTokenStatus() {
       const dot = document.getElementById('token-dot');
       const label = document.getElementById('token-label');
+      const banner = document.getElementById('setup-banner');
       if (githubToken) {
         dot.className = 'dot ok';
         label.textContent = 'Token saved';
         document.getElementById('cfg-token').value = '••••••••••••••••';
+        banner.style.display = 'none';
       } else {
         dot.className = 'dot';
         label.textContent = 'No token saved';
+        banner.style.display = '';
       }
     }
 
@@ -402,52 +367,6 @@
       }
       updateTokenStatus();
     });
-
-    // ── Images folder handle ──────────────────────────────────────
-    let dirHandle = null;
-
-    async function loadSavedFolder() {
-      try {
-        const saved = await dbGet('dirHandle');
-        if (saved) {
-          const perm = await saved.queryPermission({ mode: 'readwrite' });
-          if (perm === 'granted') { dirHandle = saved; updateFolderStatus(); return; }
-          // Permission needs re-granting — keep handle, let user click pick button
-          dirHandle = saved;
-          updateFolderStatus(true);
-        }
-      } catch (e) {}
-    }
-
-    function updateFolderStatus(needsGrant = false) {
-      const dot = document.getElementById('folder-dot');
-      const label = document.getElementById('folder-label');
-      if (!dirHandle) {
-        dot.className = 'dot'; label.textContent = 'No folder selected';
-      } else if (needsGrant) {
-        dot.className = 'dot err'; label.textContent = `"${dirHandle.name}" — click to re-grant permission`;
-      } else {
-        dot.className = 'dot ok'; label.textContent = `"${dirHandle.name}" ready`;
-      }
-    }
-
-    document.getElementById('pick-folder-btn').addEventListener('click', async () => {
-      try {
-        const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
-        dirHandle = handle;
-        await dbSet('dirHandle', handle);
-        updateFolderStatus();
-      } catch (e) {
-        if (e.name !== 'AbortError') updateFolderStatus();
-      }
-    });
-
-    // Re-request permission if needed before saving files
-    async function ensureFolderPermission() {
-      if (!dirHandle) return false;
-      const perm = await dirHandle.requestPermission({ mode: 'readwrite' });
-      return perm === 'granted';
-    }
 
     // ── Media entries ─────────────────────────────────────────────
     const pendingFiles = new Map(); // filename → File
@@ -533,17 +452,35 @@
       btn.disabled = true;
       btn.textContent = 'Publishing…';
 
+      const owner = 'robynandgold', repo = 'website', branch = 'main';
+      const headers = {
+        'Authorization': `Bearer ${githubToken}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+      };
+
       try {
-        // 1. Save media files to local folder
+        // 1. Upload media files to GitHub
         if (pendingFiles.size > 0) {
-          setStatus('info', 'Saving media files…');
-          if (!dirHandle) throw new Error('No images folder selected. Pick it in the setup section above.');
-          const ok = await ensureFolderPermission();
-          if (!ok) throw new Error('Permission denied for images folder. Click "Pick images folder" again.');
+          let i = 0;
           for (const [filename, file] of pendingFiles) {
-            const fh = await dirHandle.getFileHandle(filename, { create: true });
-            const w  = await fh.createWritable();
-            await w.write(file); await w.close();
+            i++;
+            setStatus('info', `Uploading file ${i} of ${pendingFiles.size}: ${filename}…`);
+            const arrayBuffer = await file.arrayBuffer();
+            const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+            const filePath = `src/images/products/${filename}`;
+            let sha;
+            const checkRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, { headers });
+            if (checkRes.ok) { sha = (await checkRes.json()).sha; }
+            const uploadRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
+              method: 'PUT',
+              headers,
+              body: JSON.stringify({ message: `Add image: ${filename}`, content: base64, branch, ...(sha ? { sha } : {}) }),
+            });
+            if (!uploadRes.ok) {
+              const err = await uploadRes.json();
+              throw new Error(err.message || `Failed to upload ${filename}`);
+            }
           }
         }
 
@@ -569,13 +506,7 @@
 
         // 3. Fetch current products.json from GitHub
         setStatus('info', 'Fetching products from GitHub…');
-        const owner = 'robynandgold', repo = 'website', branch = 'main';
         const apiPath = 'src/data/products.json';
-        const headers = {
-          'Authorization': `Bearer ${githubToken}`,
-          'Accept': 'application/vnd.github.v3+json',
-        };
-
         const fetchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, { headers });
         if (!fetchRes.ok) {
           const err = await fetchRes.json();
@@ -589,19 +520,14 @@
           throw new Error(`A product with slug "${slug}" already exists.`);
         }
 
-        // 5. Commit updated file
-        setStatus('info', 'Committing to GitHub…');
+        // 5. Commit updated products.json
+        setStatus('info', 'Saving product to GitHub…');
         existing.push(product);
         const newContent = btoa(unescape(encodeURIComponent(JSON.stringify(existing, null, 2))));
         const commitRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, {
           method: 'PUT',
-          headers: { ...headers, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: `Add product: ${name}`,
-            content: newContent,
-            sha: fileData.sha,
-            branch,
-          }),
+          headers,
+          body: JSON.stringify({ message: `Add product: ${name}`, content: newContent, sha: fileData.sha, branch }),
         });
         if (!commitRes.ok) {
           const err = await commitRes.json();
@@ -623,7 +549,6 @@
 
     // ── Init ──────────────────────────────────────────────────────
     updateTokenStatus();
-    loadSavedFolder();
   </script>
 </body>
 </html>

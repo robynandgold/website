@@ -467,7 +467,12 @@
             i++;
             setStatus('info', `Uploading file ${i} of ${pendingFiles.size}: ${filename}…`);
             const arrayBuffer = await file.arrayBuffer();
-            const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+            const bytes = new Uint8Array(arrayBuffer);
+            let binary = '';
+            for (let j = 0; j < bytes.length; j += 8192) {
+              binary += String.fromCharCode(...bytes.subarray(j, j + 8192));
+            }
+            const base64 = btoa(binary);
             const filePath = `src/images/products/${filename}`;
             let sha;
             const checkRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, { headers });

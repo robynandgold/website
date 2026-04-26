@@ -86,5 +86,27 @@
     "videos": [
       "/images/products/18ct-gold-old-mine-cut-diamond-gypsy-ring-v1.mp4"
     ]
+  },
+  {
+    "id": "test-ring",
+    "name": "Test ring",
+    "slug": "test-ring",
+    "description": "Test",
+    "metal": "Test",
+    "stones": "Test",
+    "size": "UK N",
+    "price": 600,
+    "currency": "EUR",
+    "featured": false,
+    "period": "Contemporary",
+    "style": "Solitaire",
+    "category": "rings",
+    "available": true,
+    "images": [
+      "/images/products/ef204d74-8d28-48c8-b77d-d4a24bbde510.jpeg",
+      "/images/products/3dec6319-cf83-4b2f-84ae-9d267dabd9af.jpeg",
+      "/images/products/2ddab22e-ba5e-49c7-9211-7ad0ee5e325b.jpeg"
+    ],
+    "videos": []
   }
 ]

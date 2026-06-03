@@ -42,7 +42,7 @@ function addToCart(product) {
   const existing = cart.find(item => item.id === product.id);
   
   if (existing) {
-    // For antique jewelry, each item is unique, so we don't increment quantity
+    // For vintage jewelry, each item is unique, so we don't increment quantity
     // Instead, show a message that item is already in cart
     return { success: false, message: 'This item is already in your cart' };
   }

@@ -2,12 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Shop — Robyn &amp; Gold</title>
+  <title>Shop Vintage Gold Rings Ireland | Robyn &amp; Gold</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta
-    name="description"
-    content="Browse the curated collection of vintage rings from Robyn &amp; Gold."
-  />
+  <meta name="description" content="Browse our curated collection of vintage gold rings from Ireland. Personally sourced, professionally prepared — jewellery with history, ready to wear." />
+  <link rel="canonical" href="https://robynandgold.com/pages/shop.html" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Robyn &amp; Gold" />
+  <meta property="og:title" content="Shop Vintage Gold Rings Ireland | Robyn &amp; Gold" />
+  <meta property="og:description" content="Browse our curated collection of vintage gold rings from Ireland. Personally sourced, professionally prepared — jewellery with history, ready to wear." />
+  <meta property="og:image" content="https://robynandgold.com/images/homepage.png" />
+  <meta property="og:url" content="https://robynandgold.com/pages/shop.html" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Shop Vintage Gold Rings Ireland | Robyn &amp; Gold" />
+  <meta name="twitter:description" content="Browse our curated collection of vintage gold rings from Ireland. Personally sourced, professionally prepared — jewellery with history, ready to wear." />
+  <meta name="twitter:image" content="https://robynandgold.com/images/homepage.png" />
 
   <!-- Fonts (same as index) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -34,7 +46,7 @@
       <div class="brand-banner">
         <div class="brand-center">
           <a href="../index.html">
-            <img src="../images/logo.png" alt="Robyn & Gold" />
+            <img src="../images/logo.png" alt="Robyn & Gold" width="120" height="40" loading="eager" />
           </a>
           <a href="../index.html" class="brand-main">Robyn &amp; Gold</a>
           <span class="brand-tagline">Vintage Jewellery</span>
@@ -190,6 +202,8 @@
               src="${product.images[0]}"
               alt="${product.name}"
               class="product-card-image"
+              width="600" height="600"
+              loading="lazy"
               onerror="this.src='../images/homepage.png'"
             />
           </a>

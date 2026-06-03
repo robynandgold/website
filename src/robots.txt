@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /pages/add-product.html
+Disallow: /pages/cart.html
+Disallow: /pages/success.html
+
+Sitemap: https://robynandgold.com/sitemap.xml

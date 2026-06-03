@@ -2,12 +2,61 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Robyn &amp; Gold — Vintage Jewellery</title>
+  <title>Vintage Gold Rings &amp; Jewellery Ireland | Robyn &amp; Gold</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta
-    name="description"
-    content="Robyn &amp; Gold curates vintage gold jewellery — rings with history, chosen for their craftsmanship and quiet beauty."
-  />
+  <meta name="description" content="Personally sourced vintage gold rings and jewellery from Ireland. Each piece carefully assessed, professionally cleaned and prepared for its next chapter." />
+  <link rel="canonical" href="https://robynandgold.com/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Robyn &amp; Gold" />
+  <meta property="og:title" content="Vintage Gold Rings &amp; Jewellery Ireland | Robyn &amp; Gold" />
+  <meta property="og:description" content="Personally sourced vintage gold rings and jewellery from Ireland. Each piece carefully assessed, professionally cleaned and prepared for its next chapter." />
+  <meta property="og:image" content="https://robynandgold.com/images/homepage.png" />
+  <meta property="og:url" content="https://robynandgold.com/" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Vintage Gold Rings &amp; Jewellery Ireland | Robyn &amp; Gold" />
+  <meta name="twitter:description" content="Personally sourced vintage gold rings and jewellery from Ireland. Each piece carefully assessed, professionally cleaned and prepared for its next chapter." />
+  <meta name="twitter:image" content="https://robynandgold.com/images/homepage.png" />
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://robynandgold.com/#organization",
+        "name": "Robyn & Gold",
+        "url": "https://robynandgold.com",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://robynandgold.com/images/logo.png"
+        },
+        "description": "Personally sourced vintage gold rings and jewellery from Ireland, each piece carefully assessed and prepared for its next chapter.",
+        "sameAs": ["https://www.instagram.com/robynandgold/"]
+      },
+      {
+        "@type": "LocalBusiness",
+        "@id": "https://robynandgold.com/#business",
+        "name": "Robyn & Gold",
+        "url": "https://robynandgold.com",
+        "image": "https://robynandgold.com/images/homepage.png",
+        "description": "Personally sourced vintage gold rings and jewellery from Ireland, each piece carefully assessed and prepared for its next chapter.",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "IE"
+        },
+        "currenciesAccepted": "EUR",
+        "paymentAccepted": "Credit Card",
+        "priceRange": "€€€",
+        "sameAs": ["https://www.instagram.com/robynandgold/"]
+      }
+    ]
+  }
+  </script>
 
   <!-- Google Fonts: classic serif + clean sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -34,7 +83,7 @@
       <div class="brand-banner">
         <div class="brand-center">
           <a href="index.html">
-            <img src="images/logo.png" alt="Robyn & Gold" />
+            <img src="images/logo.png" alt="Robyn & Gold" width="120" height="40" loading="eager" />
           </a>
           <a href="index.html" class="brand-main">Robyn &amp; Gold</a>
           <span class="brand-tagline">Vintage Jewellery</span>
@@ -68,9 +117,11 @@
         </div>
 
         <div class="hero-image-panel">
-          <img 
-            src="images/homepage.png" 
-            alt="Vintage jewellery collection from Robyn & Gold" 
+          <img
+            src="images/homepage.png"
+            alt="Vintage jewellery collection from Robyn & Gold"
+            width="800" height="600"
+            fetchpriority="high"
             style="width: 100%; height: auto; border-radius: var(--radius-lg); box-shadow: var(--shadow-soft);"
           />
         </div>
@@ -91,41 +142,39 @@
 
     <!-- ABOUT -->
     <section id="about" class="section section--alt">
-      <div class="container two-column">
-        <div class="two-column-block">
-          <h2>Jewellery with a past, chosen for your future.</h2>
-          <p>I've been fascinated by jewels for as long as I can remember.</p>
-          <p>
-            As a little girl, I would lose hours exploring my mother's jewellery box, captivated by the rings tucked
-            away inside. Each piece felt like a tiny piece of history, carrying memories and milestones.
-          </p>
-          <p>That fascination never really left me.</p>
-          <p>
-            Robyn &amp; Gold was born during one of the most challenging periods of my life. In the quiet hours of
-            the night, while caring for a baby who rarely slept and needed to be held almost constantly, I found
-            myself searching auction catalogues, estate sales and private collections long after the rest of the
-            house had fallen asleep.
-          </p>
-          <p>What began as a small escape quickly became something more.</p>
-          <p>
-            Night after night, I discovered pieces that stopped me in my tracks — rings that had celebrated
-            engagements, anniversaries and milestones decades before. Jewellery with history, character and
-            craftsmanship that deserved another chapter.
-          </p>
-          <p>
-            Today, every piece you see here is personally sourced by me. I look for jewellery that feels special
-            the moment you hold it: beautiful antique, vintage and preloved rings with timeless design, exceptional
-            quality and stories still left to tell.
-          </p>
-          <p>
-            Before being listed, each piece is carefully assessed, professionally cleaned and lovingly prepared so
-            it arrives ready for its next custodian.
-          </p>
-          <p>
-            Robyn &amp; Gold is a collection of treasures gathered slowly, thoughtfully and with genuine affection.
-            I hope you find a piece that speaks to you as much as it did to me.
-          </p>
-        </div>
+      <div class="container" style="max-width: 720px;">
+        <h2>Jewellery with a past, chosen for your future.</h2>
+        <p>I've been fascinated by jewels for as long as I can remember.</p>
+        <p>
+          As a little girl, I would lose hours exploring my mother's jewellery box, captivated by the rings tucked
+          away inside. Each piece felt like a tiny piece of history, carrying memories and milestones.
+        </p>
+        <p>That fascination never really left me.</p>
+        <p>
+          Robyn &amp; Gold was born during one of the most challenging periods of my life. In the quiet hours of
+          the night, while caring for a baby who rarely slept and needed to be held almost constantly, I found
+          myself searching auction catalogues, estate sales and private collections long after the rest of the
+          house had fallen asleep.
+        </p>
+        <p>What began as a small escape quickly became something more.</p>
+        <p>
+          Night after night, I discovered pieces that stopped me in my tracks — rings that had celebrated
+          engagements, anniversaries and milestones decades before. Jewellery with history, character and
+          craftsmanship that deserved another chapter.
+        </p>
+        <p>
+          Today, every piece you see here is personally sourced by me. I look for jewellery that feels special
+          the moment you hold it: beautiful antique, vintage and preloved rings with timeless design, exceptional
+          quality and stories still left to tell.
+        </p>
+        <p>
+          Before being listed, each piece is carefully assessed, professionally cleaned and lovingly prepared so
+          it arrives ready for its next custodian.
+        </p>
+        <p>
+          Robyn &amp; Gold is a collection of treasures gathered slowly, thoughtfully and with genuine affection.
+          I hope you find a piece that speaks to you as much as it did to me.
+        </p>
       </div>
     </section>
 
@@ -191,6 +240,8 @@
                   src="${image}"
                   alt="${product.name}"
                   class="product-card-image"
+                  width="600" height="600"
+                  loading="lazy"
                   onerror="this.src='/images/homepage.png'"
                 />
               </a>

@@ -2,12 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Your Cart — Robyn &amp; Gold</title>
+  <title>Your Cart | Robyn &amp; Gold</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta
-    name="description"
-    content="View the vintage jewellery pieces currently in your Robyn &amp; Gold cart."
-  />
+  <meta name="description" content="Review your selected vintage jewellery pieces before checkout." />
+  <meta name="robots" content="noindex, nofollow" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -33,7 +31,7 @@
       <div class="brand-banner">
         <div class="brand-center">
           <a href="../index.html">
-            <img src="../images/logo.png" alt="Robyn & Gold" />
+            <img src="../images/logo.png" alt="Robyn & Gold" width="120" height="40" loading="eager" />
           </a>
           <a href="../index.html" class="brand-main">Robyn &amp; Gold</a>
           <span class="brand-tagline">Vintage Jewellery</span>
@@ -131,8 +129,10 @@
         <div class="cart-item" data-id="${item.id}">
           <div class="cart-item-image">
             <img 
-              src="${item.image}" 
+              src="${item.image}"
               alt="${item.name}"
+              width="120" height="120"
+              loading="lazy"
               onerror="this.src='../images/homepage.png'"
             />
           </div>

@@ -2,12 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Piece — Robyn &amp; Gold</title>
+  <title>Vintage Ring | Robyn &amp; Gold</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta
-    name="description"
-    content="Discover one-of-a-kind vintage rings and jewellery from Robyn &amp; Gold."
-  />
+  <meta name="description" content="A personally sourced vintage ring from Robyn &amp; Gold, Ireland. Professionally cleaned and prepared — ready for its next chapter." />
+  <link rel="canonical" id="meta-canonical" href="https://robynandgold.com/pages/product-detail.html" />
+
+  <!-- Open Graph (updated dynamically by JS) -->
+  <meta property="og:type" content="product" />
+  <meta property="og:site_name" content="Robyn &amp; Gold" />
+  <meta property="og:title" id="og-title" content="Vintage Ring | Robyn &amp; Gold" />
+  <meta property="og:description" id="og-description" content="A personally sourced vintage ring from Robyn &amp; Gold, Ireland." />
+  <meta property="og:image" id="og-image" content="https://robynandgold.com/images/homepage.png" />
+  <meta property="og:url" id="og-url" content="https://robynandgold.com/pages/product-detail.html" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" id="tw-title" content="Vintage Ring | Robyn &amp; Gold" />
+  <meta name="twitter:description" id="tw-description" content="A personally sourced vintage ring from Robyn &amp; Gold, Ireland." />
+  <meta name="twitter:image" id="tw-image" content="https://robynandgold.com/images/homepage.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -33,7 +45,7 @@
         <div class="brand-banner">
           <div class="brand-center">
             <a href="../index.html">
-              <img src="../images/logo.png" alt="Robyn & Gold" />
+              <img src="../images/logo.png" alt="Robyn & Gold" width="120" height="40" loading="eager" />
             </a>
             <a href="../index.html" class="brand-main">Robyn &amp; Gold</a>
             <span class="brand-tagline">Vintage Jewellery</span>
@@ -145,7 +157,53 @@
 
     function renderProductDetails() {
       if (!currentProduct) return;
-      document.title = `${currentProduct.name} — Robyn & Gold`;
+
+      const title = `${currentProduct.name} | Robyn & Gold`;
+      const description = currentProduct.description || 'A personally sourced vintage ring from Robyn & Gold, Ireland.';
+      const image = currentProduct.images?.[0]
+        ? `https://robynandgold.com${currentProduct.images[0]}`
+        : 'https://robynandgold.com/images/homepage.png';
+      const url = `https://robynandgold.com/pages/product-detail.html?slug=${currentProduct.slug}`;
+
+      document.title = title;
+
+      // Update OG / Twitter meta tags
+      document.getElementById('og-title').setAttribute('content', title);
+      document.getElementById('og-description').setAttribute('content', description);
+      document.getElementById('og-image').setAttribute('content', image);
+      document.getElementById('og-url').setAttribute('content', url);
+      document.getElementById('tw-title').setAttribute('content', title);
+      document.getElementById('tw-description').setAttribute('content', description);
+      document.getElementById('tw-image').setAttribute('content', image);
+      document.getElementById('meta-canonical').setAttribute('href', url);
+
+      // Inject Product JSON-LD
+      const availability = currentProduct.available === false
+        ? 'https://schema.org/SoldOut'
+        : 'https://schema.org/InStock';
+      const ld = {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: currentProduct.name,
+        description: currentProduct.description,
+        image: (currentProduct.images || []).map(i => `https://robynandgold.com${i}`),
+        brand: { '@type': 'Brand', name: 'Robyn & Gold' },
+        offers: {
+          '@type': 'Offer',
+          url,
+          price: currentProduct.price,
+          priceCurrency: currentProduct.currency || 'EUR',
+          availability,
+          seller: { '@type': 'Organization', name: 'Robyn & Gold' }
+        }
+      };
+      const existing = document.getElementById('product-ld');
+      const script = existing || document.createElement('script');
+      script.id = 'product-ld';
+      script.type = 'application/ld+json';
+      script.textContent = JSON.stringify(ld);
+      if (!existing) document.head.appendChild(script);
+
       renderProduct();
     }
 

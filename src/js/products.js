@@ -86,32 +86,6 @@ async function getProductById(id) {
 }
 
 /**
- * Filter products by period
- */
-async function filterByPeriod(period) {
-  const products = await loadProducts();
-  if (!period || period === 'all') {
-    return products;
-  }
-  return products.filter(product => 
-    product.period.toLowerCase() === period.toLowerCase()
-  );
-}
-
-/**
- * Filter products by style
- */
-async function filterByStyle(style) {
-  const products = await loadProducts();
-  if (!style || style === 'all') {
-    return products;
-  }
-  return products.filter(product => 
-    product.style.toLowerCase() === style.toLowerCase()
-  );
-}
-
-/**
  * Format price for display
  */
 function formatPrice(price, currency = 'EUR') {
@@ -124,24 +98,6 @@ function formatPrice(price, currency = 'EUR') {
   return formatter.format(price);
 }
 
-/**
- * Get unique periods from all products
- */
-async function getAllPeriods() {
-  const products = await loadProducts();
-  const periods = [...new Set(products.map(p => p.period))];
-  return periods.sort();
-}
-
-/**
- * Get unique styles from all products
- */
-async function getAllStyles() {
-  const products = await loadProducts();
-  const styles = [...new Set(products.map(p => p.style))];
-  return styles.sort();
-}
-
 // Export functions for use in other files
 if (typeof window !== 'undefined') {
   window.ProductsAPI = {
@@ -150,10 +106,6 @@ if (typeof window !== 'undefined') {
     getFeaturedProducts,
     getProductBySlug,
     getProductById,
-    filterByPeriod,
-    filterByStyle,
-    formatPrice,
-    getAllPeriods,
-    getAllStyles
+    formatPrice
   };
 }

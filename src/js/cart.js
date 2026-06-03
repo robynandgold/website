@@ -51,11 +51,10 @@ function addToCart(product) {
     id: product.id,
     name: product.name,
     slug: product.slug,
-    period: product.period,
     price: product.price,
     currency: product.currency || 'EUR',
-    image: product.images[0], // First image for cart display
-    quantity: 1 // Always 1 for unique antiques
+    image: product.images[0],
+    quantity: 1
   });
   
   saveCart(cart);
@@ -125,7 +124,6 @@ function formatCartForCheckout() {
   return cart.map(item => ({
     id: item.id,
     name: item.name,
-    description: item.period,
     price: item.price,
     quantity: item.quantity,
     currency: item.currency || 'EUR'

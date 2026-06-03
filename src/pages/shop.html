@@ -58,18 +58,6 @@
           <h2 class="filters-title">Refine</h2>
 
           <label class="filter-group">
-            <span class="filter-label">Era</span>
-            <select id="filter-era" class="filter-select">
-              <option value="">All eras</option>
-              <option value="Victorian">Victorian</option>
-              <option value="Edwardian">Edwardian</option>
-              <option value="Art Deco">Art Deco</option>
-              <option value="Georgian">Georgian</option>
-              <option value="Retro">Mid-century / Retro</option>
-            </select>
-          </label>
-
-          <label class="filter-group">
             <span class="filter-label">Category</span>
             <select id="filter-category" class="filter-select">
               <option value="">All categories</option>
@@ -207,7 +195,6 @@
           </a>
           <div class="product-card-body">
             <h3 class="product-card-title">${product.name}</h3>
-            <p class="product-card-meta">${product.period} · ${product.metal}</p>
             <p class="product-card-price">${price}</p>
             <a href="${productLink}" class="product-card-link">View details</a>
           </div>
@@ -217,17 +204,11 @@
     
     // Filter and sort products
     function filterProducts() {
-      const era = document.getElementById('filter-era').value;
       const category = document.getElementById('filter-category').value;
       const sort = document.getElementById('filter-sort').value;
-      
+
       let filtered = [...allProducts];
-      
-      // Filter by era/period
-      if (era) {
-        filtered = filtered.filter(p => p.period === era);
-      }
-      
+
       // Filter by category
       if (category) {
         filtered = filtered.filter(p => (p.category || '').toLowerCase() === category.toLowerCase());
@@ -245,14 +226,12 @@
     
     // Clear filters
     function clearFilters() {
-      document.getElementById('filter-era').value = '';
       document.getElementById('filter-category').value = '';
       document.getElementById('filter-sort').value = 'newest';
       renderProducts(allProducts);
     }
-    
+
     // Event listeners
-    document.getElementById('filter-era').addEventListener('change', filterProducts);
     document.getElementById('filter-category').addEventListener('change', filterProducts);
     document.getElementById('filter-sort').addEventListener('change', filterProducts);
     document.getElementById('clear-filters').addEventListener('click', clearFilters);

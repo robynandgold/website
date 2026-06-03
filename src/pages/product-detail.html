@@ -198,9 +198,8 @@
         </div>
         
         <div class="product-detail-info">
-          <p class="eyebrow">${currentProduct.period}</p>
           <h1 class="product-detail-title">${currentProduct.name}</h1>
-          <p class="product-detail-meta">${currentProduct.metal} · ${currentProduct.stones} · ${currentProduct.size}</p>
+          <p class="product-detail-meta">${currentProduct.size}</p>
           <p class="product-detail-price">${formatPrice(currentProduct.price, currentProduct.currency)}</p>
           
           ${isSold ? `
@@ -221,24 +220,8 @@
           
           <dl style="margin-top: 1.5rem; display: grid; gap: 0.45rem; font-size: 0.88rem; border-top: 1px solid var(--border); padding-top: 1.2rem;">
             <div style="display: flex; gap: 0.8rem;">
-              <dt style="color: var(--muted); min-width: 5rem;">Metal</dt>
-              <dd style="margin: 0;">${currentProduct.metal}</dd>
-            </div>
-            <div style="display: flex; gap: 0.8rem;">
-              <dt style="color: var(--muted); min-width: 5rem;">Stones</dt>
-              <dd style="margin: 0;">${currentProduct.stones}</dd>
-            </div>
-            <div style="display: flex; gap: 0.8rem;">
               <dt style="color: var(--muted); min-width: 5rem;">Size</dt>
               <dd style="margin: 0;">${currentProduct.size}</dd>
-            </div>
-            <div style="display: flex; gap: 0.8rem;">
-              <dt style="color: var(--muted); min-width: 5rem;">Period</dt>
-              <dd style="margin: 0;">${currentProduct.period}</dd>
-            </div>
-            <div style="display: flex; gap: 0.8rem;">
-              <dt style="color: var(--muted); min-width: 5rem;">Style</dt>
-              <dd style="margin: 0;">${currentProduct.style}</dd>
             </div>
           </dl>
         </div>

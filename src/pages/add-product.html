@@ -209,21 +209,6 @@
           </div>
 
           <div class="form-grid" style="margin-bottom:1.4rem;">
-            <div class="field">
-              <label for="f-period">Period *</label>
-              <select id="f-period">
-                <option value="Victorian">Victorian</option>
-                <option value="Edwardian">Edwardian</option>
-                <option value="Art Deco">Art Deco</option>
-                <option value="Art Nouveau">Art Nouveau</option>
-                <option value="Georgian">Georgian</option>
-                <option value="Retro">Retro</option>
-                <option value="Contemporary" selected>Contemporary</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-grid" style="margin-bottom:1.4rem;">
             <div class="field full">
               <label for="f-description">Description *</label>
               <textarea id="f-description" placeholder="Describe the piece — history, craftsmanship, character..."></textarea>
@@ -232,20 +217,8 @@
 
           <div class="form-grid" style="margin-bottom:1.4rem;">
             <div class="field">
-              <label for="f-metal">Metal *</label>
-              <input type="text" id="f-metal" placeholder="e.g. 18ct Yellow Gold" />
-            </div>
-            <div class="field">
-              <label for="f-stones">Stones *</label>
-              <input type="text" id="f-stones" placeholder="e.g. Old Cut Diamonds (0.45ct)" />
-            </div>
-            <div class="field">
               <label for="f-size">Size *</label>
               <input type="text" id="f-size" placeholder="e.g. UK N / US 6.5" />
-            </div>
-            <div class="field">
-              <label for="f-style">Style *</label>
-              <input type="text" id="f-style" placeholder="e.g. Cluster, Solitaire, Band" />
             </div>
           </div>
 
@@ -495,14 +468,10 @@
           name,
           slug,
           description: document.getElementById('f-description').value.trim(),
-          metal:       document.getElementById('f-metal').value.trim(),
-          stones:      document.getElementById('f-stones').value.trim(),
           size:        document.getElementById('f-size').value.trim(),
           price:       parseFloat(document.getElementById('f-price').value) || 0,
           currency:    'EUR',
           featured:    document.getElementById('f-featured').checked,
-          period:      document.getElementById('f-period').value,
-          style:       document.getElementById('f-style').value.trim(),
           category:    document.getElementById('f-category').value,
           available:   document.getElementById('f-available').checked,
           images:      getMediaPaths('image-list'),

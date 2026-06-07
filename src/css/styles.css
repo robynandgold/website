@@ -587,9 +587,11 @@ a {
 
 @media (max-width: 640px) {
   .header-inner {
-    grid-template-columns: 1fr;
-    gap: 0.8rem;
-    align-items: flex-start;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    gap: 0;
   }
 
   .nav {
@@ -597,6 +599,11 @@ a {
     row-gap: 0.3rem;
   }
   .nav-left { display: none; }
+
+  .nav-right {
+    position: absolute;
+    right: 0;
+  }
 
   .hero {
     padding-top: 3rem;

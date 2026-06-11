@@ -97,9 +97,9 @@
     "size": "",
     "price": 0.5,
     "currency": "EUR",
-    "featured": true,
+    "featured": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "images": [
       "/images/products/IMG_8412.jpeg"
     ],

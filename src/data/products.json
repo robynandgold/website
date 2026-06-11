@@ -88,5 +88,21 @@
       "/images/products/2ddab22e-ba5e-49c7-9211-7ad0ee5e325b.jpeg"
     ],
     "videos": []
+  },
+  {
+    "id": "test",
+    "name": "Test",
+    "slug": "test",
+    "description": "Test",
+    "size": "",
+    "price": 0.5,
+    "currency": "EUR",
+    "featured": true,
+    "category": "rings",
+    "available": true,
+    "images": [
+      "/images/products/IMG_8412.jpeg"
+    ],
+    "videos": []
   }
 ]

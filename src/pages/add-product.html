@@ -342,53 +342,47 @@
     // ── Media entries ─────────────────────────────────────────────
     const pendingFiles = new Map(); // filename → File
 
-    function addMediaEntry(listId, type) {
+    function addMediaEntry(listId, type, file) {
       const list = document.getElementById(listId);
-      const accept = type === 'video' ? 'video/*' : 'image/*';
+      const path = `/images/products/${file.name}`;
+      const url = URL.createObjectURL(file);
+      pendingFiles.set(file.name, file);
+
       const entry = document.createElement('div');
       entry.className = 'media-entry';
-      entry._path = '';
+      entry._path = path;
       entry.innerHTML = `
         <div class="media-thumb">
-          <div class="thumb-placeholder">Click to<br>choose</div>
+          ${type === 'video'
+            ? `<video src="${url}" muted autoplay loop playsinline></video>`
+            : `<img src="${url}" alt="${file.name}" />`}
         </div>
         <div class="media-entry-right">
-          <span class="media-filename empty">No file chosen</span>
-          <span class="media-path"></span>
+          <span class="media-filename">${file.name}</span>
+          <span class="media-path">${path}</span>
         </div>
         <button class="btn-remove" aria-label="Remove">×</button>
-        <input type="file" accept="${accept}" style="display:none" />
       `;
-      const thumb = entry.querySelector('.media-thumb');
-      const fileInput = entry.querySelector('input[type="file"]');
-      const filenameEl = entry.querySelector('.media-filename');
-      const pathEl = entry.querySelector('.media-path');
-
-      thumb.addEventListener('click', () => fileInput.click());
-      fileInput.addEventListener('change', () => {
-        const file = fileInput.files[0];
-        if (!file) return;
-        const path = `/images/products/${file.name}`;
-        entry._path = path;
-        filenameEl.textContent = file.name;
-        filenameEl.classList.remove('empty');
-        pathEl.textContent = path;
-        const url = URL.createObjectURL(file);
-        thumb.innerHTML = type === 'video'
-          ? `<video src="${url}" muted autoplay loop playsinline></video>`
-          : `<img src="${url}" alt="${file.name}" />`;
-        pendingFiles.set(file.name, file);
-      });
       entry.querySelector('.btn-remove').addEventListener('click', () => {
-        if (entry._path) pendingFiles.delete(entry._path.split('/').pop());
+        pendingFiles.delete(file.name);
         entry.remove();
       });
       list.appendChild(entry);
-      fileInput.click();
     }
 
-    document.getElementById('add-image-btn').addEventListener('click', () => addMediaEntry('image-list', 'image'));
-    document.getElementById('add-video-btn').addEventListener('click', () => addMediaEntry('video-list', 'video'));
+    function openMediaPicker(listId, type) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = type === 'video' ? 'video/*' : 'image/*';
+      input.multiple = true;
+      input.addEventListener('change', () => {
+        Array.from(input.files).forEach(file => addMediaEntry(listId, type, file));
+      });
+      input.click();
+    }
+
+    document.getElementById('add-image-btn').addEventListener('click', () => openMediaPicker('image-list', 'image'));
+    document.getElementById('add-video-btn').addEventListener('click', () => openMediaPicker('video-list', 'video'));
 
     // ── Slug generation ───────────────────────────────────────────
     function newSlugSuffix() {

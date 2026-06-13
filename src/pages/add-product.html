@@ -129,7 +129,7 @@
       border-radius: var(--radius-md); font-size: 0.88rem;
       display: none;
     }
-    .publish-status.info    { display: flex; align-items: center; gap: 0.5rem; background: var(--bg-alt); color: var(--muted); border: 1px solid var(--border); }
+    .publish-status.info    { display: block; background: var(--bg-alt); color: var(--muted); border: 1px solid var(--border); }
     .publish-status.success { display: block; background: #edf7f0; color: #3a7a52; border: 1px solid #a8d5b5; }
     .publish-status.error   { display: block; background: #fdf0f0; color: #b04040; border: 1px solid #e8b0b0; }
     @keyframes rg-spin { to { transform: rotate(360deg); } }
@@ -137,6 +137,18 @@
       width: 15px; height: 15px; flex-shrink: 0;
       border: 2px solid currentColor; border-top-color: transparent;
       border-radius: 50%; animation: rg-spin 0.7s linear infinite; opacity: 0.5;
+    }
+    .status-progress-bar {
+      width: 100%; height: 3px; background: rgba(0,0,0,0.08);
+      border-radius: 2px; margin-top: 0.55rem; overflow: hidden;
+    }
+    .status-progress-fill {
+      height: 100%; border-radius: 2px; background: currentColor;
+      opacity: 0.35; width: 0; transition: width 0.25s ease;
+    }
+    @keyframes progress-slide { 0% { margin-left: -40%; } 100% { margin-left: 110%; } }
+    .status-progress-fill.indeterminate {
+      width: 40% !important; animation: progress-slide 1.4s ease-in-out infinite;
     }
     .error-detail { margin-top: 0.6rem; font-size: 0.8rem; }
     .error-detail summary { cursor: pointer; opacity: 0.75; }
@@ -671,11 +683,15 @@
       return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    function setStatus(type, msg, detail) {
+    function setStatus(type, msg, detail, progress) {
       const el = document.getElementById('publish-status');
       el.className = 'publish-status ' + type;
       if (type === 'info') {
-        el.innerHTML = `<span class="status-spinner"></span><span>${msg}</span>`;
+        const hasPct = typeof progress === 'number';
+        const pctLabel = hasPct ? `<span style="font-size:0.76rem;opacity:0.5;margin-left:auto;">${Math.round(progress * 100)}%</span>` : '';
+        const fillClass = hasPct ? '' : ' indeterminate';
+        const fillStyle = hasPct ? `style="width:${Math.round(progress * 100)}%"` : '';
+        el.innerHTML = `<div style="display:flex;align-items:center;gap:0.5rem;"><span class="status-spinner"></span><span>${msg}</span>${pctLabel}</div><div class="status-progress-bar"><div class="status-progress-fill${fillClass}" ${fillStyle}></div></div>`;
       } else if (type === 'error' && detail) {
         el.innerHTML = `${escHtml(msg)}<details class="error-detail"><summary>Show full error ›</summary><pre>${escHtml(detail)}</pre></details>`;
       } else {
@@ -708,13 +724,35 @@
       btn.textContent = currentMode === 'edit' ? btn.dataset.editLabel : btn.dataset.addLabel;
     }
 
+    // ── XHR wrapper with upload-progress callback ─────────────────
+    function xhrFetch(method, url, headers, body, onProgress) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open(method, url);
+        Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
+        if (onProgress) {
+          xhr.upload.addEventListener('progress', e => {
+            if (e.lengthComputable) onProgress(e.loaded / e.total);
+          });
+        }
+        xhr.addEventListener('load', () => resolve({
+          ok: xhr.status >= 200 && xhr.status < 300,
+          status: xhr.status,
+          json: () => Promise.resolve(JSON.parse(xhr.responseText)),
+        }));
+        xhr.addEventListener('error', () => reject(new Error('Network error during upload')));
+        xhr.send(body);
+      });
+    }
+
     // ── Upload large file via Git Data API (bypasses Contents API body-size limit) ──
     async function uploadFileViaGitDataAPI(owner, repo, branch, headers, filePath, base64, filename) {
-      setStatus('info', `Uploading ${filename} — sending to GitHub…`);
-      const blobRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/blobs`, {
-        method: 'POST', headers,
-        body: JSON.stringify({ content: base64, encoding: 'base64' }),
-      });
+      const blobRes = await xhrFetch('POST',
+        `https://api.github.com/repos/${owner}/${repo}/git/blobs`,
+        headers,
+        JSON.stringify({ content: base64, encoding: 'base64' }),
+        pct => setStatus('info', `Uploading ${filename}…`, null, pct * 0.8)
+      );
       if (!blobRes.ok) {
         const body = await blobRes.json().catch(() => ({}));
         const err = new Error(`Blob upload failed (${blobRes.status}): ${body.message || filename}`);
@@ -723,7 +761,7 @@
       }
       const { sha: blobSha } = await blobRes.json();
 
-      setStatus('info', `Uploading ${filename} — committing to repository…`);
+      setStatus('info', `Uploading ${filename} — creating commit…`, null, 0.85);
       const branchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/branches/${branch}`, { headers });
       if (!branchRes.ok) {
         const body = await branchRes.json().catch(() => ({}));
@@ -747,6 +785,7 @@
       }
       const { sha: newTreeSha } = await treeRes.json();
 
+      setStatus('info', `Uploading ${filename} — finalising…`, null, 0.95);
       const newCommitRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/commits`, {
         method: 'POST', headers,
         body: JSON.stringify({ message: `Add media: ${filename}`, tree: newTreeSha, parents: [currentCommitSha] }),
@@ -794,11 +833,12 @@
           let sha;
           const checkRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, { headers });
           if (checkRes.ok) { sha = (await checkRes.json()).sha; }
-          const uploadRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
-            method: 'PUT',
+          const uploadRes = await xhrFetch('PUT',
+            `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
             headers,
-            body: JSON.stringify({ message: `Add media: ${filename}`, content: base64, branch, ...(sha ? { sha } : {}) }),
-          });
+            JSON.stringify({ message: `Add media: ${filename}`, content: base64, branch, ...(sha ? { sha } : {}) }),
+            pct => setStatus('info', `Uploading file ${i} of ${pendingFiles.size}: ${filename}…`, null, pct)
+          );
           if (!uploadRes.ok) {
             const body = await uploadRes.json().catch(() => ({}));
             console.error(`Upload failed for ${filename}`, uploadRes.status, body);

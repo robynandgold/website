@@ -36,23 +36,6 @@
     "videos": []
   },
   {
-    "id": "9ct-gold-diamond-band",
-    "name": "9ct Gold Diamond Band",
-    "slug": "9ct-gold-diamond-band",
-    "description": "A beautiful diamond band ring crafted in 9ct gold. The classic design features sparkling diamonds in an elegant band setting. Weighing 1.8g, this piece combines timeless style with everyday wearability.",
-    "size": "UK P / US 7.5",
-    "price": 285,
-    "currency": "EUR",
-    "featured": false,
-    "category": "rings",
-    "available": false,
-    "images": [
-      "/images/products/9ct-gold-diamond-band-1.png",
-      "/images/products/9ct-gold-diamond-band-2.png"
-    ],
-    "videos": []
-  },
-  {
     "id": "18ct-yellow-gold-diamond-five-stone-ring",
     "name": "18ct Yellow Gold Diamond Five Stone Ring",
     "slug": "18ct-yellow-gold-diamond-five-stone-ring",

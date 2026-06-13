@@ -89,7 +89,7 @@
     "currency": "EUR",
     "featured": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "images": [
       "/images/products/IMG_8564.jpeg",
       "/images/products/IMG_8566.jpeg",

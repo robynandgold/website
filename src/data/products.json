@@ -130,7 +130,7 @@
     "id": "18ct-yellow-gold-sapphire-and-diamond-ring",
     "name": "18ct Yellow Gold Sapphire and Diamond Ring",
     "slug": "18ct-yellow-gold-sapphire-and-diamond-ring",
-    "description": "Set with oval-cut sapphires and brilliant cut diamonds. Stones are set into 18ct white gold. Fully hallmarked.",
+    "description": "Set with oval-cut sapphires and brilliant cut diamonds. Stones are set into 18ct white gold. Fully hallmarked. 3g.",
     "size": "UK R",
     "price": 925,
     "currency": "EUR",
@@ -142,7 +142,8 @@
       "/images/products/IMG_8568.jpeg"
     ],
     "videos": [
-      "/images/products/IMG_8594.mov"
+      "/images/products/IMG_8594.mov",
+      "/images/products/IMG_8450.mov"
     ]
   },
   {

@@ -599,8 +599,8 @@
 
       const sizeMB = file.size / 1024 / 1024;
       const sizeLabel = sizeMB < 1 ? `${(file.size / 1024).toFixed(0)} KB` : `${sizeMB.toFixed(1)} MB`;
-      const sizeWarning = sizeMB > 50
-        ? `<span style="font-size:0.72rem;color:#b04040;">⚠ ${sizeLabel} — may fail (50 MB limit)</span>`
+      const sizeWarning = sizeMB > 20
+        ? `<span style="font-size:0.72rem;color:#b04040;">⚠ ${sizeLabel} — may fail (GitHub limit ~20 MB)</span>`
         : `<span style="font-size:0.72rem;color:var(--muted);">${sizeLabel}</span>`;
 
       const entry = document.createElement('div');
@@ -665,10 +665,20 @@
         .map(e => e._path).filter(Boolean);
     }
 
-    function setStatus(type, msg) {
+    function escHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function setStatus(type, msg, detail) {
       const el = document.getElementById('publish-status');
       el.className = 'publish-status ' + type;
-      el.textContent = msg;
+      if (type === 'info') {
+        el.innerHTML = `<span class="status-spinner"></span><span>${msg}</span>`;
+      } else if (type === 'error' && detail) {
+        el.innerHTML = `${escHtml(msg)}<details class="error-detail"><summary>Show full error ›</summary><pre>${escHtml(detail)}</pre></details>`;
+      } else {
+        el.textContent = msg;
+      }
     }
 
     function clearForm() {
@@ -721,7 +731,9 @@
         if (!uploadRes.ok) {
           const body = await uploadRes.json().catch(() => ({}));
           console.error(`Upload failed for ${filename}`, uploadRes.status, body);
-          throw new Error(`Upload failed (${uploadRes.status}): ${body.message || filename}`);
+          const err = new Error(`Upload failed (${uploadRes.status}): ${body.message || filename}`);
+          err.detail = JSON.stringify(body, null, 2);
+          throw err;
         }
       }
     }
@@ -736,7 +748,9 @@
         if (!fetchRes.ok) {
           const body = await fetchRes.json().catch(() => ({}));
           console.error('Fetch products.json failed', fetchRes.status, body);
-          throw new Error(`Fetch failed (${fetchRes.status}): ${body.message || 'could not load products.json'}`);
+          const err = new Error(`Fetch failed (${fetchRes.status}): ${body.message || 'could not load products.json'}`);
+          err.detail = JSON.stringify(body, null, 2);
+          throw err;
         }
         const fileData = await fetchRes.json();
         const allProducts = JSON.parse(atob(fileData.content.replace(/\n/g, '')));
@@ -766,7 +780,9 @@
         console.error('Commit failed', commitRes.status, body);
 
         if (commitRes.status === 409 && attempt === 1) continue; // SHA conflict — retry with fresh fetch
-        throw new Error(`Save failed (${commitRes.status}): ${body.message || 'could not commit to GitHub'}`);
+        const commitErr = new Error(`Save failed (${commitRes.status}): ${body.message || 'could not commit to GitHub'}`);
+        commitErr.detail = JSON.stringify(body, null, 2);
+        throw commitErr;
       }
     }
 
@@ -836,7 +852,7 @@
         }
 
       } catch (err) {
-        setStatus('error', err.message);
+        setStatus('error', err.message, err.detail);
         btn.disabled = false;
         btn.textContent = currentMode === 'edit' ? btn.dataset.editLabel : btn.dataset.addLabel;
       }

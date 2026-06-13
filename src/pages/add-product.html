@@ -171,6 +171,13 @@
     .product-pick-meta { font-size: 0.75rem; color: var(--muted); margin-top: 0.1rem; }
     .media-entry.existing { border-style: dashed; }
     .media-entry.existing .media-path::before { content: 'Saved · '; }
+    .btn-delete-product {
+      background: none; border: 1px solid #e8b0b0; color: #b04040;
+      border-radius: var(--radius-md); padding: 0.25rem 0.6rem;
+      font-size: 0.72rem; font-family: inherit; cursor: pointer;
+      flex-shrink: 0; transition: background 0.15s;
+    }
+    .btn-delete-product:hover { background: #fdf0f0; }
 
     @media (max-width: 640px) {
       .form-grid { grid-template-columns: 1fr; }
@@ -444,11 +451,15 @@
           const status = product.available === false ? 'Sold' : `€${product.price}`;
           const item = document.createElement('div');
           item.className = 'product-pick-item';
-          item.innerHTML = `${thumb}<div class="product-pick-info"><div class="product-pick-name">${product.name}</div><div class="product-pick-meta">${product.size} · ${status}</div></div>`;
-          item.addEventListener('click', () => {
+          item.innerHTML = `${thumb}<div class="product-pick-info"><div class="product-pick-name">${product.name}</div><div class="product-pick-meta">${product.size} · ${status}</div></div><button class="btn-delete-product" title="Delete product">Delete</button>`;
+          item.querySelector('.product-pick-info').addEventListener('click', () => {
             list.querySelectorAll('.product-pick-item').forEach(el => el.classList.remove('selected'));
             item.classList.add('selected');
             loadProductForEdit(product);
+          });
+          item.querySelector('.btn-delete-product').addEventListener('click', e => {
+            e.stopPropagation();
+            deleteProduct(product, item);
           });
           list.appendChild(item);
         });
@@ -457,6 +468,51 @@
         list.style.display = '';
       } catch (err) {
         loading.textContent = `Error: ${err.message}`;
+      }
+    }
+
+    async function deleteProduct(product, itemEl) {
+      if (!confirm(`Delete "${product.name}"?\n\nThis removes it from the site permanently. Media files are not deleted.`)) return;
+      if (!githubToken) { alert('No GitHub token saved. Add it in the setup section above.'); return; }
+
+      const btn = itemEl.querySelector('.btn-delete-product');
+      btn.disabled = true;
+      btn.textContent = 'Deleting…';
+
+      const owner = 'robynandgold', repo = 'website', branch = 'main';
+      const headers = {
+        'Authorization': `Bearer ${githubToken}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+      };
+
+      try {
+        const apiPath = 'src/data/products.json';
+        const fetchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, { headers });
+        if (!fetchRes.ok) throw new Error('Failed to fetch products.json');
+        const fileData = await fetchRes.json();
+        const allProducts = JSON.parse(atob(fileData.content.replace(/\n/g, '')));
+
+        const filtered = allProducts.filter(p => p.id !== product.id);
+        if (filtered.length === allProducts.length) throw new Error('Product not found in products.json');
+
+        const newContent = btoa(unescape(encodeURIComponent(JSON.stringify(filtered, null, 2))));
+        const commitRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({ message: `Delete product: ${product.name}`, content: newContent, sha: fileData.sha, branch }),
+        });
+        if (!commitRes.ok) {
+          const err = await commitRes.json();
+          throw new Error(err.message || 'Failed to commit');
+        }
+
+        itemEl.remove();
+        if (currentEditProduct?.id === product.id) clearForm();
+      } catch (err) {
+        alert(`Delete failed: ${err.message}`);
+        btn.disabled = false;
+        btn.textContent = 'Delete';
       }
     }
 

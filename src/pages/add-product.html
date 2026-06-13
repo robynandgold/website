@@ -599,9 +599,11 @@
 
       const sizeMB = file.size / 1024 / 1024;
       const sizeLabel = sizeMB < 1 ? `${(file.size / 1024).toFixed(0)} KB` : `${sizeMB.toFixed(1)} MB`;
-      const sizeWarning = sizeMB > 20
-        ? `<span style="font-size:0.72rem;color:#b04040;">⚠ ${sizeLabel} — may fail (GitHub limit ~20 MB)</span>`
-        : `<span style="font-size:0.72rem;color:var(--muted);">${sizeLabel}</span>`;
+      const sizeWarning = sizeMB > 50
+        ? `<span style="font-size:0.72rem;color:#b04040;">⚠ ${sizeLabel} — very large, may time out</span>`
+        : sizeMB > 10
+          ? `<span style="font-size:0.72rem;color:#a07830;">↑ ${sizeLabel} — large file, uploading via Git API</span>`
+          : `<span style="font-size:0.72rem;color:var(--muted);">${sizeLabel}</span>`;
 
       const entry = document.createElement('div');
       entry.className = 'media-entry';
@@ -706,6 +708,69 @@
       btn.textContent = currentMode === 'edit' ? btn.dataset.editLabel : btn.dataset.addLabel;
     }
 
+    // ── Upload large file via Git Data API (bypasses Contents API body-size limit) ──
+    async function uploadFileViaGitDataAPI(owner, repo, branch, headers, filePath, base64, filename) {
+      setStatus('info', `Uploading ${filename} — sending to GitHub…`);
+      const blobRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/blobs`, {
+        method: 'POST', headers,
+        body: JSON.stringify({ content: base64, encoding: 'base64' }),
+      });
+      if (!blobRes.ok) {
+        const body = await blobRes.json().catch(() => ({}));
+        const err = new Error(`Blob upload failed (${blobRes.status}): ${body.message || filename}`);
+        err.detail = JSON.stringify(body, null, 2);
+        throw err;
+      }
+      const { sha: blobSha } = await blobRes.json();
+
+      setStatus('info', `Uploading ${filename} — committing to repository…`);
+      const branchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/branches/${branch}`, { headers });
+      if (!branchRes.ok) {
+        const body = await branchRes.json().catch(() => ({}));
+        const err = new Error(`Get branch failed (${branchRes.status}): ${body.message || ''}`);
+        err.detail = JSON.stringify(body, null, 2);
+        throw err;
+      }
+      const branchData = await branchRes.json();
+      const currentCommitSha = branchData.commit.sha;
+      const currentTreeSha = branchData.commit.commit.tree.sha;
+
+      const treeRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees`, {
+        method: 'POST', headers,
+        body: JSON.stringify({ base_tree: currentTreeSha, tree: [{ path: filePath, mode: '100644', type: 'blob', sha: blobSha }] }),
+      });
+      if (!treeRes.ok) {
+        const body = await treeRes.json().catch(() => ({}));
+        const err = new Error(`Create tree failed (${treeRes.status}): ${body.message || ''}`);
+        err.detail = JSON.stringify(body, null, 2);
+        throw err;
+      }
+      const { sha: newTreeSha } = await treeRes.json();
+
+      const newCommitRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/commits`, {
+        method: 'POST', headers,
+        body: JSON.stringify({ message: `Add media: ${filename}`, tree: newTreeSha, parents: [currentCommitSha] }),
+      });
+      if (!newCommitRes.ok) {
+        const body = await newCommitRes.json().catch(() => ({}));
+        const err = new Error(`Create commit failed (${newCommitRes.status}): ${body.message || ''}`);
+        err.detail = JSON.stringify(body, null, 2);
+        throw err;
+      }
+      const { sha: newCommitSha } = await newCommitRes.json();
+
+      const updateRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${branch}`, {
+        method: 'PATCH', headers,
+        body: JSON.stringify({ sha: newCommitSha }),
+      });
+      if (!updateRes.ok) {
+        const body = await updateRes.json().catch(() => ({}));
+        const err = new Error(`Update branch failed (${updateRes.status}): ${body.message || ''}`);
+        err.detail = JSON.stringify(body, null, 2);
+        throw err;
+      }
+    }
+
     // ── Upload media files to GitHub ──────────────────────────────
     async function uploadPendingFiles(owner, repo, branch, headers) {
       let i = 0;
@@ -720,20 +785,27 @@
         }
         const base64 = btoa(binary);
         const filePath = `src/images/products/${filename}`;
-        let sha;
-        const checkRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, { headers });
-        if (checkRes.ok) { sha = (await checkRes.json()).sha; }
-        const uploadRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
-          method: 'PUT',
-          headers,
-          body: JSON.stringify({ message: `Add media: ${filename}`, content: base64, branch, ...(sha ? { sha } : {}) }),
-        });
-        if (!uploadRes.ok) {
-          const body = await uploadRes.json().catch(() => ({}));
-          console.error(`Upload failed for ${filename}`, uploadRes.status, body);
-          const err = new Error(`Upload failed (${uploadRes.status}): ${body.message || filename}`);
-          err.detail = JSON.stringify(body, null, 2);
-          throw err;
+        const sizeMB = file.size / 1024 / 1024;
+
+        if (sizeMB > 10) {
+          // Files > 10 MB: use Git Data API to avoid Contents API JSON-body size limit
+          await uploadFileViaGitDataAPI(owner, repo, branch, headers, filePath, base64, filename);
+        } else {
+          let sha;
+          const checkRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, { headers });
+          if (checkRes.ok) { sha = (await checkRes.json()).sha; }
+          const uploadRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
+            method: 'PUT',
+            headers,
+            body: JSON.stringify({ message: `Add media: ${filename}`, content: base64, branch, ...(sha ? { sha } : {}) }),
+          });
+          if (!uploadRes.ok) {
+            const body = await uploadRes.json().catch(() => ({}));
+            console.error(`Upload failed for ${filename}`, uploadRes.status, body);
+            const err = new Error(`Upload failed (${uploadRes.status}): ${body.message || filename}`);
+            err.detail = JSON.stringify(body, null, 2);
+            throw err;
+          }
         }
       }
     }

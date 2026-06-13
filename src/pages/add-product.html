@@ -699,9 +699,54 @@
           body: JSON.stringify({ message: `Add media: ${filename}`, content: base64, branch, ...(sha ? { sha } : {}) }),
         });
         if (!uploadRes.ok) {
-          const err = await uploadRes.json();
-          throw new Error(err.message || `Failed to upload ${filename}`);
+          const body = await uploadRes.json().catch(() => ({}));
+          console.error(`Upload failed for ${filename}`, uploadRes.status, body);
+          throw new Error(`Upload failed (${uploadRes.status}): ${body.message || filename}`);
         }
+      }
+    }
+
+    // ── Commit products.json with automatic SHA-conflict retry ────
+    async function commitProductsJson(owner, repo, branch, headers, product, commitMessage) {
+      const apiPath = 'src/data/products.json';
+
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        setStatus('info', attempt === 1 ? 'Fetching products from GitHub…' : 'Retrying after conflict…');
+        const fetchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, { headers });
+        if (!fetchRes.ok) {
+          const body = await fetchRes.json().catch(() => ({}));
+          console.error('Fetch products.json failed', fetchRes.status, body);
+          throw new Error(`Fetch failed (${fetchRes.status}): ${body.message || 'could not load products.json'}`);
+        }
+        const fileData = await fetchRes.json();
+        const allProducts = JSON.parse(atob(fileData.content.replace(/\n/g, '')));
+
+        if (currentMode === 'edit') {
+          const idx = allProducts.findIndex(p => p.id === product.id);
+          if (idx === -1) throw new Error(`Product "${product.id}" not found in products.json.`);
+          allProducts[idx] = product;
+        } else {
+          if (allProducts.find(p => p.id === product.id)) {
+            throw new Error(`A product with slug "${product.id}" already exists.`);
+          }
+          allProducts.push(product);
+        }
+
+        setStatus('info', 'Saving to GitHub…');
+        const newContent = btoa(unescape(encodeURIComponent(JSON.stringify(allProducts, null, 2))));
+        const commitRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({ message: commitMessage, content: newContent, sha: fileData.sha, branch }),
+        });
+
+        if (commitRes.ok) return;
+
+        const body = await commitRes.json().catch(() => ({}));
+        console.error('Commit failed', commitRes.status, body);
+
+        if (commitRes.status === 409 && attempt === 1) continue; // SHA conflict — retry with fresh fetch
+        throw new Error(`Save failed (${commitRes.status}): ${body.message || 'could not commit to GitHub'}`);
       }
     }
 
@@ -744,41 +789,8 @@
           videos:      getMediaPaths('video-list'),
         };
 
-        setStatus('info', 'Fetching products from GitHub…');
-        const apiPath = 'src/data/products.json';
-        const fetchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, { headers });
-        if (!fetchRes.ok) {
-          const err = await fetchRes.json();
-          throw new Error(err.message || 'Failed to fetch products.json from GitHub');
-        }
-        const fileData = await fetchRes.json();
-        const allProducts = JSON.parse(atob(fileData.content.replace(/\n/g, '')));
-
-        let commitMessage;
-        if (currentMode === 'edit') {
-          const idx = allProducts.findIndex(p => p.id === slug);
-          if (idx === -1) throw new Error(`Product "${slug}" not found in products.json.`);
-          allProducts[idx] = product;
-          commitMessage = `Update product: ${name}`;
-        } else {
-          if (allProducts.find(p => p.id === slug)) {
-            throw new Error(`A product with slug "${slug}" already exists.`);
-          }
-          allProducts.push(product);
-          commitMessage = `Add product: ${name}`;
-        }
-
-        setStatus('info', 'Saving to GitHub…');
-        const newContent = btoa(unescape(encodeURIComponent(JSON.stringify(allProducts, null, 2))));
-        const commitRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, {
-          method: 'PUT',
-          headers,
-          body: JSON.stringify({ message: commitMessage, content: newContent, sha: fileData.sha, branch }),
-        });
-        if (!commitRes.ok) {
-          const err = await commitRes.json();
-          throw new Error(err.message || 'Failed to commit to GitHub');
-        }
+        const commitMessage = currentMode === 'edit' ? `Update product: ${name}` : `Add product: ${name}`;
+        await commitProductsJson(owner, repo, branch, headers, product, commitMessage);
 
         pendingFiles.clear();
         const statusEl = document.getElementById('publish-status');

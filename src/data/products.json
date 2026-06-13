@@ -220,5 +220,25 @@
     "videos": [
       "/images/products/IMG_8451.mov"
     ]
+  },
+  {
+    "id": "18ct-white-gold-diamond-five-stone-ring-fzpdt",
+    "name": "18ct White Gold Diamond Five Stone Ring",
+    "slug": "18ct-white-gold-diamond-five-stone-ring-fzpdt",
+    "description": "Set with graduated round brilliant-cut diamonds totalling approximately 0.80 carats. Diamonds are all eye clean, bright and well-matched. Fully hallmarked for Birmingham, 1984. \n2.7g.",
+    "size": "UK K.5",
+    "price": 1150,
+    "currency": "EUR",
+    "featured": true,
+    "category": "rings",
+    "available": true,
+    "images": [
+      "/images/products/IMG_8586.jpeg",
+      "/images/products/IMG_8588.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_8542.mov",
+      "/images/products/IMG_8441.mov"
+    ]
   }
 ]

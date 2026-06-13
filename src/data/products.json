@@ -181,5 +181,25 @@
     "videos": [
       "/images/products/IMG_8545.mov"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-sapphire-and-diamond-trefoil-ring-wzkq2",
+    "name": "9ct Yellow Gold Sapphire and Diamond Trefoil Ring",
+    "slug": "9ct-yellow-gold-sapphire-and-diamond-trefoil-ring-wzkq2",
+    "description": "Set with oval-cut sapphire and brilliant-cut diamonds. Fully hallmarked for London, 1988. \n\nPlease note that one of the prongs on the sapphire shows signs of wear but the goldsmith has verified that the stone is secure. 2.3g.",
+    "size": "UK N",
+    "price": 325,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "images": [
+      "/images/products/IMG_8564.jpeg",
+      "/images/products/IMG_8566.jpeg",
+      "/images/products/IMG_8565.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_8553.mov"
+    ]
   }
 ]

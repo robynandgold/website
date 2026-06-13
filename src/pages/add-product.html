@@ -391,13 +391,22 @@
     document.getElementById('add-video-btn').addEventListener('click', () => addMediaEntry('video-list', 'video'));
 
     // ── Slug generation ───────────────────────────────────────────
-    document.getElementById('f-name').addEventListener('input', function () {
-      document.getElementById('f-slug').value = this.value
+    function newSlugSuffix() {
+      return Math.random().toString(36).slice(2, 7);
+    }
+    let slugSuffix = newSlugSuffix();
+
+    function refreshSlug() {
+      const base = document.getElementById('f-name').value
         .toLowerCase().trim()
         .replace(/[^a-z0-9\s-]/g, '')
         .replace(/\s+/g, '-')
-        .replace(/-+/g, '-');
-    });
+        .replace(/-+/g, '-')
+        .replace(/-$/, '');
+      document.getElementById('f-slug').value = base ? `${base}-${slugSuffix}` : '';
+    }
+
+    document.getElementById('f-name').addEventListener('input', refreshSlug);
 
     // ── Helpers ───────────────────────────────────────────────────
     function getMediaPaths(listId) {
@@ -413,6 +422,7 @@
 
     // ── Reset form ────────────────────────────────────────────────
     function resetForm() {
+      slugSuffix = newSlugSuffix();
       ['f-name', 'f-slug', 'f-description', 'f-size', 'f-price'].forEach(id => {
         document.getElementById(id).value = '';
       });

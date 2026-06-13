@@ -72,22 +72,6 @@
     ]
   },
   {
-    "id": "test",
-    "name": "Test",
-    "slug": "test",
-    "description": "Test",
-    "size": "",
-    "price": 0.5,
-    "currency": "EUR",
-    "featured": false,
-    "category": "rings",
-    "available": false,
-    "images": [
-      "/images/products/IMG_8412.jpeg"
-    ],
-    "videos": []
-  },
-  {
     "id": "18ct-yellow-gold-diamond-five-stone-ring",
     "name": "18ct Yellow Gold Diamond Five Stone Ring",
     "slug": "18ct-yellow-gold-diamond-five-stone-ring",

@@ -189,9 +189,9 @@
     "size": "UK N",
     "price": 380,
     "currency": "EUR",
-    "featured": true,
+    "featured": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "images": [
       "/images/products/IMG_8573.jpeg",
       "/images/products/IMG_8571.jpeg"

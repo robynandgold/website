@@ -143,5 +143,24 @@
     "videos": [
       "/images/products/IMG_8594.mov"
     ]
+  },
+  {
+    "id": "18ct-yellow-gold-diamond-five-stone-ring-zawc3",
+    "name": "18ct Yellow Gold Diamond Five Stone Ring",
+    "slug": "18ct-yellow-gold-diamond-five-stone-ring-zawc3",
+    "description": "Set with five graduated brilliant-cut diamonds totalling approximately 0.5ct. Diamonds are all eye clean, bright and well-matched. Fully hallmarked for London, 1978. 3g.",
+    "size": "UK J",
+    "price": 825,
+    "currency": "EUR",
+    "featured": true,
+    "category": "rings",
+    "available": true,
+    "images": [
+      "/images/products/IMG_8590.jpeg",
+      "/images/products/IMG_8592.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_8543.mov"
+    ]
   }
 ]

@@ -212,7 +212,7 @@
     function buildSlides() {
       const images = (currentProduct.images || []).map(src => ({ type: 'image', src }));
       const videos = (currentProduct.videos || []).map(src => ({ type: 'video', src }));
-      return [...images, ...videos];
+      return [...videos, ...images];
     }
 
     // Render product details

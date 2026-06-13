@@ -162,5 +162,24 @@
     "videos": [
       "/images/products/IMG_8543.mov"
     ]
+  },
+  {
+    "id": "18ct-yellow-gold-diamond-five-stone-ring-vxm99",
+    "name": "18ct Yellow Gold Diamond Five Stone Ring",
+    "slug": "18ct-yellow-gold-diamond-five-stone-ring-vxm99",
+    "description": "Set with five graduated brilliant-cut diamonds totalling approximately 0.25ct. Diamonds are all eye clean, bright and well-matched. Stamped for 18ct and platinum. Diamonds are set into platinum. 1.6g.",
+    "size": "UK K",
+    "price": 650,
+    "currency": "EUR",
+    "featured": true,
+    "category": "rings",
+    "available": true,
+    "images": [
+      "/images/products/IMG_8579.jpeg",
+      "/images/products/IMG_8578.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_8545.mov"
+    ]
   }
 ]

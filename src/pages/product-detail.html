@@ -231,7 +231,7 @@
         }
         return `
           <div class="carousel-slide${activeClass}" data-index="${index}">
-            <img src="${item.src}" alt="${currentProduct.name} view ${index + 1}" onerror="this.src='../images/homepage.png'" />
+            <img src="${item.src}" alt="${currentProduct.name} view ${index + 1}" onerror="this.style.display='none'" />
           </div>`;
       }).join('');
 

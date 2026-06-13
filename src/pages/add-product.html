@@ -348,6 +348,12 @@
       const url = URL.createObjectURL(file);
       pendingFiles.set(file.name, file);
 
+      const sizeMB = file.size / 1024 / 1024;
+      const sizeLabel = sizeMB < 1 ? `${(file.size / 1024).toFixed(0)} KB` : `${sizeMB.toFixed(1)} MB`;
+      const sizeWarning = sizeMB > 50
+        ? `<span style="font-size:0.72rem;color:#b04040;">⚠ ${sizeLabel} — may fail (50 MB limit)</span>`
+        : `<span style="font-size:0.72rem;color:var(--muted);">${sizeLabel}</span>`;
+
       const entry = document.createElement('div');
       entry.className = 'media-entry';
       entry._path = path;
@@ -360,6 +366,7 @@
         <div class="media-entry-right">
           <span class="media-filename">${file.name}</span>
           <span class="media-path">${path}</span>
+          ${sizeWarning}
         </div>
         <button class="btn-remove" aria-label="Remove">×</button>
       `;

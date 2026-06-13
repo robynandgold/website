@@ -300,5 +300,25 @@
       "/images/products/IMG_8548.mov",
       "/images/products/IMG_8443.mov"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-pear-cut-lab-diamond-solitaire-ohn9t",
+    "name": "9ct Yellow Gold Pear-cut Lab Diamond Solitaire",
+    "slug": "9ct-yellow-gold-pear-cut-lab-diamond-solitaire-ohn9t",
+    "description": "1.04ct pear-cut lab-grown diamond set in polished 9ct yellow gold, featuring a contemporary flowing bypass design. D colour and VS1 clarity. Diamond is IGI-certified. Certificate provided with ring. \n2.9g",
+    "size": "UK K",
+    "price": 680,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "images": [
+      "/images/products/IMG_8556.jpeg",
+      "/images/products/IMG_8524.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_8555.mov",
+      "/images/products/IMG_8444.mov"
+    ]
   }
 ]

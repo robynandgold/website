@@ -133,6 +133,45 @@
     .publish-status.success { display: block; background: #edf7f0; color: #3a7a52; border: 1px solid #a8d5b5; }
     .publish-status.error   { display: block; background: #fdf0f0; color: #b04040; border: 1px solid #e8b0b0; }
 
+    /* ── Mode tabs ──────────────────────────── */
+    .mode-tabs {
+      display: flex; margin-bottom: 2rem;
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      overflow: hidden; background: var(--bg-alt);
+    }
+    .mode-tab {
+      flex: 1; padding: 0.65rem 1rem; font-size: 0.85rem;
+      font-family: inherit; cursor: pointer; background: none; border: none;
+      color: var(--muted); transition: background 0.15s, color 0.15s; text-align: center;
+    }
+    .mode-tab.active { background: #fdfbf8; color: var(--ink); font-weight: 500; }
+    .mode-tab:first-child { border-right: 1px solid var(--border); }
+
+    /* ── Product picker ─────────────────────── */
+    #edit-picker { margin-bottom: 1.5rem; display: none; }
+    #edit-picker-loading { font-size: 0.85rem; color: var(--muted); padding: 0.5rem 0; }
+    .product-pick-list {
+      display: flex; flex-direction: column; gap: 0.4rem; max-height: 280px;
+      overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-md);
+      background: #fdfbf8; padding: 0.4rem;
+    }
+    .product-pick-item {
+      display: flex; align-items: center; gap: 0.8rem;
+      padding: 0.5rem 0.7rem; border-radius: 6px; cursor: pointer;
+      transition: background 0.12s; border: 1px solid transparent;
+    }
+    .product-pick-item:hover { background: var(--bg-alt); }
+    .product-pick-item.selected { background: rgba(198,168,120,0.12); border-color: var(--accent-soft); }
+    .product-pick-thumb {
+      width: 48px; height: 38px; border-radius: 4px; object-fit: cover;
+      background: #e8e0d4; flex-shrink: 0;
+    }
+    .product-pick-info { flex: 1; min-width: 0; }
+    .product-pick-name { font-size: 0.88rem; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .product-pick-meta { font-size: 0.75rem; color: var(--muted); margin-top: 0.1rem; }
+    .media-entry.existing { border-style: dashed; }
+    .media-entry.existing .media-path::before { content: 'Saved · '; }
+
     @media (max-width: 640px) {
       .form-grid { grid-template-columns: 1fr; }
       .form-grid .full { grid-column: 1; }
@@ -179,8 +218,14 @@
     <section class="section">
       <div class="container" style="max-width: 780px;">
         <p class="eyebrow">Internal tool</p>
-        <h1 class="page-title">Add a new piece</h1>
-        <p class="page-intro" style="margin-bottom: 2rem;">Fill in the details and click <strong>Publish to site</strong> Images are saved locally and the product is committed to GitHub automatically.</p>
+        <h1 class="page-title" id="page-heading">Add a new piece</h1>
+        <p class="page-intro" id="page-intro" style="margin-bottom: 2rem;">Fill in the details and click <strong>Publish to site</strong>. Images and videos are committed to GitHub automatically.</p>
+
+        <!-- Mode tabs -->
+        <div class="mode-tabs">
+          <button class="mode-tab active" id="tab-add" onclick="switchMode('add')">Add new piece</button>
+          <button class="mode-tab" id="tab-edit" onclick="switchMode('edit')">Edit existing piece</button>
+        </div>
 
         <!-- Setup -->
         <div class="setup-banner" id="setup-banner">
@@ -195,8 +240,15 @@
           </div>
         </div>
 
+        <!-- Edit product picker -->
+        <div id="edit-picker">
+          <p class="section-label" style="margin-bottom:0.6rem;">Select a product to edit</p>
+          <div id="edit-picker-loading">Loading products…</div>
+          <div class="product-pick-list" id="product-pick-list" style="display:none;"></div>
+        </div>
+
         <!-- Form -->
-        <div class="form-card">
+        <div class="form-card" id="form-card">
 
           <div class="form-grid" style="margin-bottom:1.4rem;">
             <div class="field full">
@@ -263,7 +315,7 @@
             <button class="btn-add-media" id="add-video-btn">+ Add video</button>
           </div>
 
-          <button class="btn btn-primary" id="publish-btn" style="width:100%;">Publish to site</button>
+          <button class="btn btn-primary" id="publish-btn" style="width:100%;" data-add-label="Publish to site" data-edit-label="Save changes">Publish to site</button>
           <div class="publish-status" id="publish-status"></div>
         </div>
 
@@ -339,8 +391,129 @@
       updateTokenStatus();
     });
 
+    // ── Mode switching ────────────────────────────────────────────
+    let currentMode = 'add';
+    let currentEditProduct = null;
+
+    function switchMode(mode) {
+      currentMode = mode;
+      document.getElementById('tab-add').classList.toggle('active', mode === 'add');
+      document.getElementById('tab-edit').classList.toggle('active', mode === 'edit');
+
+      const picker = document.getElementById('edit-picker');
+      const publishBtn = document.getElementById('publish-btn');
+
+      if (mode === 'add') {
+        document.getElementById('page-heading').textContent = 'Add a new piece';
+        document.getElementById('page-intro').innerHTML = 'Fill in the details and click <strong>Publish to site</strong>. Images and videos are committed to GitHub automatically.';
+        picker.style.display = 'none';
+        publishBtn.textContent = publishBtn.dataset.addLabel;
+        resetForm();
+      } else {
+        document.getElementById('page-heading').textContent = 'Edit a piece';
+        document.getElementById('page-intro').textContent = 'Select a product below to load its details, make changes, then save.';
+        picker.style.display = '';
+        publishBtn.textContent = publishBtn.dataset.editLabel;
+        clearForm();
+        loadProductPicker();
+      }
+    }
+
+    // ── Product picker (edit mode) ────────────────────────────────
+    async function loadProductPicker() {
+      const loading = document.getElementById('edit-picker-loading');
+      const list = document.getElementById('product-pick-list');
+      loading.style.display = '';
+      list.style.display = 'none';
+      list.innerHTML = '';
+
+      try {
+        const owner = 'robynandgold', repo = 'website';
+        const headers = githubToken
+          ? { 'Authorization': `Bearer ${githubToken}`, 'Accept': 'application/vnd.github.v3+json' }
+          : { 'Accept': 'application/vnd.github.v3+json' };
+        const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/src/data/products.json`, { headers });
+        if (!res.ok) throw new Error('Failed to load products');
+        const fileData = await res.json();
+        const products = JSON.parse(atob(fileData.content.replace(/\n/g, '')));
+
+        products.forEach(product => {
+          const thumb = product.images?.[0]
+            ? `<img class="product-pick-thumb" src="https://robynandgold.com${product.images[0]}" alt="" onerror="this.style.background='#e8e0d4';this.style.display='block'" />`
+            : `<div class="product-pick-thumb"></div>`;
+          const status = product.available === false ? 'Sold' : `€${product.price}`;
+          const item = document.createElement('div');
+          item.className = 'product-pick-item';
+          item.innerHTML = `${thumb}<div class="product-pick-info"><div class="product-pick-name">${product.name}</div><div class="product-pick-meta">${product.size} · ${status}</div></div>`;
+          item.addEventListener('click', () => {
+            list.querySelectorAll('.product-pick-item').forEach(el => el.classList.remove('selected'));
+            item.classList.add('selected');
+            loadProductForEdit(product);
+          });
+          list.appendChild(item);
+        });
+
+        loading.style.display = 'none';
+        list.style.display = '';
+      } catch (err) {
+        loading.textContent = `Error: ${err.message}`;
+      }
+    }
+
+    function loadProductForEdit(product) {
+      currentEditProduct = product;
+      document.getElementById('f-name').value = product.name || '';
+      document.getElementById('f-slug').value = product.slug || '';
+      document.getElementById('f-description').value = product.description || '';
+      document.getElementById('f-size').value = product.size || '';
+      document.getElementById('f-price').value = product.price || '';
+      document.getElementById('f-category').value = product.category || 'rings';
+      document.getElementById('f-available').checked = product.available !== false;
+      document.getElementById('f-featured').checked = product.featured === true;
+
+      document.getElementById('image-list').innerHTML = '';
+      document.getElementById('video-list').innerHTML = '';
+      pendingFiles.clear();
+
+      (product.images || []).forEach(path => addExistingMediaEntry('image-list', 'image', path));
+      (product.videos || []).forEach(path => addExistingMediaEntry('video-list', 'video', path));
+
+      const statusEl = document.getElementById('publish-status');
+      statusEl.className = 'publish-status';
+      statusEl.innerHTML = '';
+      const btn = document.getElementById('publish-btn');
+      btn.disabled = false;
+      btn.textContent = btn.dataset.editLabel;
+
+      document.getElementById('form-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
     // ── Media entries ─────────────────────────────────────────────
-    const pendingFiles = new Map(); // filename → File
+    const pendingFiles = new Map();
+
+    function addExistingMediaEntry(listId, type, path) {
+      const list = document.getElementById(listId);
+      const filename = path.split('/').pop();
+      const liveUrl = `https://robynandgold.com${path}`;
+
+      const entry = document.createElement('div');
+      entry.className = 'media-entry existing';
+      entry._path = path;
+      entry.innerHTML = `
+        <div class="media-thumb">
+          ${type === 'video'
+            ? `<video src="${liveUrl}" muted autoplay loop playsinline></video>`
+            : `<img src="${liveUrl}" alt="${filename}" />`}
+        </div>
+        <div class="media-entry-right">
+          <span class="media-filename">${filename}</span>
+          <span class="media-path">${path}</span>
+        </div>
+        <button class="btn-remove" aria-label="Remove">×</button>
+      `;
+      entry.querySelector('.btn-remove').addEventListener('click', () => entry.remove());
+      list.appendChild(entry);
+    }
 
     function addMediaEntry(listId, type, file) {
       const list = document.getElementById(listId);
@@ -391,13 +564,14 @@
     document.getElementById('add-image-btn').addEventListener('click', () => openMediaPicker('image-list', 'image'));
     document.getElementById('add-video-btn').addEventListener('click', () => openMediaPicker('video-list', 'video'));
 
-    // ── Slug generation ───────────────────────────────────────────
+    // ── Slug generation (add mode only) ───────────────────────────
     function newSlugSuffix() {
       return Math.random().toString(36).slice(2, 7);
     }
     let slugSuffix = newSlugSuffix();
 
     function refreshSlug() {
+      if (currentMode !== 'add') return;
       const base = document.getElementById('f-name').value
         .toLowerCase().trim()
         .replace(/[^a-z0-9\s-]/g, '')
@@ -421,9 +595,7 @@
       el.textContent = msg;
     }
 
-    // ── Reset form ────────────────────────────────────────────────
-    function resetForm() {
-      slugSuffix = newSlugSuffix();
+    function clearForm() {
       ['f-name', 'f-slug', 'f-description', 'f-size', 'f-price'].forEach(id => {
         document.getElementById(id).value = '';
       });
@@ -436,12 +608,48 @@
       const statusEl = document.getElementById('publish-status');
       statusEl.className = 'publish-status';
       statusEl.innerHTML = '';
-      const btn = document.getElementById('publish-btn');
-      btn.disabled = false;
-      btn.textContent = 'Publish to site';
     }
 
-    // ── Publish ───────────────────────────────────────────────────
+    // ── Reset form ────────────────────────────────────────────────
+    function resetForm() {
+      slugSuffix = newSlugSuffix();
+      currentEditProduct = null;
+      clearForm();
+      const btn = document.getElementById('publish-btn');
+      btn.disabled = false;
+      btn.textContent = currentMode === 'edit' ? btn.dataset.editLabel : btn.dataset.addLabel;
+    }
+
+    // ── Upload media files to GitHub ──────────────────────────────
+    async function uploadPendingFiles(owner, repo, branch, headers) {
+      let i = 0;
+      for (const [filename, file] of pendingFiles) {
+        i++;
+        setStatus('info', `Uploading file ${i} of ${pendingFiles.size}: ${filename}…`);
+        const arrayBuffer = await file.arrayBuffer();
+        const bytes = new Uint8Array(arrayBuffer);
+        let binary = '';
+        for (let j = 0; j < bytes.length; j += 8192) {
+          binary += String.fromCharCode(...bytes.subarray(j, j + 8192));
+        }
+        const base64 = btoa(binary);
+        const filePath = `src/images/products/${filename}`;
+        let sha;
+        const checkRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, { headers });
+        if (checkRes.ok) { sha = (await checkRes.json()).sha; }
+        const uploadRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({ message: `Add media: ${filename}`, content: base64, branch, ...(sha ? { sha } : {}) }),
+        });
+        if (!uploadRes.ok) {
+          const err = await uploadRes.json();
+          throw new Error(err.message || `Failed to upload ${filename}`);
+        }
+      }
+    }
+
+    // ── Publish / Save ────────────────────────────────────────────
     document.getElementById('publish-btn').addEventListener('click', async () => {
       const name = document.getElementById('f-name').value.trim();
       const slug = document.getElementById('f-slug').value.trim();
@@ -451,7 +659,7 @@
 
       const btn = document.getElementById('publish-btn');
       btn.disabled = true;
-      btn.textContent = 'Publishing…';
+      btn.textContent = currentMode === 'edit' ? 'Saving…' : 'Publishing…';
 
       const owner = 'robynandgold', repo = 'website', branch = 'main';
       const headers = {
@@ -461,36 +669,10 @@
       };
 
       try {
-        // 1. Upload media files to GitHub
         if (pendingFiles.size > 0) {
-          let i = 0;
-          for (const [filename, file] of pendingFiles) {
-            i++;
-            setStatus('info', `Uploading file ${i} of ${pendingFiles.size}: ${filename}…`);
-            const arrayBuffer = await file.arrayBuffer();
-            const bytes = new Uint8Array(arrayBuffer);
-            let binary = '';
-            for (let j = 0; j < bytes.length; j += 8192) {
-              binary += String.fromCharCode(...bytes.subarray(j, j + 8192));
-            }
-            const base64 = btoa(binary);
-            const filePath = `src/images/products/${filename}`;
-            let sha;
-            const checkRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, { headers });
-            if (checkRes.ok) { sha = (await checkRes.json()).sha; }
-            const uploadRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
-              method: 'PUT',
-              headers,
-              body: JSON.stringify({ message: `Add image: ${filename}`, content: base64, branch, ...(sha ? { sha } : {}) }),
-            });
-            if (!uploadRes.ok) {
-              const err = await uploadRes.json();
-              throw new Error(err.message || `Failed to upload ${filename}`);
-            }
-          }
+          await uploadPendingFiles(owner, repo, branch, headers);
         }
 
-        // 2. Build product object
         const product = {
           id: slug,
           name,
@@ -506,7 +688,6 @@
           videos:      getMediaPaths('video-list'),
         };
 
-        // 3. Fetch current products.json from GitHub
         setStatus('info', 'Fetching products from GitHub…');
         const apiPath = 'src/data/products.json';
         const fetchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, { headers });
@@ -515,39 +696,61 @@
           throw new Error(err.message || 'Failed to fetch products.json from GitHub');
         }
         const fileData = await fetchRes.json();
-        const existing = JSON.parse(atob(fileData.content.replace(/\n/g, '')));
+        const allProducts = JSON.parse(atob(fileData.content.replace(/\n/g, '')));
 
-        // 4. Check for duplicate slug
-        if (existing.find(p => p.id === product.id)) {
-          throw new Error(`A product with slug "${slug}" already exists.`);
+        let commitMessage;
+        if (currentMode === 'edit') {
+          const idx = allProducts.findIndex(p => p.id === slug);
+          if (idx === -1) throw new Error(`Product "${slug}" not found in products.json.`);
+          allProducts[idx] = product;
+          commitMessage = `Update product: ${name}`;
+        } else {
+          if (allProducts.find(p => p.id === slug)) {
+            throw new Error(`A product with slug "${slug}" already exists.`);
+          }
+          allProducts.push(product);
+          commitMessage = `Add product: ${name}`;
         }
 
-        // 5. Commit updated products.json
-        setStatus('info', 'Saving product to GitHub…');
-        existing.push(product);
-        const newContent = btoa(unescape(encodeURIComponent(JSON.stringify(existing, null, 2))));
+        setStatus('info', 'Saving to GitHub…');
+        const newContent = btoa(unescape(encodeURIComponent(JSON.stringify(allProducts, null, 2))));
         const commitRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, {
           method: 'PUT',
           headers,
-          body: JSON.stringify({ message: `Add product: ${name}`, content: newContent, sha: fileData.sha, branch }),
+          body: JSON.stringify({ message: commitMessage, content: newContent, sha: fileData.sha, branch }),
         });
         if (!commitRes.ok) {
           const err = await commitRes.json();
           throw new Error(err.message || 'Failed to commit to GitHub');
         }
 
-        // 6. Done
         pendingFiles.clear();
         const statusEl = document.getElementById('publish-status');
         statusEl.className = 'publish-status success';
-        statusEl.innerHTML = `✓ "${name}" published successfully. Vercel will redeploy in ~30 seconds.<br><br><button class="btn btn-ghost" id="add-another-btn" style="margin-top:0.5rem;">Add another product</button>`;
-        btn.textContent = 'Published!';
-        document.getElementById('add-another-btn').addEventListener('click', resetForm);
+        const actionLabel = currentMode === 'edit' ? 'updated' : 'published';
+        const nextLabel = currentMode === 'edit' ? 'Edit another product' : 'Add another product';
+        statusEl.innerHTML = `✓ "${name}" ${actionLabel} successfully. Vercel will redeploy in ~30 seconds.<br><br><button class="btn btn-ghost" id="next-action-btn" style="margin-top:0.5rem;">${nextLabel}</button>`;
+        btn.textContent = currentMode === 'edit' ? 'Saved!' : 'Published!';
+
+        if (currentMode === 'edit') {
+          document.getElementById('next-action-btn').addEventListener('click', () => {
+            currentEditProduct = null;
+            document.querySelectorAll('.product-pick-item').forEach(el => el.classList.remove('selected'));
+            clearForm();
+            btn.disabled = false;
+            btn.textContent = btn.dataset.editLabel;
+            statusEl.className = 'publish-status';
+            statusEl.innerHTML = '';
+            loadProductPicker();
+          });
+        } else {
+          document.getElementById('next-action-btn').addEventListener('click', resetForm);
+        }
 
       } catch (err) {
         setStatus('error', err.message);
         btn.disabled = false;
-        btn.textContent = 'Publish to site';
+        btn.textContent = currentMode === 'edit' ? btn.dataset.editLabel : btn.dataset.addLabel;
       }
     });
 

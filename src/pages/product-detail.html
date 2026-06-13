@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -92,10 +92,10 @@
         <span class="brand-main">Robyn &amp; Gold</span>
         <span class="brand-tagline">Vintage Jewellery</span>
       </div>
-      <div class="footer-links">
+<div class="footer-links">
         <a href="/pages/shop.html" class="footer-link">Shop</a>
-        <a href="/index.html#about" class="footer-link">About</a>
-        <a href="/index.html#ethos" class="footer-link">Ethos</a>
+        <a href="/pages/about.html" class="footer-link">Our story</a>
+        <a href="/#ethos" class="footer-link">Ethos</a>
         <a href="/pages/contact.html" class="footer-link">Contact</a>
         <a href="/pages/terms.html" class="footer-link">T&amp;Cs</a>
         <a href="/pages/returns.html" class="footer-link">Returns</a>
@@ -384,10 +384,8 @@
         message.style.color = result.success ? 'var(--accent)' : 'var(--muted)';
         
         if (result.success) {
-          btn.textContent = 'Added to cart';
-          setTimeout(() => {
-            btn.textContent = 'Add to cart';
-          }, 2000);
+          btn.textContent = 'Go to checkout';
+          btn.onclick = () => window.location.href = 'cart.html';
         }
       });
     }

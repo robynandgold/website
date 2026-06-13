@@ -260,5 +260,26 @@
       "/images/products/IMG_8552.mov",
       "/images/products/IMG_8442.mov"
     ]
+  },
+  {
+    "id": "18ct-white-gold-diamond-five-stone-ring-2715b",
+    "name": "18ct White Gold Diamond Five Stone Ring",
+    "slug": "18ct-white-gold-diamond-five-stone-ring-2715b",
+    "description": "Set with five brilliant-cut diamonds totalling approximately 1ct. Diamonds are all eye clean, bright and well-matched. Fully hallmarked. \n3.16g.",
+    "size": "UK M",
+    "price": 1350,
+    "currency": "EUR",
+    "featured": true,
+    "category": "rings",
+    "available": true,
+    "images": [
+      "/images/products/IMG_8576.jpeg",
+      "/images/products/IMG_8577.jpeg",
+      "/images/products/IMG_8574.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_8546.mov",
+      "/images/products/IMG_8440.mov"
+    ]
   }
 ]

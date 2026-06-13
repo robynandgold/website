@@ -236,14 +236,17 @@
 
         <!-- Setup -->
         <div class="setup-banner" id="setup-banner">
-          <p><strong>One-time setup:</strong> add your GitHub token to enable publishing.</p>
-          <div class="setup-row">
-            <input type="password" id="cfg-token" placeholder="GitHub personal access token (repo scope)" autocomplete="off" />
-            <button class="btn btn-ghost" id="save-token-btn" style="white-space:nowrap; padding:0.5rem 1rem; font-size:0.8rem;">Save token</button>
+          <div id="token-saved-row" style="display:none; align-items:center; gap:0.7rem;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#5a9e6f;flex-shrink:0;display:inline-block;"></span>
+            <span style="font-size:0.85rem;color:var(--muted);flex:1;">GitHub token saved</span>
+            <button class="btn btn-ghost" id="update-token-btn" style="padding:0.3rem 0.8rem;font-size:0.78rem;white-space:nowrap;">Update token</button>
           </div>
-          <div class="setup-status" id="token-status">
-            <span class="dot" id="token-dot"></span>
-            <span id="token-label">No token saved</span>
+          <div id="token-entry-row">
+            <p style="margin:0 0 0.7rem;color:var(--muted);"><strong>One-time setup:</strong> add your GitHub token to enable publishing.</p>
+            <div class="setup-row">
+              <input type="password" id="cfg-token" placeholder="GitHub personal access token (repo scope)" autocomplete="off" />
+              <button class="btn btn-ghost" id="save-token-btn" style="white-space:nowrap;padding:0.5rem 1rem;font-size:0.8rem;">Save token</button>
+            </div>
           </div>
         </div>
 
@@ -374,18 +377,16 @@
     let githubToken = localStorage.getItem(TOKEN_KEY) || '';
 
     function updateTokenStatus() {
-      const dot = document.getElementById('token-dot');
-      const label = document.getElementById('token-label');
-      const banner = document.getElementById('setup-banner');
+      const savedRow = document.getElementById('token-saved-row');
+      const entryRow = document.getElementById('token-entry-row');
       if (githubToken) {
-        dot.className = 'dot ok';
-        label.textContent = 'Token saved';
-        document.getElementById('cfg-token').value = '••••••••••••••••';
-        banner.style.display = 'none';
+        savedRow.style.display = 'flex';
+        entryRow.style.display = 'none';
       } else {
-        dot.className = 'dot';
-        label.textContent = 'No token saved';
-        banner.style.display = '';
+        savedRow.style.display = 'none';
+        entryRow.style.display = '';
+        document.getElementById('cfg-token').value = '';
+        document.getElementById('cfg-token').focus();
       }
     }
 
@@ -395,6 +396,12 @@
         githubToken = val;
         localStorage.setItem(TOKEN_KEY, val);
       }
+      updateTokenStatus();
+    });
+
+    document.getElementById('update-token-btn').addEventListener('click', () => {
+      githubToken = '';
+      localStorage.removeItem(TOKEN_KEY);
       updateTokenStatus();
     });
 

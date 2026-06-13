@@ -280,5 +280,25 @@
       "/images/products/IMG_8546.mov",
       "/images/products/IMG_8440.mov"
     ]
+  },
+  {
+    "id": "9ct-bezel-set-sapphire-and-diamond-band-raa62",
+    "name": "9ct Bezel-set Sapphire and Diamond Band",
+    "slug": "9ct-bezel-set-sapphire-and-diamond-band-raa62",
+    "description": "9ct yellow gold ring set with an oval-cut sapphire, accented by two sparkling diamonds in a classic two-tone setting (sapphire set into 9ct white gold). Fully hallmarked. 2.8g.",
+    "size": "UK N",
+    "price": 380,
+    "currency": "EUR",
+    "featured": true,
+    "category": "rings",
+    "available": true,
+    "images": [
+      "/images/products/IMG_8573.jpeg",
+      "/images/products/IMG_8571.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_8548.mov",
+      "/images/products/IMG_8443.mov"
+    ]
   }
 ]

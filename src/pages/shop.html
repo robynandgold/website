@@ -188,25 +188,22 @@
       countEl.textContent = `Showing ${products.length} ${products.length === 1 ? 'piece' : 'pieces'}`;
       
       grid.innerHTML = products.map(product => {
-        // Safe price formatting
-        const price = window.ProductsAPI?.formatPrice 
+        const price = window.ProductsAPI?.formatPrice
           ? window.ProductsAPI.formatPrice(product.price, product.currency)
           : `€${product.price}`;
-        
+
         const productLink = `product-detail.html?slug=${product.slug}`;
-          
+        const video = product.videos?.[0];
+        const image = product.images?.[0];
+        const media = video
+          ? `<video src="${video}" class="product-card-image" autoplay muted loop playsinline></video>`
+          : image
+            ? `<img src="${image}" alt="${product.name}" class="product-card-image" width="600" height="600" loading="lazy" onerror="this.style.display='none'" />`
+            : '';
+
         return `
         <article class="product-card">
-          <a href="${productLink}">
-            <img
-              src="${product.images[0]}"
-              alt="${product.name}"
-              class="product-card-image"
-              width="600" height="600"
-              loading="lazy"
-              onerror="this.src='../images/homepage.png'"
-            />
-          </a>
+          <a href="${productLink}">${media}</a>
           <div class="product-card-body">
             <h3 class="product-card-title">${product.name}</h3>
             <p class="product-card-price">${price}</p>

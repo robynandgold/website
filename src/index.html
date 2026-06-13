@@ -206,21 +206,18 @@
           const price = (window?.ProductsAPI?.formatPrice)
             ? window.ProductsAPI.formatPrice(product.price, product.currency)
             : `${product.currency || '€'}${product.price}`;
-          const image = (product.images && product.images[0]) ? product.images[0] : 'images/homepage.png';
           const slug = product.slug || product.id;
-          
+          const video = product.videos?.[0];
+          const image = product.images?.[0];
+          const media = video
+            ? `<video src="${video}" class="product-card-image" autoplay muted loop playsinline></video>`
+            : image
+              ? `<img src="${image}" alt="${product.name}" class="product-card-image" width="600" height="600" loading="lazy" onerror="this.style.display='none'" />`
+              : '';
+
           return `
             <article class="product-card">
-              <a href="pages/product-detail.html?slug=${slug}">
-                <img
-                  src="${image}"
-                  alt="${product.name}"
-                  class="product-card-image"
-                  width="600" height="600"
-                  loading="lazy"
-                  onerror="this.src='/images/homepage.png'"
-                />
-              </a>
+              <a href="pages/product-detail.html?slug=${slug}">${media}</a>
               <div class="product-card-body">
                 <h3 class="product-card-title">${product.name}</h3>
                 <p class="product-card-price">${price}</p>

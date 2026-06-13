@@ -201,5 +201,24 @@
     "videos": [
       "/images/products/IMG_8553.mov"
     ]
+  },
+  {
+    "id": "9ct-white-gold-diamond-half-eternity-ring-p0jov",
+    "name": "9ct White Gold Diamond Half-eternity Ring",
+    "slug": "9ct-white-gold-diamond-half-eternity-ring-p0jov",
+    "description": "Art deco-style band bezel- and claw-set with brilliant-cut diamonds. Fineness stamp for 9ct gold. 3.3g.",
+    "size": "UK R",
+    "price": 580,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "images": [
+      "/images/products/IMG_8560.jpeg",
+      "/images/products/IMG_8534.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_8451.mov"
+    ]
   }
 ]

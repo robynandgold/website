@@ -53,25 +53,6 @@
     "videos": []
   },
   {
-    "id": "18ct-gold-old-mine-cut-diamond-gypsy-ring",
-    "name": "18ct Gold Old Mine Cut Diamond Gypsy Ring",
-    "slug": "18ct-gold-old-mine-cut-diamond-gypsy-ring",
-    "description": "18ct yellow gold flush-set with five old mine cut diamonds. Inscribed with \"AB to GD\". Full UK hallmarks. 3g",
-    "size": "UK Size J",
-    "price": 585,
-    "currency": "EUR",
-    "featured": true,
-    "category": "rings",
-    "available": false,
-    "images": [
-      "/images/products/18ct-gold-old-mine-cut-diamond-gypsy-ring-1.jpeg",
-      "/images/products/18ct-gold-old-mine-cut-diamond-gypsy-ring-2.jpeg"
-    ],
-    "videos": [
-      "/images/products/18ct-gold-old-mine-cut-diamond-gypsy-ring-v1.mp4"
-    ]
-  },
-  {
     "id": "18ct-yellow-gold-diamond-five-stone-ring",
     "name": "18ct Yellow Gold Diamond Five Stone Ring",
     "slug": "18ct-yellow-gold-diamond-five-stone-ring",

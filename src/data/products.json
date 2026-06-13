@@ -104,5 +104,25 @@
       "/images/products/IMG_8412.jpeg"
     ],
     "videos": []
+  },
+  {
+    "id": "18ct-yellow-gold-diamond-five-stone-ring",
+    "name": "18ct Yellow Gold Diamond Five Stone Ring",
+    "slug": "18ct-yellow-gold-diamond-five-stone-ring",
+    "description": "Set with approximately 0.7ct old cut diamonds. Unmarked but tests as 18ct. Diamonds are all eye clean, bright and well-matched. 1.8g.",
+    "size": "UK L",
+    "price": 1050,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "images": [
+      "/images/products/IMG_8584.jpeg",
+      "/images/products/IMG_8581.jpeg",
+      "/images/products/IMG_8582.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_8544.mov"
+    ]
   }
 ]

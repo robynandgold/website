@@ -240,5 +240,46 @@
       "/images/products/IMG_8542.mov",
       "/images/products/IMG_8441.mov"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-sapphire-and-diamond-ring-3tl0x",
+    "name": "9ct Yellow Gold Sapphire and Diamond Ring",
+    "slug": "9ct-yellow-gold-sapphire-and-diamond-ring-3tl0x",
+    "description": "Set with a central marquise-cut sapphire flanked on each side by five princess cut sapphires within a border of round brilliant cut diamonds. Stamped 9ct for nine carat gold. Late 20th century. \n3.7g.",
+    "size": "UK K",
+    "price": 495,
+    "currency": "EUR",
+    "featured": true,
+    "category": "rings",
+    "available": true,
+    "images": [
+      "/images/products/IMG_8563.jpeg",
+      "/images/products/IMG_8561.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_8552.mov",
+      "/images/products/IMG_8442.mov"
+    ]
+  },
+  {
+    "id": "18ct-white-gold-diamond-five-stone-ring-2715b",
+    "name": "18ct White Gold Diamond Five Stone Ring",
+    "slug": "18ct-white-gold-diamond-five-stone-ring-2715b",
+    "description": "Set with five brilliant-cut diamonds totalling approximately 1ct. Diamonds are all eye clean, bright and well-matched. Fully hallmarked. \n3.16g.",
+    "size": "UK M",
+    "price": 1350,
+    "currency": "EUR",
+    "featured": true,
+    "category": "rings",
+    "available": true,
+    "images": [
+      "/images/products/IMG_8576.jpeg",
+      "/images/products/IMG_8577.jpeg",
+      "/images/products/IMG_8574.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_8546.mov",
+      "/images/products/IMG_8440.mov"
+    ]
   }
 ]

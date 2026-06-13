@@ -129,9 +129,22 @@
       border-radius: var(--radius-md); font-size: 0.88rem;
       display: none;
     }
-    .publish-status.info    { display: block; background: var(--bg-alt); color: var(--muted); border: 1px solid var(--border); }
+    .publish-status.info    { display: flex; align-items: center; gap: 0.5rem; background: var(--bg-alt); color: var(--muted); border: 1px solid var(--border); }
     .publish-status.success { display: block; background: #edf7f0; color: #3a7a52; border: 1px solid #a8d5b5; }
     .publish-status.error   { display: block; background: #fdf0f0; color: #b04040; border: 1px solid #e8b0b0; }
+    @keyframes rg-spin { to { transform: rotate(360deg); } }
+    .status-spinner {
+      width: 15px; height: 15px; flex-shrink: 0;
+      border: 2px solid currentColor; border-top-color: transparent;
+      border-radius: 50%; animation: rg-spin 0.7s linear infinite; opacity: 0.5;
+    }
+    .error-detail { margin-top: 0.6rem; font-size: 0.8rem; }
+    .error-detail summary { cursor: pointer; opacity: 0.75; }
+    .error-detail pre {
+      margin: 0.4rem 0 0; white-space: pre-wrap; word-break: break-all;
+      font-size: 0.72rem; background: rgba(176,64,64,0.06);
+      padding: 0.5rem; border-radius: 4px; max-height: 140px; overflow-y: auto;
+    }
 
     /* ── Mode tabs ──────────────────────────── */
     .mode-tabs {

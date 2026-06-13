@@ -1,23 +1,5 @@
 [
   {
-    "id": "9ct-gold-diamond-crossover-ring",
-    "name": "9ct Gold Diamond Crossover Ring",
-    "slug": "9ct-gold-diamond-crossover-ring",
-    "description": "An elegant channel-set diamond crossover ring crafted in 9ct gold. The modern design features a graceful crossover band with sparkling diamonds set in a secure channel setting. Weighing 2.8g, this piece offers both style and comfort.",
-    "size": "UK P / US 7.5",
-    "price": 275,
-    "currency": "EUR",
-    "featured": false,
-    "category": "rings",
-    "available": false,
-    "images": [
-      "/images/products/9ct-gold-diamond-crossover-ring-1.png",
-      "/images/products/9ct-gold-diamond-crossover-ring-2.png",
-      "/images/products/9ct-gold-diamond-crossover-ring-3.png"
-    ],
-    "videos": []
-  },
-  {
     "id": "18ct-yellow-gold-diamond-five-stone-ring",
     "name": "18ct Yellow Gold Diamond Five Stone Ring",
     "slug": "18ct-yellow-gold-diamond-five-stone-ring",

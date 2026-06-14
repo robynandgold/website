@@ -274,10 +274,12 @@
 
         <!-- Setup -->
         <div class="setup-banner" id="setup-banner">
-          <div id="token-saved-row" style="display:none; align-items:center; gap:0.7rem;">
+          <div id="token-saved-row" style="display:none; align-items:center; gap:0.7rem; flex-wrap:wrap;">
             <span style="width:8px;height:8px;border-radius:50%;background:#5a9e6f;flex-shrink:0;display:inline-block;"></span>
             <span style="font-size:0.85rem;color:var(--muted);flex:1;">GitHub token saved</span>
+            <button class="btn btn-ghost" id="test-token-btn" style="padding:0.3rem 0.8rem;font-size:0.78rem;white-space:nowrap;">Test token</button>
             <button class="btn btn-ghost" id="update-token-btn" style="padding:0.3rem 0.8rem;font-size:0.78rem;white-space:nowrap;">Update token</button>
+            <p id="token-test-status" style="width:100%;margin:0.4rem 0 0;font-size:0.82rem;color:var(--muted);"></p>
           </div>
           <div id="token-entry-row">
             <p style="margin:0 0 0.7rem;color:var(--muted);"><strong>One-time setup:</strong> add your GitHub token to enable publishing.</p>
@@ -415,7 +417,14 @@
 
     // ── GitHub token ─────────────────────────────────────────────
     const TOKEN_KEY = 'rg_github_token';
-    let githubToken = localStorage.getItem(TOKEN_KEY) || '';
+    // Tokens are contiguous ASCII; strip any whitespace or invisible chars a
+    // mobile paste may inject (non-breaking / zero-width spaces, newlines).
+    function sanitizeToken(t) { return (t || '').replace(/\s+/g, ''); }
+    let githubToken = sanitizeToken(localStorage.getItem(TOKEN_KEY) || '');
+    // Repair a previously stored token that was saved with stray characters
+    if (githubToken && githubToken !== localStorage.getItem(TOKEN_KEY)) {
+      localStorage.setItem(TOKEN_KEY, githubToken);
+    }
 
     function updateTokenStatus() {
       const savedRow = document.getElementById('token-saved-row');
@@ -432,7 +441,7 @@
     }
 
     document.getElementById('save-token-btn').addEventListener('click', () => {
-      const val = document.getElementById('cfg-token').value.trim();
+      const val = sanitizeToken(document.getElementById('cfg-token').value);
       if (val && !val.startsWith('•')) {
         githubToken = val;
         localStorage.setItem(TOKEN_KEY, val);
@@ -443,7 +452,48 @@
     document.getElementById('update-token-btn').addEventListener('click', () => {
       githubToken = '';
       localStorage.removeItem(TOKEN_KEY);
+      const statusEl = document.getElementById('token-test-status');
+      if (statusEl) statusEl.textContent = '';
       updateTokenStatus();
+    });
+
+    // Verify the saved token directly against GitHub
+    document.getElementById('test-token-btn').addEventListener('click', async () => {
+      const statusEl = document.getElementById('token-test-status');
+      statusEl.style.color = 'var(--muted)';
+      statusEl.textContent = 'Testing token…';
+      try {
+        const res = await fetch('https://api.github.com/repos/robynandgold/website', {
+          headers: { 'Authorization': `Bearer ${githubToken}`, 'Accept': 'application/vnd.github.v3+json' },
+          cache: 'no-store',
+        });
+        if (res.status === 401) {
+          statusEl.style.color = '#b04040';
+          statusEl.textContent = '✗ Invalid token (Bad credentials). Generate a new one and click “Update token”.';
+          return;
+        }
+        if (res.status === 404 || res.status === 403) {
+          statusEl.style.color = '#b04040';
+          statusEl.textContent = '✗ Token is valid but has no access to robynandgold/website. Give it Contents: Read and write (or the repo scope).';
+          return;
+        }
+        if (!res.ok) {
+          statusEl.style.color = '#b04040';
+          statusEl.textContent = `✗ Unexpected error (${res.status}). Try again or regenerate the token.`;
+          return;
+        }
+        const repo = await res.json();
+        if (repo.permissions && repo.permissions.push) {
+          statusEl.style.color = '#5a9e6f';
+          statusEl.textContent = '✓ Token valid with write access — you can publish.';
+        } else {
+          statusEl.style.color = '#b04040';
+          statusEl.textContent = '✗ Token works but lacks write access. Give it Contents: Read and write (or the repo scope).';
+        }
+      } catch (e) {
+        statusEl.style.color = '#b04040';
+        statusEl.textContent = '✗ Network error while testing. Check your connection and try again.';
+      }
     });
 
     // ── Mode switching ────────────────────────────────────────────

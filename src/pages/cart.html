@@ -116,6 +116,9 @@
     <button class="btn btn-primary" id="mcb-checkout-button">Checkout</button>
   </div>
 
+  <!-- Floating shop CTA — shown only when the bag is empty (mobile) -->
+  <a href="/pages/shop.html" class="btn btn-primary mobile-shop-cta" id="cart-shop-cta" hidden>Shop the collection</a>
+
   <footer class="site-footer">
     <div class="container footer-inner">
       <div class="footer-brand">
@@ -151,6 +154,7 @@
       const subtotalEl = document.getElementById('cart-subtotal');
       const mcbBar = document.getElementById('mobile-checkout-bar');
       const mcbSubtotal = document.getElementById('mcb-subtotal');
+      const shopCta = document.getElementById('cart-shop-cta');
       const checkoutBtn = document.getElementById('checkout-button');
 
       const count = cart ? cart.length : 0;
@@ -162,6 +166,7 @@
         cartLayout.hidden = true;
         continueEl.hidden = true;
         mcbBar.hidden = true;
+        shopCta.hidden = false;   // floating "Shop the collection" (mobile, empty only)
         subtotalEl.textContent = window.ProductsAPI.formatPrice(0, 'EUR');
         checkoutBtn.disabled = true;
         return;
@@ -171,6 +176,7 @@
       cartLayout.hidden = false;
       continueEl.hidden = false;
       mcbBar.hidden = false;
+      shopCta.hidden = true;    // hide floating CTA when the bag has items
       checkoutBtn.disabled = false;
 
       // Render each cart item

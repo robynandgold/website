@@ -1436,6 +1436,10 @@ a {
     box-shadow: 0 6px 22px rgba(28, 20, 12, 0.22);
     padding: 0.8rem 1.7rem;
   }
+  .mobile-shop-cta[hidden] { display: none; }
   /* Room so the floating button never hides the footer's last line */
   .site-footer { padding-bottom: 5rem; }
+
+  /* Empty cart on mobile uses the floating CTA, so drop the inline button */
+  body.cart-page .cart-empty .btn { display: none; }
 }

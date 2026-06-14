@@ -792,49 +792,61 @@
       }
       const { sha: blobSha } = await blobRes.json();
 
-      setStatus('info', `Uploading ${filename} — creating commit…`, null, 0.85);
-      const branchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/branches/${branch}`, { headers });
-      if (!branchRes.ok) {
-        const body = await branchRes.json().catch(() => ({}));
-        const err = new Error(`Get branch failed (${branchRes.status}): ${body.message || ''}`);
-        err.detail = JSON.stringify(body, null, 2);
-        throw err;
-      }
-      const branchData = await branchRes.json();
-      const currentCommitSha = branchData.commit.sha;
-      const currentTreeSha = branchData.commit.commit.tree.sha;
+      // Build the commit on the latest branch tip and move the ref. If main
+      // advanced in the meantime GitHub rejects the move as "not a fast
+      // forward" (422); re-read the tip and rebuild on top, then retry.
+      const maxAttempts = 4;
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        setStatus('info', `Uploading ${filename} — creating commit…`, null, 0.85);
+        const branchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/branches/${branch}`, { headers });
+        if (!branchRes.ok) {
+          const body = await branchRes.json().catch(() => ({}));
+          const err = new Error(`Get branch failed (${branchRes.status}): ${body.message || ''}`);
+          err.detail = JSON.stringify(body, null, 2);
+          throw err;
+        }
+        const branchData = await branchRes.json();
+        const currentCommitSha = branchData.commit.sha;
+        const currentTreeSha = branchData.commit.commit.tree.sha;
 
-      const treeRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees`, {
-        method: 'POST', headers,
-        body: JSON.stringify({ base_tree: currentTreeSha, tree: [{ path: filePath, mode: '100644', type: 'blob', sha: blobSha }] }),
-      });
-      if (!treeRes.ok) {
-        const body = await treeRes.json().catch(() => ({}));
-        const err = new Error(`Create tree failed (${treeRes.status}): ${body.message || ''}`);
-        err.detail = JSON.stringify(body, null, 2);
-        throw err;
-      }
-      const { sha: newTreeSha } = await treeRes.json();
+        const treeRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees`, {
+          method: 'POST', headers,
+          body: JSON.stringify({ base_tree: currentTreeSha, tree: [{ path: filePath, mode: '100644', type: 'blob', sha: blobSha }] }),
+        });
+        if (!treeRes.ok) {
+          const body = await treeRes.json().catch(() => ({}));
+          const err = new Error(`Create tree failed (${treeRes.status}): ${body.message || ''}`);
+          err.detail = JSON.stringify(body, null, 2);
+          throw err;
+        }
+        const { sha: newTreeSha } = await treeRes.json();
 
-      setStatus('info', `Uploading ${filename} — finalising…`, null, 0.95);
-      const newCommitRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/commits`, {
-        method: 'POST', headers,
-        body: JSON.stringify({ message: `Add media: ${filename}`, tree: newTreeSha, parents: [currentCommitSha] }),
-      });
-      if (!newCommitRes.ok) {
-        const body = await newCommitRes.json().catch(() => ({}));
-        const err = new Error(`Create commit failed (${newCommitRes.status}): ${body.message || ''}`);
-        err.detail = JSON.stringify(body, null, 2);
-        throw err;
-      }
-      const { sha: newCommitSha } = await newCommitRes.json();
+        setStatus('info', `Uploading ${filename} — finalising…`, null, 0.95);
+        const newCommitRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/commits`, {
+          method: 'POST', headers,
+          body: JSON.stringify({ message: `Add media: ${filename}`, tree: newTreeSha, parents: [currentCommitSha] }),
+        });
+        if (!newCommitRes.ok) {
+          const body = await newCommitRes.json().catch(() => ({}));
+          const err = new Error(`Create commit failed (${newCommitRes.status}): ${body.message || ''}`);
+          err.detail = JSON.stringify(body, null, 2);
+          throw err;
+        }
+        const { sha: newCommitSha } = await newCommitRes.json();
 
-      const updateRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${branch}`, {
-        method: 'PATCH', headers,
-        body: JSON.stringify({ sha: newCommitSha }),
-      });
-      if (!updateRes.ok) {
+        const updateRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${branch}`, {
+          method: 'PATCH', headers,
+          body: JSON.stringify({ sha: newCommitSha }),
+        });
+        if (updateRes.ok) return;
+
         const body = await updateRes.json().catch(() => ({}));
+        const notFastForward = updateRes.status === 422 || updateRes.status === 409;
+        if (notFastForward && attempt < maxAttempts) {
+          setStatus('info', `Branch moved — retrying ${filename}…`);
+          await new Promise(r => setTimeout(r, 400 * attempt));
+          continue;
+        }
         const err = new Error(`Update branch failed (${updateRes.status}): ${body.message || ''}`);
         err.detail = JSON.stringify(body, null, 2);
         throw err;

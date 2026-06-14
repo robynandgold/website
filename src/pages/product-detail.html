@@ -238,9 +238,10 @@
       const slidesHTML = slides.map((item, index) => {
         const activeClass = index === 0 ? ' active' : '';
         if (item.type === 'video') {
+          const poster = currentProduct.images?.[0];
           return `
             <div class="carousel-slide${activeClass}" data-index="${index}">
-              <video src="${item.src}" autoplay muted loop playsinline class="carousel-video"></video>
+              <video src="${item.src}" autoplay muted loop playsinline preload="metadata" class="carousel-video" ${poster ? `poster="${poster}"` : ''}></video>
             </div>`;
         }
         return `
@@ -326,7 +327,7 @@
         const video = product.videos?.[0];
         const image = product.images?.[0];
         const media = video
-          ? `<video src="${video}" class="product-card-image" muted loop playsinline preload="metadata"></video>`
+          ? `<video src="${video}" class="product-card-image" muted loop playsinline preload="metadata" ${image ? `poster="${image}"` : ''}></video>`
           : image
             ? `<img src="${image}" alt="${product.name}" class="product-card-image" width="600" height="600" loading="lazy" onerror="this.style.display='none'" />`
             : '';

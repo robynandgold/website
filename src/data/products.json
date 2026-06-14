@@ -168,7 +168,7 @@
     "size": "UK M",
     "price": 1350,
     "currency": "EUR",
-    "featured": true,
+    "featured": false,
     "category": "rings",
     "available": true,
     "images": [

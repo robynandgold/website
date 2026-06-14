@@ -32,6 +32,13 @@ body {
   padding: 0;
 }
 
+/* Offset in-page anchor jumps so the sticky header doesn't cover the target */
+:target,
+section[id],
+[id] {
+  scroll-margin-top: 130px;
+}
+
 body.page {
   font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   background: radial-gradient(circle at top left, #fdfbf8 0, #f7f3ec 38%, #f3eee6 100%);

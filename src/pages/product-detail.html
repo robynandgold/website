@@ -326,7 +326,7 @@
         const video = product.videos?.[0];
         const image = product.images?.[0];
         const media = video
-          ? `<video src="${video}" class="product-card-image" autoplay muted loop playsinline preload="auto"></video>`
+          ? `<video src="${video}" class="product-card-image" muted loop playsinline preload="metadata"></video>`
           : image
             ? `<img src="${image}" alt="${product.name}" class="product-card-image" width="600" height="600" loading="lazy" onerror="this.style.display='none'" />`
             : '';

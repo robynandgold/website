@@ -98,14 +98,55 @@ function formatPrice(price, currency = 'EUR') {
   return formatter.format(price);
 }
 
+/**
+ * Play product-card videos only while they're in view, pausing them
+ * otherwise. Saves mobile data/CPU vs. autoplaying everything at once.
+ * Call after rendering cards into `container`. Falls back to plain
+ * autoplay if IntersectionObserver isn't available.
+ */
+let _videoObserver = null;
+function lazyPlayVideos(container) {
+  const scope = container || document;
+  const videos = scope.querySelectorAll('video');
+  if (!videos.length) return;
+
+  if (!('IntersectionObserver' in window)) {
+    videos.forEach(v => { v.muted = true; const p = v.play(); if (p) p.catch(() => {}); });
+    return;
+  }
+
+  if (!_videoObserver) {
+    _videoObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const v = entry.target;
+        if (entry.isIntersecting) {
+          v.muted = true;
+          const p = v.play();
+          if (p) p.catch(() => {});
+        } else {
+          v.pause();
+        }
+      });
+    }, { threshold: 0.25 });
+  }
+
+  videos.forEach(v => {
+    v.muted = true;
+    v.setAttribute('playsinline', '');
+    _videoObserver.observe(v);
+  });
+}
+
 // Export functions for use in other files
 if (typeof window !== 'undefined') {
+  window.lazyPlayVideos = lazyPlayVideos;
   window.ProductsAPI = {
     loadProducts,
     getAllProducts,
     getFeaturedProducts,
     getProductBySlug,
     getProductById,
-    formatPrice
+    formatPrice,
+    lazyPlayVideos
   };
 }

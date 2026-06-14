@@ -1,4 +1,55 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const fs = require('fs').promises;
+const path = require('path');
+
+const GH_OWNER = 'robynandgold';
+const GH_REPO = 'website';
+const PRODUCTS_PATH = 'src/data/products.json';
+
+/**
+ * Load the current product catalogue, preferring the freshest source so a
+ * just-sold item is caught even before the site finishes rebuilding.
+ * Order: GitHub Contents API (authenticated, no CDN cache) → raw GitHub
+ * (may be briefly cached) → the file bundled with this deploy.
+ */
+async function getCurrentProducts() {
+  const token = process.env.GITHUB_TOKEN;
+
+  if (token) {
+    try {
+      const resp = await fetch(
+        `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${PRODUCTS_PATH}?ref=main`,
+        { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github.v3+json' } }
+      );
+      if (resp.ok) {
+        const data = await resp.json();
+        return JSON.parse(Buffer.from(data.content, 'base64').toString('utf8'));
+      }
+      console.error('[checkout] GitHub contents fetch failed:', resp.status);
+    } catch (err) {
+      console.error('[checkout] GitHub contents fetch error:', err);
+    }
+  }
+
+  try {
+    const resp = await fetch(
+      `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/${PRODUCTS_PATH}`,
+      { headers: { 'Cache-Control': 'no-cache' } }
+    );
+    if (resp.ok) return await resp.json();
+    console.error('[checkout] raw GitHub fetch failed:', resp.status);
+  } catch (err) {
+    console.error('[checkout] raw GitHub fetch error:', err);
+  }
+
+  try {
+    const filePath = path.join(process.cwd(), PRODUCTS_PATH);
+    return JSON.parse(await fs.readFile(filePath, 'utf8'));
+  } catch (err) {
+    console.error('[checkout] local products read error:', err);
+    return null;
+  }
+}
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -18,6 +69,31 @@ module.exports = async (req, res) => {
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: 'No items provided' });
+    }
+
+    // Re-check availability before taking payment. This shrinks (but does not
+    // fully eliminate) the window where two people could buy the same unique
+    // piece. If the catalogue can't be loaded we fail open so a transient
+    // outage doesn't block every sale.
+    const products = await getCurrentProducts();
+    if (products) {
+      const byId = new Map(products.map(p => [String(p.id), p]));
+      const unavailable = items
+        .filter(item => {
+          const product = byId.get(String(item.id));
+          return !product || product.available === false;
+        })
+        .map(item => ({ id: item.id, name: item.name }));
+
+      if (unavailable.length > 0) {
+        console.log('[checkout] Rejected — unavailable items:', unavailable.map(u => u.id).join(', '));
+        return res.status(409).json({
+          error: 'Some items are no longer available',
+          unavailable
+        });
+      }
+    } else {
+      console.warn('[checkout] Could not verify availability; proceeding (fail open)');
     }
 
     const line_items = items.map(item => ({

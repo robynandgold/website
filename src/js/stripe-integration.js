@@ -49,6 +49,30 @@ async function initiateCheckout() {
       })
     });
 
+    // An item sold out between adding to cart and checkout
+    if (response.status === 409) {
+      const data = await response.json().catch(() => ({}));
+      const unavailable = data.unavailable || [];
+      unavailable.forEach(u => { if (u.id) window.CartAPI.removeFromCart(u.id); });
+
+      const names = unavailable.map(u => u.name).filter(Boolean).join(', ');
+      const plural = unavailable.length > 1;
+      showError(
+        names
+          ? `Sorry — ${names} ${plural ? 'are' : 'is'} no longer available and ${plural ? 'have' : 'has'} been removed from your cart.`
+          : 'Sorry — one or more items in your cart are no longer available.'
+      );
+
+      if (checkoutButton) {
+        checkoutButton.disabled = false;
+        checkoutButton.textContent = 'Proceed to secure checkout';
+      }
+
+      // Refresh so the cart view reflects the removed item(s)
+      setTimeout(() => window.location.reload(), 2500);
+      return;
+    }
+
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.error || 'Failed to create checkout session');

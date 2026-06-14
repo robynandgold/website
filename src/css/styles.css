@@ -1209,4 +1209,44 @@ a {
   /* No arc in new design — keep absolute positioning for the
      hamburger dropdown (.nav-left) and cart (.nav-right). */
   .nav { justify-content: center; }
+
+  /* Shorter hero so the featured rings peek above the fold on landing */
+  .hero {
+    padding: 2rem 0 2.25rem;
+  }
+  .hero-inner {
+    gap: 1.4rem;
+  }
+  .hero-copy h1 {
+    font-size: clamp(1.85rem, 7vw, 2.3rem);
+    margin-bottom: 0.8rem;
+  }
+  .hero-actions {
+    margin-top: 1.2rem;
+  }
+  /* Crop the hero image shorter on phones (overrides the inline height:auto) */
+  .hero-image-panel img {
+    height: 34vh !important;
+    object-fit: cover;
+  }
+}
+
+/* =========================
+   Floating mobile "Shop" CTA
+   ========================= */
+.mobile-shop-cta { display: none; }
+
+@media (max-width: 640px) {
+  .mobile-shop-cta {
+    display: inline-flex;
+    position: fixed;
+    left: 50%;
+    bottom: 1rem;
+    transform: translateX(-50%);
+    z-index: 90;
+    box-shadow: 0 6px 22px rgba(28, 20, 12, 0.22);
+    padding: 0.8rem 1.7rem;
+  }
+  /* Room so the floating button never hides the footer's last line */
+  .site-footer { padding-bottom: 5rem; }
 }

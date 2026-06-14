@@ -24,7 +24,7 @@
   <script>window.plausible=window.plausible||function(){(window.plausible.q=window.plausible.q||[]).push(arguments)};</script>
 
 </head>
-<body class="page">
+<body class="page cart-page">
   <header class="site-header">
     <div class="container header-inner">
       <button class="nav-toggle" type="button" aria-label="Toggle menu" aria-controls="primary-nav" aria-expanded="false">
@@ -58,16 +58,22 @@
 
   <main>
     <section class="section section--compact">
-      <div class="container cart-layout">
+      <div class="container">
+        <div class="cart-heading">
+          <h1>Your bag</h1>
+          <span class="cart-item-count" id="cart-item-count"></span>
+        </div>
+      </div>
+
+      <div class="container cart-layout" id="cart-layout">
         <div class="cart-items-wrapper">
           <div id="cart-items" class="cart-items">
             <!-- JS renders line items here -->
           </div>
 
-          <p class="cart-empty-message" id="cart-empty-message" hidden>
-            Your cart is currently empty.  
-            <a href="/pages/shop.html" class="breadcrumb-link">Browse the collection</a>
-          </p>
+          <div class="cart-continue" id="cart-continue" hidden>
+            <a href="/pages/shop.html">← Continue shopping</a>
+          </div>
         </div>
 
         <aside class="cart-summary" aria-label="Order summary">
@@ -89,8 +95,26 @@
           </p>
         </aside>
       </div>
+
+      <!-- Empty state -->
+      <div class="container">
+        <div class="cart-empty" id="cart-empty" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1.1 11a1.3 1.3 0 0 1-1.3 1.2H7.4A1.3 1.3 0 0 1 6.1 19Z"/><path d="M9 8V6.6a3 3 0 0 1 6 0V8"/></svg>
+          <p class="cart-empty-message">Your bag is empty.</p>
+          <a href="/pages/shop.html" class="btn btn-primary">Browse the collection</a>
+        </div>
+      </div>
     </section>
   </main>
+
+  <!-- Sticky mobile checkout bar -->
+  <div class="mobile-checkout-bar" id="mobile-checkout-bar" hidden>
+    <div class="mcb-subtotal">
+      <small>Subtotal</small>
+      <strong id="mcb-subtotal">€0</strong>
+    </div>
+    <button class="btn btn-primary" id="mcb-checkout-button">Checkout</button>
+  </div>
 
   <footer class="site-footer">
     <div class="container footer-inner">
@@ -120,21 +144,35 @@
     function renderCart() {
       const cart = window.CartAPI.getCart();
       const itemsContainer = document.getElementById('cart-items');
-      const emptyMessage = document.getElementById('cart-empty-message');
+      const emptyState = document.getElementById('cart-empty');
+      const cartLayout = document.getElementById('cart-layout');
+      const continueEl = document.getElementById('cart-continue');
+      const countEl = document.getElementById('cart-item-count');
       const subtotalEl = document.getElementById('cart-subtotal');
+      const mcbBar = document.getElementById('mobile-checkout-bar');
+      const mcbSubtotal = document.getElementById('mcb-subtotal');
       const checkoutBtn = document.getElementById('checkout-button');
-      
+
+      const count = cart ? cart.length : 0;
+      countEl.textContent = count ? `${count} ${count === 1 ? 'piece' : 'pieces'}` : '';
+
       if (!cart || cart.length === 0) {
         itemsContainer.innerHTML = '';
-        emptyMessage.hidden = false;
+        emptyState.hidden = false;
+        cartLayout.hidden = true;
+        continueEl.hidden = true;
+        mcbBar.hidden = true;
         subtotalEl.textContent = window.ProductsAPI.formatPrice(0, 'EUR');
         checkoutBtn.disabled = true;
         return;
       }
-      
-      emptyMessage.hidden = true;
+
+      emptyState.hidden = true;
+      cartLayout.hidden = false;
+      continueEl.hidden = false;
+      mcbBar.hidden = false;
       checkoutBtn.disabled = false;
-      
+
       // Render each cart item
       itemsContainer.innerHTML = cart.map(item => `
         <div class="cart-item" data-id="${item.id}">
@@ -159,10 +197,12 @@
         </div>
       `).join('');
       
-      // Update subtotal
+      // Update subtotal (desktop summary + sticky mobile bar)
       const total = window.CartAPI.getCartTotal();
-      subtotalEl.textContent = window.ProductsAPI.formatPrice(total, 'EUR');
-      
+      const formatted = window.ProductsAPI.formatPrice(total, 'EUR');
+      subtotalEl.textContent = formatted;
+      mcbSubtotal.textContent = formatted;
+
       // Add remove button listeners
       document.querySelectorAll('.cart-item-remove').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -173,8 +213,11 @@
       });
     }
     
-    // Setup checkout button
+    // Setup checkout buttons (desktop summary + sticky mobile bar)
     document.getElementById('checkout-button').addEventListener('click', () => {
+      window.StripeCheckout.initiateCheckout();
+    });
+    document.getElementById('mcb-checkout-button').addEventListener('click', () => {
       window.StripeCheckout.initiateCheckout();
     });
     

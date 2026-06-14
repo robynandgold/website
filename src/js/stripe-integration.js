@@ -21,6 +21,12 @@ async function initiateCheckout() {
     return;
   }
 
+  // Track checkout intent (cart abandonment funnel: Add to cart → Begin checkout → Purchase)
+  trackEvent('Begin checkout', {
+    items: cartItems.length,
+    value: window.CartAPI.getCartTotal()
+  });
+
   // Show loading state
   const checkoutButton = document.getElementById('checkout-button');
   if (checkoutButton) {

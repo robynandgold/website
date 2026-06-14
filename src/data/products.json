@@ -281,5 +281,24 @@
     "videos": [
       "/images/products/IMG_8117.mov"
     ]
+  },
+  {
+    "id": "18ct-yellow-gold-diamond-gypsy-ring-5qlwm",
+    "name": "18ct Yellow Gold Diamond Gypsy Ring",
+    "slug": "18ct-yellow-gold-diamond-gypsy-ring-5qlwm",
+    "description": "18ct yellow gold band star-set with a diamond. The band features openwork scroll detailing to the shoulders. There are no hallmarks but the piece tests as 18ct gold. Hallmarks may have been removed while sizing at some point during its lifetime. 3.9g.\n\nPlease note that size is listed as UK O and a half/P as it falls just between the two on a sizing mandrel.",
+    "size": "UK O.5/P",
+    "price": 710,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "images": [
+      "/images/products/IMG_8021.jpeg",
+      "/images/products/IMG_8018.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_8116.mov"
+    ]
   }
 ]

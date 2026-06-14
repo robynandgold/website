@@ -456,6 +456,15 @@ a {
   box-shadow: var(--shadow-soft);
 }
 
+/* Whole card is one clickable link */
+.product-card-link-wrap {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+}
+
 .product-card-image {
   width: 100%;
   height: 240px;
@@ -492,7 +501,12 @@ a {
   padding-bottom: 0.1rem;
 }
 
-.product-card-link:hover {
+.product-card-link {
+  display: inline-block;
+}
+
+.product-card-link:hover,
+.product-card:hover .product-card-link {
   border-color: var(--ink);
 }
 

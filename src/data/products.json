@@ -48,7 +48,7 @@
     "size": "UK J",
     "price": 825,
     "currency": "EUR",
-    "featured": true,
+    "featured": false,
     "category": "rings",
     "available": true,
     "images": [

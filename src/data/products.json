@@ -28,7 +28,7 @@
     "size": "UK R",
     "price": 925,
     "currency": "EUR",
-    "featured": true,
+    "featured": false,
     "category": "rings",
     "available": true,
     "images": [

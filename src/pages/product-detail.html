@@ -326,7 +326,7 @@
         const video = product.videos?.[0];
         const image = product.images?.[0];
         const media = video
-          ? `<video src="${video}" class="product-card-image" autoplay muted loop playsinline></video>`
+          ? `<video src="${video}" class="product-card-image" autoplay muted loop playsinline preload="auto"></video>`
           : image
             ? `<img src="${image}" alt="${product.name}" class="product-card-image" width="600" height="600" loading="lazy" onerror="this.style.display='none'" />`
             : '';
@@ -342,6 +342,13 @@
             </a>
           </article>`;
       }).join('');
+
+      // Force muted autoplay for JS-injected videos (mobile Safari needs the nudge)
+      grid.querySelectorAll('video').forEach(v => {
+        v.muted = true;
+        const p = v.play();
+        if (p) p.catch(() => {});
+      });
 
       section.hidden = false;
     }

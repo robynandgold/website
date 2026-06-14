@@ -487,7 +487,7 @@
         const headers = githubToken
           ? { 'Authorization': `Bearer ${githubToken}`, 'Accept': 'application/vnd.github.v3+json' }
           : { 'Accept': 'application/vnd.github.v3+json' };
-        const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/src/data/products.json`, { headers });
+        const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/src/data/products.json`, { headers, cache: 'no-store' });
         if (!res.ok) throw new Error('Failed to load products');
         const fileData = await res.json();
         const products = JSON.parse(atob(fileData.content.replace(/\n/g, '')));
@@ -536,7 +536,7 @@
 
       try {
         const apiPath = 'src/data/products.json';
-        const fetchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, { headers });
+        const fetchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, { headers, cache: 'no-store' });
         if (!fetchRes.ok) throw new Error('Failed to fetch products.json');
         const fileData = await fetchRes.json();
         const allProducts = JSON.parse(atob(fileData.content.replace(/\n/g, '')));
@@ -798,7 +798,7 @@
       const maxAttempts = 4;
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         setStatus('info', `Uploading ${filename} — creating commit…`, null, 0.85);
-        const branchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/branches/${branch}`, { headers });
+        const branchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/branches/${branch}`, { headers, cache: 'no-store' });
         if (!branchRes.ok) {
           const body = await branchRes.json().catch(() => ({}));
           const err = new Error(`Get branch failed (${branchRes.status}): ${body.message || ''}`);
@@ -874,7 +874,7 @@
           await uploadFileViaGitDataAPI(owner, repo, branch, headers, filePath, base64, filename);
         } else {
           let sha;
-          const checkRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, { headers });
+          const checkRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, { headers, cache: 'no-store' });
           if (checkRes.ok) { sha = (await checkRes.json()).sha; }
           const uploadRes = await xhrFetch('PUT',
             `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
@@ -896,10 +896,11 @@
     // ── Commit products.json with automatic SHA-conflict retry ────
     async function commitProductsJson(owner, repo, branch, headers, product, commitMessage) {
       const apiPath = 'src/data/products.json';
+      const maxAttempts = 4;
 
-      for (let attempt = 1; attempt <= 2; attempt++) {
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         setStatus('info', attempt === 1 ? 'Fetching products from GitHub…' : 'Retrying after conflict…');
-        const fetchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, { headers });
+        const fetchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, { headers, cache: 'no-store' });
         if (!fetchRes.ok) {
           const body = await fetchRes.json().catch(() => ({}));
           console.error('Fetch products.json failed', fetchRes.status, body);
@@ -934,7 +935,10 @@
         const body = await commitRes.json().catch(() => ({}));
         console.error('Commit failed', commitRes.status, body);
 
-        if (commitRes.status === 409 && attempt === 1) continue; // SHA conflict — retry with fresh fetch
+        if (commitRes.status === 409 && attempt < maxAttempts) {
+          await new Promise(r => setTimeout(r, 400 * attempt)); // SHA conflict — back off then re-fetch
+          continue;
+        }
         const commitErr = new Error(`Save failed (${commitRes.status}): ${body.message || 'could not commit to GitHub'}`);
         commitErr.detail = JSON.stringify(body, null, 2);
         throw commitErr;

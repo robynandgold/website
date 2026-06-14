@@ -776,14 +776,44 @@
       });
     }
 
+    // Retry a network operation on transient connection failures (Safari's
+    // "Load failed", Chrome's "Failed to fetch", or an XHR network error).
+    // HTTP error statuses (409/422/etc.) are NOT retried here — callers handle
+    // those — because fetch/xhrFetch resolve normally for them.
+    function isTransientNetworkError(err) {
+      return err instanceof TypeError
+        || /network error|load failed|failed to fetch|networkerror/i.test(err && err.message || '');
+    }
+
+    async function withRetry(fn, label) {
+      const attempts = 4;
+      let lastErr;
+      for (let attempt = 1; attempt <= attempts; attempt++) {
+        try {
+          return await fn();
+        } catch (err) {
+          lastErr = err;
+          if (!isTransientNetworkError(err) || attempt === attempts) throw err;
+          setStatus('info', `Connection dropped — retrying ${label} (attempt ${attempt + 1} of ${attempts})…`);
+          await new Promise(r => setTimeout(r, 800 * attempt));
+        }
+      }
+      throw lastErr;
+    }
+
+    // fetch() that retries only on transient network failures
+    function netFetch(url, options, label) {
+      return withRetry(() => fetch(url, options), label || 'request');
+    }
+
     // ── Upload large file via Git Data API (bypasses Contents API body-size limit) ──
     async function uploadFileViaGitDataAPI(owner, repo, branch, headers, filePath, base64, filename) {
-      const blobRes = await xhrFetch('POST',
+      const blobRes = await withRetry(() => xhrFetch('POST',
         `https://api.github.com/repos/${owner}/${repo}/git/blobs`,
         headers,
         JSON.stringify({ content: base64, encoding: 'base64' }),
         pct => setStatus('info', `Uploading ${filename}…`, null, pct * 0.8)
-      );
+      ), filename);
       if (!blobRes.ok) {
         const body = await blobRes.json().catch(() => ({}));
         const err = new Error(`Blob upload failed (${blobRes.status}): ${body.message || filename}`);
@@ -798,7 +828,7 @@
       const maxAttempts = 4;
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         setStatus('info', `Uploading ${filename} — creating commit…`, null, 0.85);
-        const branchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/branches/${branch}`, { headers, cache: 'no-store' });
+        const branchRes = await netFetch(`https://api.github.com/repos/${owner}/${repo}/branches/${branch}`, { headers, cache: 'no-store' }, 'branch lookup');
         if (!branchRes.ok) {
           const body = await branchRes.json().catch(() => ({}));
           const err = new Error(`Get branch failed (${branchRes.status}): ${body.message || ''}`);
@@ -809,10 +839,10 @@
         const currentCommitSha = branchData.commit.sha;
         const currentTreeSha = branchData.commit.commit.tree.sha;
 
-        const treeRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees`, {
+        const treeRes = await netFetch(`https://api.github.com/repos/${owner}/${repo}/git/trees`, {
           method: 'POST', headers,
           body: JSON.stringify({ base_tree: currentTreeSha, tree: [{ path: filePath, mode: '100644', type: 'blob', sha: blobSha }] }),
-        });
+        }, 'commit');
         if (!treeRes.ok) {
           const body = await treeRes.json().catch(() => ({}));
           const err = new Error(`Create tree failed (${treeRes.status}): ${body.message || ''}`);
@@ -822,10 +852,10 @@
         const { sha: newTreeSha } = await treeRes.json();
 
         setStatus('info', `Uploading ${filename} — finalising…`, null, 0.95);
-        const newCommitRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/commits`, {
+        const newCommitRes = await netFetch(`https://api.github.com/repos/${owner}/${repo}/git/commits`, {
           method: 'POST', headers,
           body: JSON.stringify({ message: `Add media: ${filename}`, tree: newTreeSha, parents: [currentCommitSha] }),
-        });
+        }, 'commit');
         if (!newCommitRes.ok) {
           const body = await newCommitRes.json().catch(() => ({}));
           const err = new Error(`Create commit failed (${newCommitRes.status}): ${body.message || ''}`);
@@ -834,10 +864,10 @@
         }
         const { sha: newCommitSha } = await newCommitRes.json();
 
-        const updateRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${branch}`, {
+        const updateRes = await netFetch(`https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${branch}`, {
           method: 'PATCH', headers,
           body: JSON.stringify({ sha: newCommitSha }),
-        });
+        }, 'branch update');
         if (updateRes.ok) return;
 
         const body = await updateRes.json().catch(() => ({}));
@@ -874,14 +904,14 @@
           await uploadFileViaGitDataAPI(owner, repo, branch, headers, filePath, base64, filename);
         } else {
           let sha;
-          const checkRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, { headers, cache: 'no-store' });
+          const checkRes = await netFetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, { headers, cache: 'no-store' }, filename);
           if (checkRes.ok) { sha = (await checkRes.json()).sha; }
-          const uploadRes = await xhrFetch('PUT',
+          const uploadRes = await withRetry(() => xhrFetch('PUT',
             `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
             headers,
             JSON.stringify({ message: `Add media: ${filename}`, content: base64, branch, ...(sha ? { sha } : {}) }),
             pct => setStatus('info', `Uploading file ${i} of ${pendingFiles.size}: ${filename}…`, null, pct)
-          );
+          ), filename);
           if (!uploadRes.ok) {
             const body = await uploadRes.json().catch(() => ({}));
             console.error(`Upload failed for ${filename}`, uploadRes.status, body);
@@ -900,7 +930,7 @@
 
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         setStatus('info', attempt === 1 ? 'Fetching products from GitHub…' : 'Retrying after conflict…');
-        const fetchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, { headers, cache: 'no-store' });
+        const fetchRes = await netFetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, { headers, cache: 'no-store' }, 'products.json');
         if (!fetchRes.ok) {
           const body = await fetchRes.json().catch(() => ({}));
           console.error('Fetch products.json failed', fetchRes.status, body);
@@ -924,11 +954,11 @@
 
         setStatus('info', 'Saving to GitHub…');
         const newContent = btoa(unescape(encodeURIComponent(JSON.stringify(allProducts, null, 2))));
-        const commitRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, {
+        const commitRes = await netFetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, {
           method: 'PUT',
           headers,
           body: JSON.stringify({ message: commitMessage, content: newContent, sha: fileData.sha, branch }),
-        });
+        }, 'products.json');
 
         if (commitRes.ok) return;
 

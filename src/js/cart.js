@@ -9,16 +9,28 @@
 const CART_KEY = 'robyn_gold_cart';
 
 /**
- * Send a custom analytics event to Plausible (no-op if not loaded)
+ * Send a custom analytics event to Plausible (no-op if not loaded).
+ * `revenue` should be { currency, amount } to record sales value.
  */
-function trackEvent(name, props) {
+function trackEvent(name, props, revenue) {
   try {
     if (typeof window !== 'undefined' && typeof window.plausible === 'function') {
-      window.plausible(name, props ? { props } : undefined);
+      const options = {};
+      if (props) options.props = props;
+      if (revenue) options.revenue = revenue;
+      window.plausible(name, Object.keys(options).length ? options : undefined);
     }
   } catch (error) {
     /* analytics should never break the app */
   }
+}
+
+/**
+ * Currency of the items currently in the cart (defaults to EUR)
+ */
+function getCartCurrency() {
+  const cart = getCart();
+  return (cart[0] && cart[0].currency) || 'EUR';
 }
 
 /**
@@ -71,7 +83,11 @@ function addToCart(product) {
   });
   
   saveCart(cart);
-  trackEvent('Add to cart', { product: product.name, value: product.price });
+  trackEvent(
+    'Add to cart',
+    { product: product.name },
+    { currency: product.currency || 'EUR', amount: product.price }
+  );
   return { success: true, message: 'Added to cart' };
 }
 
@@ -79,8 +95,13 @@ function addToCart(product) {
  * Remove product from cart
  */
 function removeFromCart(productId) {
-  const cart = getCart().filter(item => item.id !== productId);
+  const current = getCart();
+  const removed = current.find(item => item.id === productId);
+  const cart = current.filter(item => item.id !== productId);
   saveCart(cart);
+  if (removed) {
+    trackEvent('Remove from cart', { product: removed.name });
+  }
 }
 
 /**
@@ -205,7 +226,9 @@ if (typeof window !== 'undefined') {
     clearCart,
     getCartTotal,
     getCartCount,
+    getCartCurrency,
     updateCartCount,
-    formatCartForCheckout
+    formatCartForCheckout,
+    trackEvent
   };
 }

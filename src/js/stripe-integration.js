@@ -22,10 +22,11 @@ async function initiateCheckout() {
   }
 
   // Track checkout intent (cart abandonment funnel: Add to cart → Begin checkout → Purchase)
-  trackEvent('Begin checkout', {
-    items: cartItems.length,
-    value: window.CartAPI.getCartTotal()
-  });
+  trackEvent(
+    'Begin checkout',
+    { items: cartItems.length },
+    { currency: window.CartAPI.getCartCurrency(), amount: window.CartAPI.getCartTotal() }
+  );
 
   // Show loading state
   const checkoutButton = document.getElementById('checkout-button');

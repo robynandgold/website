@@ -98,10 +98,11 @@
     document.getElementById('year').textContent = new Date().getFullYear();
 
     // Track the completed purchase before clearing the cart
-    trackEvent('Purchase', {
-      items: window.CartAPI.getCartCount(),
-      value: window.CartAPI.getCartTotal()
-    });
+    trackEvent(
+      'Purchase',
+      { items: window.CartAPI.getCartCount() },
+      { currency: window.CartAPI.getCartCurrency(), amount: window.CartAPI.getCartTotal() }
+    );
 
     // Clear cart after successful purchase
     window.CartAPI.clearCart();

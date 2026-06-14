@@ -130,11 +130,55 @@ function formatCartForCheckout() {
   }));
 }
 
-// Initialize cart count on page load
+/**
+ * Mobile navigation menu (hamburger) toggle
+ */
+function initMobileMenu() {
+  const toggle = document.querySelector('.nav-toggle');
+  const headerInner = document.querySelector('.header-inner');
+  if (!toggle || !headerInner) return;
+
+  const closeMenu = () => {
+    headerInner.classList.remove('menu-open');
+    toggle.setAttribute('aria-expanded', 'false');
+  };
+
+  toggle.addEventListener('click', (event) => {
+    event.stopPropagation();
+    const isOpen = headerInner.classList.toggle('menu-open');
+    toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  });
+
+  // Close after choosing a link
+  const primaryNav = document.getElementById('primary-nav');
+  if (primaryNav) {
+    primaryNav.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', closeMenu);
+    });
+  }
+
+  // Close when tapping outside the header
+  document.addEventListener('click', (event) => {
+    if (headerInner.classList.contains('menu-open') && !headerInner.contains(event.target)) {
+      closeMenu();
+    }
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeMenu();
+  });
+}
+
+// Initialize cart count and mobile menu on page load
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', updateCartCount);
+  document.addEventListener('DOMContentLoaded', () => {
+    updateCartCount();
+    initMobileMenu();
+  });
 } else {
   updateCartCount();
+  initMobileMenu();
 }
 
 // Export cart API

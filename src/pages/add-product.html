@@ -1041,7 +1041,14 @@
         }
 
       } catch (err) {
-        setStatus('error', err.message, err.detail);
+        const badCreds = /\b401\b|bad credentials/i.test(err.message || '');
+        if (badCreds) {
+          setStatus('error',
+            'GitHub rejected your token (Bad credentials). It has likely expired or been revoked. Click "Update token" above and paste a new personal access token (repo scope), then try again.',
+            err.detail);
+        } else {
+          setStatus('error', err.message, err.detail);
+        }
         btn.disabled = false;
         btn.textContent = currentMode === 'edit' ? btn.dataset.editLabel : btn.dataset.addLabel;
       }

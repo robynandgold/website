@@ -9,6 +9,19 @@
 const CART_KEY = 'robyn_gold_cart';
 
 /**
+ * Send a custom analytics event to Plausible (no-op if not loaded)
+ */
+function trackEvent(name, props) {
+  try {
+    if (typeof window !== 'undefined' && typeof window.plausible === 'function') {
+      window.plausible(name, props ? { props } : undefined);
+    }
+  } catch (error) {
+    /* analytics should never break the app */
+  }
+}
+
+/**
  * Get current cart items from localStorage
  */
 function getCart() {
@@ -58,6 +71,7 @@ function addToCart(product) {
   });
   
   saveCart(cart);
+  trackEvent('Add to cart', { product: product.name, value: product.price });
   return { success: true, message: 'Added to cart' };
 }
 

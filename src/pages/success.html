@@ -19,6 +19,10 @@
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png" />
   <link rel="manifest" href="/images/site.webmanifest" />
+  <!-- Plausible Analytics (privacy-friendly, cookieless) -->
+  <script defer data-domain="robynandgold.com" src="https://plausible.io/js/script.js"></script>
+  <script>window.plausible=window.plausible||function(){(window.plausible.q=window.plausible.q||[]).push(arguments)};</script>
+
 </head>
 <body class="page">
   <header class="site-header">
@@ -92,6 +96,12 @@
   <script src="../js/cart.js"></script>
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Track the completed purchase before clearing the cart
+    trackEvent('Purchase', {
+      items: window.CartAPI.getCartCount(),
+      value: window.CartAPI.getCartTotal()
+    });
 
     // Clear cart after successful purchase
     window.CartAPI.clearCart();

@@ -68,7 +68,7 @@
     "size": "UK K",
     "price": 650,
     "currency": "EUR",
-    "featured": true,
+    "featured": false,
     "category": "rings",
     "available": true,
     "images": [

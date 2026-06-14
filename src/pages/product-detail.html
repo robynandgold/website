@@ -38,7 +38,7 @@
   <script>window.plausible=window.plausible||function(){(window.plausible.q=window.plausible.q||[]).push(arguments)};</script>
 
   </head>
-  <body class="page">
+  <body class="page product-page">
     <header class="site-header">
       <div class="container header-inner">
         <button class="nav-toggle" type="button" aria-label="Toggle menu" aria-controls="primary-nav" aria-expanded="false">
@@ -74,26 +74,26 @@
     <section class="section">
       <div class="container">
         <!-- JS populates this element -->
-        <div id="product-detail" class="product-detail-layout">
-          <!-- Example structure (for reference only; filled by JS):
-          <div class="product-detail-image">
-            <img src="../images/products/example.jpg" alt="..." />
-          </div>
-          <div class="product-detail-info">
-            <p class="eyebrow">Art Deco · c.1930</p>
-            <h1 class="product-detail-title">Art Deco Solitaire Diamond Ring</h1>
-            <p class="product-detail-meta">Platinum · Old European-cut diamond · Size L</p>
-            <p class="product-detail-price">£4,600</p>
-            <button class="btn btn-primary">Add to cart</button>
-            <div class="product-detail-copy">
-              <p>Long-form description here...</p>
-            </div>
-          </div>
-          -->
+        <div id="product-detail" class="product-detail-layout"></div>
+
+        <!-- You might also like -->
+        <div class="related-section" id="related-section" hidden>
+          <h2 class="related-title">You might also like</h2>
+          <div class="product-grid" id="related-grid"></div>
         </div>
       </div>
     </section>
   </main>
+
+  <!-- Sticky mobile add-to-cart bar -->
+  <div class="product-sticky-bar" id="product-sticky-bar" hidden>
+    <div class="psb-info">
+      <small id="psb-name"></small>
+      <strong id="psb-price"></strong>
+    </div>
+    <button class="btn btn-primary" id="psb-add-btn">Add to cart</button>
+    <span class="psb-sold" id="psb-sold" hidden>Sold</span>
+  </div>
 
   <footer class="site-footer">
     <div class="container footer-inner">
@@ -119,6 +119,7 @@
     document.getElementById('year').textContent = new Date().getFullYear();
     
     let currentProduct = null;
+    let allProducts = [];
     let currentSlideIndex = 0;
 
     function getSlugFromURL() {
@@ -138,6 +139,7 @@
         const response = await fetch('../data/products.json');
         if (response.ok) {
           const products = await response.json();
+          allProducts = products;
           currentProduct = products.find(p => p.slug === slug);
           if (currentProduct) { renderProductDetails(); return; }
         }
@@ -151,6 +153,9 @@
       }
       if (!window.ProductsAPI) return;
 
+      if (window.ProductsAPI.getAllProducts) {
+        try { allProducts = await window.ProductsAPI.getAllProducts(); } catch (e) {}
+      }
       currentProduct = await window.ProductsAPI.getProductBySlug(slug);
 
       if (!currentProduct) {
@@ -268,9 +273,10 @@
         
         <div class="product-detail-info">
           <h1 class="product-detail-title">${currentProduct.name}</h1>
-          <p class="product-detail-meta">${currentProduct.size}</p>
+          <p class="product-detail-meta">Size ${currentProduct.size}</p>
           <p class="product-detail-price">${formatPrice(currentProduct.price, currentProduct.currency)}</p>
-          
+          ${isSold ? '' : `<p class="product-detail-oneoff">✦ One of a kind — only one available</p>`}
+
           ${isSold ? `
             <div style="background: var(--muted); color: white; padding: 1rem; border-radius: var(--radius-md); margin-top: 1.5rem; text-align: center;">
               <strong style="font-size: 1.1rem;">SOLD</strong>
@@ -282,25 +288,91 @@
             </button>
             <p id="cart-message" style="margin-top: 0.8rem; font-size: 0.9rem; color: var(--muted); display: none;"></p>
           `}
-          
-          <div class="product-detail-copy" style="margin-top: 1.8rem;">
-            <p>${currentProduct.description}</p>
-          </div>
-          
-          <dl style="margin-top: 1.5rem; display: grid; gap: 0.45rem; font-size: 0.88rem; border-top: 1px solid var(--border); padding-top: 1.2rem;">
-            <div style="display: flex; gap: 0.8rem;">
-              <dt style="color: var(--muted); min-width: 5rem;">Size</dt>
-              <dd style="margin: 0;">${currentProduct.size}</dd>
-            </div>
-          </dl>
+
+          <div class="product-detail-copy" style="margin-top: 1.8rem;">${currentProduct.description}</div>
+
+          ${isSold ? '' : `
+          <ul class="product-trust">
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg> Free insured shipping from Ireland</li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> Secure checkout via Stripe</li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 3 9l9 12 9-12z"/><path d="M3 9h18"/></svg> Personally sourced &amp; professionally prepared</li>
+          </ul>`}
         </div>
       `;
-      
+
       // Add event listeners
       setupCarousel();
       if (!isSold) {
         setupAddToCart();
       }
+      setupStickyBar(isSold);
+      renderRelated();
+    }
+
+    // "You might also like" — other available pieces
+    function renderRelated() {
+      const section = document.getElementById('related-section');
+      const grid = document.getElementById('related-grid');
+      if (!section || !grid) return;
+
+      const others = allProducts
+        .filter(p => p.slug !== currentProduct.slug && p.available !== false)
+        .slice(0, 3);
+
+      if (others.length === 0) { section.hidden = true; return; }
+
+      grid.innerHTML = others.map(product => {
+        const price = formatPrice(product.price, product.currency);
+        const video = product.videos?.[0];
+        const image = product.images?.[0];
+        const media = video
+          ? `<video src="${video}" class="product-card-image" autoplay muted loop playsinline></video>`
+          : image
+            ? `<img src="${image}" alt="${product.name}" class="product-card-image" width="600" height="600" loading="lazy" onerror="this.style.display='none'" />`
+            : '';
+        return `
+          <article class="product-card">
+            <a class="product-card-link-wrap" href="product-detail.html?slug=${product.slug}">
+              ${media}
+              <div class="product-card-body">
+                <h3 class="product-card-title">${product.name}</h3>
+                <p class="product-card-price">${price}</p>
+                <span class="product-card-link">View details</span>
+              </div>
+            </a>
+          </article>`;
+      }).join('');
+
+      section.hidden = false;
+    }
+
+    // Sticky mobile add-to-cart bar
+    function setupStickyBar(isSold) {
+      const bar = document.getElementById('product-sticky-bar');
+      if (!bar) return;
+      document.getElementById('psb-name').textContent = currentProduct.name;
+      document.getElementById('psb-price').textContent = formatPrice(currentProduct.price, currentProduct.currency);
+
+      const addBtn = document.getElementById('psb-add-btn');
+      const soldTag = document.getElementById('psb-sold');
+
+      if (isSold) {
+        addBtn.hidden = true;
+        soldTag.hidden = false;
+      } else {
+        addBtn.hidden = false;
+        soldTag.hidden = true;
+        addBtn.onclick = () => {
+          const result = window.CartAPI.addToCart(currentProduct);
+          if (result.success) {
+            window.location.href = 'cart.html';
+          } else {
+            addBtn.textContent = 'In your bag — view';
+            addBtn.onclick = () => window.location.href = 'cart.html';
+          }
+        };
+      }
+      bar.hidden = false;
     }
     
     // Setup carousel (images + videos)

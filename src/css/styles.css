@@ -269,6 +269,29 @@ a {
   text-align: center;
 }
 
+/* Mobile menu toggle (hamburger) — hidden on desktop */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 42px;
+  height: 42px;
+  padding: 9px 8px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.nav-toggle span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--ink);
+  border-radius: 2px;
+  transition: transform 0.25s ease, opacity 0.2s ease;
+}
+
 /* =========================
    Hero
    ========================= */
@@ -598,7 +621,49 @@ a {
     flex-wrap: wrap;
     row-gap: 0.3rem;
   }
-  .nav-left { display: none; }
+
+  /* Show hamburger toggle on the left */
+  .nav-toggle {
+    display: flex;
+    position: absolute;
+    left: 0;
+  }
+
+  /* Reveal primary nav as a dropdown panel when the menu is open */
+  .nav-left {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.1rem;
+    padding: 1.25rem 1.5rem;
+    background: rgba(247, 243, 236, 0.98);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(221, 209, 194, 0.65);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .header-inner.menu-open .nav-left {
+    display: flex;
+  }
+
+  .nav-left .nav-link {
+    font-size: 1rem;
+  }
+
+  /* Animate hamburger into an X when open */
+  .header-inner.menu-open .nav-toggle span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .header-inner.menu-open .nav-toggle span:nth-child(2) {
+    opacity: 0;
+  }
+  .header-inner.menu-open .nav-toggle span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
 
   .nav-right {
     position: absolute;
@@ -1120,6 +1185,7 @@ a {
 }
 
 @media (max-width: 640px) {
-  /* No arc in new design */
-  .nav { position: static; justify-content: center; }
+  /* No arc in new design — keep absolute positioning for the
+     hamburger dropdown (.nav-left) and cart (.nav-right). */
+  .nav { justify-content: center; }
 }

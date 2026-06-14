@@ -220,5 +220,25 @@
       "/images/products/IMG_8555.mov",
       "/images/products/IMG_8444.mov"
     ]
+  },
+  {
+    "id": "18ct-yellow-gold-diamond-half-eternity-ring-62zd3",
+    "name": "18ct Yellow Gold Diamond Half-eternity Ring",
+    "slug": "18ct-yellow-gold-diamond-half-eternity-ring-62zd3",
+    "description": "Set with round brilliant-cut diamonds totalling approximately 1.2ct (assessed as D/E colour and VVS1/2 clarity). Fineness stamp of 750 indicating 18ct gold. 5.2g.",
+    "size": "UK N",
+    "price": 1950,
+    "currency": "EUR",
+    "featured": true,
+    "category": "rings",
+    "available": true,
+    "images": [
+      "/images/products/IMG_7389.jpeg",
+      "/images/products/IMG_7391.jpeg",
+      "/images/products/IMG_7392.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_7354.mov"
+    ]
   }
 ]

@@ -211,6 +211,25 @@
       flex-shrink: 0; transition: background 0.15s;
     }
     .btn-delete-product:hover { background: #fdf0f0; }
+    .product-pick-item.is-featured { background: rgba(198,168,120,0.06); }
+    .product-pick-featured-badge {
+      font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em;
+      color: #a07830; background: rgba(198,168,120,0.16);
+      border-radius: 4px; padding: 0.1rem 0.4rem; margin-left: 0.5rem; white-space: nowrap;
+    }
+    .pick-group-label {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.16em;
+      color: var(--muted); margin: 0.5rem 0.3rem 0.2rem;
+    }
+    .pick-group-label:first-child { margin-top: 0.2rem; }
+
+    /* ── Featured cap note ───────────────────────── */
+    .featured-note {
+      font-size: 0.78rem; margin: 0.7rem 0 0;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .featured-note.full { color: #a07830; }
+    .featured-note.ok { color: var(--muted); }
 
     @media (max-width: 640px) {
       .form-grid { grid-template-columns: 1fr; }
@@ -283,7 +302,7 @@
 
         <!-- Edit product picker -->
         <div id="edit-picker">
-          <p class="section-label" style="margin-bottom:0.6rem;">Select a product to edit</p>
+          <p class="section-label" style="margin-bottom:0.6rem;">Select a product to edit <span id="featured-count-label" style="text-transform:none;letter-spacing:0;color:var(--muted);"></span></p>
           <div id="edit-picker-loading">Loading products…</div>
           <div class="product-pick-list" id="product-pick-list" style="display:none;"></div>
         </div>
@@ -342,6 +361,7 @@
                 Featured on homepage
               </label>
             </div>
+            <p class="featured-note ok" id="featured-note"></p>
           </div>
 
           <div style="margin-bottom:1.4rem;">
@@ -461,12 +481,72 @@
       ensureToken().catch(() => {/* gate is shown by ensureToken on failure */});
     }
 
+    // ── Featured cap (homepage shows max 3 featured rings) ────────
+    const FEATURED_MAX = 3;
+    let featuredIds = new Set();        // ids of currently-featured products, from last fetch
+    let featuredStateLoaded = false;
+
+    // Read-only fetch of products.json to learn which pieces are featured.
+    // Needs no auth (public catalogue); safe to call before login.
+    async function ensureFeaturedState(force) {
+      if (featuredStateLoaded && !force) return;
+      try {
+        const res = await fetch('https://api.github.com/repos/robynandgold/website/contents/src/data/products.json',
+          { headers: { 'Accept': 'application/vnd.github.v3+json' }, cache: 'no-store' });
+        if (!res.ok) return;
+        const fileData = await res.json();
+        const products = JSON.parse(atob(fileData.content.replace(/\n/g, '')));
+        updateFeaturedState(products);
+        featuredStateLoaded = true;
+      } catch (e) { /* leave cap permissive if the catalogue can't be read */ }
+      applyFeaturedCap(currentEditProduct?.id || null);
+    }
+
+    function updateFeaturedState(products) {
+      featuredIds = new Set(products.filter(p => p.featured === true).map(p => p.id));
+    }
+
+    // Enforce the cap on the "Featured on homepage" checkbox for the piece
+    // currently in the form. `currentId` is the product being edited (or null
+    // when adding) so an already-featured piece can still be un-featured.
+    function applyFeaturedCap(currentId) {
+      const cb = document.getElementById('f-featured');
+      const note = document.getElementById('featured-note');
+      if (!cb || !note) return;
+      const isThisFeatured = currentId && featuredIds.has(currentId);
+      const count = featuredIds.size;
+      const atCap = count >= FEATURED_MAX && !isThisFeatured;
+      if (atCap) {
+        cb.checked = false;
+        cb.disabled = true;
+        note.className = 'featured-note full';
+        note.textContent = `★ Homepage is full (${count}/${FEATURED_MAX}). Un-feature another piece first to feature this one.`;
+      } else {
+        cb.disabled = false;
+        note.className = 'featured-note ok';
+        note.textContent = `${count}/${FEATURED_MAX} pieces featured on the homepage.`;
+      }
+    }
+
+    document.getElementById('f-featured').addEventListener('change', () => {
+      const note = document.getElementById('featured-note');
+      const cb = document.getElementById('f-featured');
+      if (cb.disabled) return;
+      // Reflect what the count will be once saved (snapshot ± this piece)
+      const id = currentEditProduct?.id || document.getElementById('f-slug').value.trim();
+      const base = new Set(featuredIds);
+      if (cb.checked) base.add(id); else base.delete(id);
+      note.className = 'featured-note ok';
+      note.textContent = `${base.size}/${FEATURED_MAX} pieces featured on the homepage.`;
+    });
+
     // ── Mode switching ────────────────────────────────────────────
     let currentMode = 'add';
     let currentEditProduct = null;
 
     function switchMode(mode) {
       currentMode = mode;
+      ensureFeaturedState(true);   // refresh the featured cap whenever modes change
       document.getElementById('tab-add').classList.toggle('active', mode === 'add');
       document.getElementById('tab-edit').classList.toggle('active', mode === 'edit');
 
@@ -505,15 +585,21 @@
         if (!res.ok) throw new Error('Failed to load products');
         const fileData = await res.json();
         const products = JSON.parse(atob(fileData.content.replace(/\n/g, '')));
+        updateFeaturedState(products);
+        applyFeaturedCap(currentEditProduct?.id || null);
 
-        products.forEach(product => {
+        const countLabel = document.getElementById('featured-count-label');
+        if (countLabel) countLabel.textContent = `· ${featuredIds.size}/${FEATURED_MAX} featured`;
+
+        function makeItem(product) {
           const thumb = product.images?.[0]
             ? `<img class="product-pick-thumb" src="https://robynandgold.com${product.images[0]}" alt="" onerror="this.style.background='#e8e0d4';this.style.display='block'" />`
             : `<div class="product-pick-thumb"></div>`;
           const status = product.available === false ? 'Sold' : `€${product.price}`;
+          const badge = product.featured === true ? ' <span class="product-pick-featured-badge">★ Featured</span>' : '';
           const item = document.createElement('div');
-          item.className = 'product-pick-item';
-          item.innerHTML = `${thumb}<div class="product-pick-info"><div class="product-pick-name">${product.name}</div><div class="product-pick-meta">${product.size} · ${status}</div></div><button class="btn-delete-product" title="Delete product">Delete</button>`;
+          item.className = 'product-pick-item' + (product.featured === true ? ' is-featured' : '');
+          item.innerHTML = `${thumb}<div class="product-pick-info"><div class="product-pick-name">${product.name}</div><div class="product-pick-meta">${product.size} · ${status}${badge}</div></div><button class="btn-delete-product" title="Delete product">Delete</button>`;
           item.querySelector('.product-pick-info').addEventListener('click', () => {
             list.querySelectorAll('.product-pick-item').forEach(el => el.classList.remove('selected'));
             item.classList.add('selected');
@@ -523,8 +609,27 @@
             e.stopPropagation();
             deleteProduct(product, item);
           });
-          list.appendChild(item);
-        });
+          return item;
+        }
+
+        // Featured pieces first (under a heading), then everything else
+        const featured = products.filter(p => p.featured === true);
+        const rest = products.filter(p => p.featured !== true);
+
+        if (featured.length) {
+          const lbl = document.createElement('p');
+          lbl.className = 'pick-group-label';
+          lbl.textContent = `On the homepage (${featured.length}/${FEATURED_MAX})`;
+          list.appendChild(lbl);
+          featured.forEach(p => list.appendChild(makeItem(p)));
+        }
+        if (rest.length) {
+          const lbl = document.createElement('p');
+          lbl.className = 'pick-group-label';
+          lbl.textContent = featured.length ? 'All other pieces' : 'All pieces';
+          list.appendChild(lbl);
+          rest.forEach(p => list.appendChild(makeItem(p)));
+        }
 
         loading.style.display = 'none';
         list.style.display = '';
@@ -579,7 +684,11 @@
         }
 
         itemEl.remove();
+        featuredIds.delete(product.id);
+        const countLabel = document.getElementById('featured-count-label');
+        if (countLabel) countLabel.textContent = `· ${featuredIds.size}/${FEATURED_MAX} featured`;
         if (currentEditProduct?.id === product.id) clearForm();
+        else applyFeaturedCap(currentEditProduct?.id || null);
       } catch (err) {
         alert(`Delete failed: ${err.message}`);
         btn.disabled = false;
@@ -597,6 +706,7 @@
       document.getElementById('f-category').value = product.category || 'rings';
       document.getElementById('f-available').checked = product.available !== false;
       document.getElementById('f-featured').checked = product.featured === true;
+      applyFeaturedCap(product.id);
 
       document.getElementById('image-list').innerHTML = '';
       document.getElementById('video-list').innerHTML = '';
@@ -766,6 +876,7 @@
       const statusEl = document.getElementById('publish-status');
       statusEl.className = 'publish-status';
       statusEl.innerHTML = '';
+      applyFeaturedCap(currentEditProduct?.id || null);
     }
 
     // ── Reset form ────────────────────────────────────────────────
@@ -1005,6 +1116,15 @@
 
       if (!name || !slug) { setStatus('error', 'Please enter at least a name.'); return; }
 
+      // Enforce the homepage featured cap (defensive — the checkbox is also disabled at cap)
+      if (document.getElementById('f-featured').checked) {
+        const othersFeatured = [...featuredIds].filter(id => id !== slug).length;
+        if (othersFeatured >= FEATURED_MAX) {
+          setStatus('error', `Only ${FEATURED_MAX} pieces can be featured on the homepage. Un-feature one first, then try again.`);
+          return;
+        }
+      }
+
       const btn = document.getElementById('publish-btn');
       btn.disabled = true;
       btn.textContent = currentMode === 'edit' ? 'Saving…' : 'Publishing…';
@@ -1049,6 +1169,9 @@
         const commitMessage = currentMode === 'edit' ? `Update product: ${name}` : `Add product: ${name}`;
         await commitProductsJson(owner, repo, branch, headers, product, commitMessage);
 
+        // Keep the featured cap in sync with what we just saved
+        if (product.featured) featuredIds.add(product.id); else featuredIds.delete(product.id);
+
         pendingFiles.clear();
         const statusEl = document.getElementById('publish-status');
         statusEl.className = 'publish-status success';
@@ -1086,6 +1209,9 @@
         btn.textContent = currentMode === 'edit' ? btn.dataset.editLabel : btn.dataset.addLabel;
       }
     });
+
+    // Load the featured cap state on first paint (public read, no auth needed)
+    ensureFeaturedState();
   </script>
 </body>
 </html>

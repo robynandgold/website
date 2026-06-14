@@ -280,5 +280,23 @@
     "videos": [
       "/images/products/IMG_8116.mov"
     ]
+  },
+  {
+    "id": "18ct-yellow-gold-diamond-belcher-style-solitaire-5pf2j",
+    "name": "18ct Yellow Gold Diamond Belcher-style Solitaire",
+    "slug": "18ct-yellow-gold-diamond-belcher-style-solitaire-5pf2j",
+    "description": "18ct yellow gold set with an approximately 0.15ct diamond. Diamond is extremely bright with excellent clarity. There is an “18ct” fineness stamp but no additional hallmarks. Likely an antique piece. 3.5g.",
+    "size": "UK R.5",
+    "price": 685,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "images": [
+      "/images/products/IMG_8122.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_8121.mov"
+    ]
   }
 ]

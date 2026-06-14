@@ -226,12 +226,14 @@
 
           return `
             <article class="product-card">
-              <a href="pages/product-detail.html?slug=${slug}">${media}</a>
-              <div class="product-card-body">
-                <h3 class="product-card-title">${product.name}</h3>
-                <p class="product-card-price">${price}</p>
-                <a href="pages/product-detail.html?slug=${slug}" class="product-card-link">View details</a>
-              </div>
+              <a class="product-card-link-wrap" href="pages/product-detail.html?slug=${slug}">
+                ${media}
+                <div class="product-card-body">
+                  <h3 class="product-card-title">${product.name}</h3>
+                  <p class="product-card-price">${price}</p>
+                  <span class="product-card-link">View details</span>
+                </div>
+              </a>
             </article>
           `;
         }).join('');

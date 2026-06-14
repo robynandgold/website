@@ -274,19 +274,10 @@
 
         <!-- Setup -->
         <div class="setup-banner" id="setup-banner">
-          <div id="token-saved-row" style="display:none; align-items:center; gap:0.7rem; flex-wrap:wrap;">
+          <div style="display:flex; align-items:center; gap:0.7rem;">
             <span style="width:8px;height:8px;border-radius:50%;background:#5a9e6f;flex-shrink:0;display:inline-block;"></span>
-            <span style="font-size:0.85rem;color:var(--muted);flex:1;">GitHub token saved</span>
-            <button class="btn btn-ghost" id="test-token-btn" style="padding:0.3rem 0.8rem;font-size:0.78rem;white-space:nowrap;">Test token</button>
-            <button class="btn btn-ghost" id="update-token-btn" style="padding:0.3rem 0.8rem;font-size:0.78rem;white-space:nowrap;">Update token</button>
-            <p id="token-test-status" style="width:100%;margin:0.4rem 0 0;font-size:0.82rem;color:var(--muted);"></p>
-          </div>
-          <div id="token-entry-row">
-            <p style="margin:0 0 0.7rem;color:var(--muted);"><strong>One-time setup:</strong> add your GitHub token to enable publishing.</p>
-            <div class="setup-row">
-              <input type="password" id="cfg-token" placeholder="GitHub personal access token (repo scope)" autocomplete="off" />
-              <button class="btn btn-ghost" id="save-token-btn" style="white-space:nowrap;padding:0.5rem 1rem;font-size:0.8rem;">Save token</button>
-            </div>
+            <span style="font-size:0.85rem;color:var(--muted);flex:1;">Logged in — publishing enabled</span>
+            <button class="btn btn-ghost" id="logout-btn" style="padding:0.3rem 0.8rem;font-size:0.78rem;white-space:nowrap;">Log out</button>
           </div>
         </div>
 
@@ -395,106 +386,80 @@
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // ── Auth ─────────────────────────────────────────────────────
-    const ADMIN_PASSWORD = 'RobynRooney12225';
-    const SESSION_KEY = 'rg_admin_auth';
+    // ── Admin auth (server-validated) ─────────────────────────────
+    // One password unlocks the page AND yields the GitHub token used to
+    // publish. The token lives in Vercel env vars and is only held in memory
+    // for this tab session — never hard-coded in the page or saved to disk.
+    const PW_KEY = 'rg_admin_pw';
+    let githubToken = '';            // fetched from the server after login; in-memory only
 
     function showPage() { document.getElementById('auth-gate').style.display = 'none'; }
-    if (sessionStorage.getItem(SESSION_KEY) === '1') showPage();
+    function showGate() { document.getElementById('auth-gate').style.display = 'flex'; }
 
-    function tryAuth() {
-      if (document.getElementById('auth-input').value === ADMIN_PASSWORD) {
-        sessionStorage.setItem(SESSION_KEY, '1');
+    // Validate a password against the server; on success cache token + remember pw for the tab
+    async function login(password) {
+      let res;
+      try {
+        res = await fetch('/api/admin-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password }),
+        });
+      } catch (e) {
+        return { ok: false, reason: 'Network error — check your connection and try again.' };
+      }
+      if (res.status === 401) return { ok: false, reason: 'Incorrect password.' };
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        return { ok: false, reason: body.error || `Login failed (${res.status}).` };
+      }
+      const data = await res.json();
+      githubToken = data.token || '';
+      sessionStorage.setItem(PW_KEY, password);
+      return { ok: true };
+    }
+
+    // Ensure we hold a valid token before a write; re-login from the stored
+    // session password if needed. Re-shows the gate and throws if unavailable.
+    async function ensureToken() {
+      if (githubToken) return githubToken;
+      const pw = sessionStorage.getItem(PW_KEY);
+      if (pw) {
+        const result = await login(pw);
+        if (result.ok) return githubToken;
+      }
+      showGate();
+      throw new Error('Your session expired — please log in again, then retry.');
+    }
+
+    async function tryAuth() {
+      const input = document.getElementById('auth-input');
+      const errorEl = document.getElementById('auth-error');
+      errorEl.style.display = 'none';
+      const result = await login(input.value);
+      if (result.ok) {
         showPage();
       } else {
-        document.getElementById('auth-error').style.display = 'block';
-        document.getElementById('auth-input').value = '';
-        document.getElementById('auth-input').focus();
+        errorEl.textContent = result.reason;
+        errorEl.style.display = 'block';
+        input.value = '';
+        input.focus();
       }
     }
     document.getElementById('auth-submit').addEventListener('click', tryAuth);
     document.getElementById('auth-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryAuth(); });
 
-    // ── GitHub token ─────────────────────────────────────────────
-    const TOKEN_KEY = 'rg_github_token';
-    // Tokens are contiguous ASCII; strip any whitespace or invisible chars a
-    // mobile paste may inject (non-breaking / zero-width spaces, newlines).
-    function sanitizeToken(t) { return (t || '').replace(/\s+/g, ''); }
-    let githubToken = sanitizeToken(localStorage.getItem(TOKEN_KEY) || '');
-    // Repair a previously stored token that was saved with stray characters
-    if (githubToken && githubToken !== localStorage.getItem(TOKEN_KEY)) {
-      localStorage.setItem(TOKEN_KEY, githubToken);
-    }
-
-    function updateTokenStatus() {
-      const savedRow = document.getElementById('token-saved-row');
-      const entryRow = document.getElementById('token-entry-row');
-      if (githubToken) {
-        savedRow.style.display = 'flex';
-        entryRow.style.display = 'none';
-      } else {
-        savedRow.style.display = 'none';
-        entryRow.style.display = '';
-        document.getElementById('cfg-token').value = '';
-        document.getElementById('cfg-token').focus();
-      }
-    }
-
-    document.getElementById('save-token-btn').addEventListener('click', () => {
-      const val = sanitizeToken(document.getElementById('cfg-token').value);
-      if (val && !val.startsWith('•')) {
-        githubToken = val;
-        localStorage.setItem(TOKEN_KEY, val);
-      }
-      updateTokenStatus();
-    });
-
-    document.getElementById('update-token-btn').addEventListener('click', () => {
+    document.getElementById('logout-btn').addEventListener('click', () => {
       githubToken = '';
-      localStorage.removeItem(TOKEN_KEY);
-      const statusEl = document.getElementById('token-test-status');
-      if (statusEl) statusEl.textContent = '';
-      updateTokenStatus();
+      sessionStorage.removeItem(PW_KEY);
+      showGate();
     });
 
-    // Verify the saved token directly against GitHub
-    document.getElementById('test-token-btn').addEventListener('click', async () => {
-      const statusEl = document.getElementById('token-test-status');
-      statusEl.style.color = 'var(--muted)';
-      statusEl.textContent = 'Testing token…';
-      try {
-        const res = await fetch('https://api.github.com/repos/robynandgold/website', {
-          headers: { 'Authorization': `Bearer ${githubToken}`, 'Accept': 'application/vnd.github.v3+json' },
-          cache: 'no-store',
-        });
-        if (res.status === 401) {
-          statusEl.style.color = '#b04040';
-          statusEl.textContent = '✗ Invalid token (Bad credentials). Generate a new one and click “Update token”.';
-          return;
-        }
-        if (res.status === 404 || res.status === 403) {
-          statusEl.style.color = '#b04040';
-          statusEl.textContent = '✗ Token is valid but has no access to robynandgold/website. Give it Contents: Read and write (or the repo scope).';
-          return;
-        }
-        if (!res.ok) {
-          statusEl.style.color = '#b04040';
-          statusEl.textContent = `✗ Unexpected error (${res.status}). Try again or regenerate the token.`;
-          return;
-        }
-        const repo = await res.json();
-        if (repo.permissions && repo.permissions.push) {
-          statusEl.style.color = '#5a9e6f';
-          statusEl.textContent = '✓ Token valid with write access — you can publish.';
-        } else {
-          statusEl.style.color = '#b04040';
-          statusEl.textContent = '✗ Token works but lacks write access. Give it Contents: Read and write (or the repo scope).';
-        }
-      } catch (e) {
-        statusEl.style.color = '#b04040';
-        statusEl.textContent = '✗ Network error while testing. Check your connection and try again.';
-      }
-    });
+    // Restore an existing tab session: show the page and pre-fetch the token
+    if (sessionStorage.getItem(PW_KEY)) {
+      showPage();
+      ensureToken().catch(() => {/* gate is shown by ensureToken on failure */});
+    }
 
     // ── Mode switching ────────────────────────────────────────────
     let currentMode = 'add';
@@ -534,9 +499,8 @@
 
       try {
         const owner = 'robynandgold', repo = 'website';
-        const headers = githubToken
-          ? { 'Authorization': `Bearer ${githubToken}`, 'Accept': 'application/vnd.github.v3+json' }
-          : { 'Accept': 'application/vnd.github.v3+json' };
+        // Reading the public catalogue needs no auth
+        const headers = { 'Accept': 'application/vnd.github.v3+json' };
         const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/src/data/products.json`, { headers, cache: 'no-store' });
         if (!res.ok) throw new Error('Failed to load products');
         const fileData = await res.json();
@@ -571,15 +535,24 @@
 
     async function deleteProduct(product, itemEl) {
       if (!confirm(`Delete "${product.name}"?\n\nThis removes it from the site permanently. Media files are not deleted.`)) return;
-      if (!githubToken) { alert('No GitHub token saved. Add it in the setup section above.'); return; }
 
       const btn = itemEl.querySelector('.btn-delete-product');
       btn.disabled = true;
       btn.textContent = 'Deleting…';
 
+      let token;
+      try {
+        token = await ensureToken();
+      } catch (e) {
+        alert(e.message);
+        btn.disabled = false;
+        btn.textContent = 'Delete';
+        return;
+      }
+
       const owner = 'robynandgold', repo = 'website', branch = 'main';
       const headers = {
-        'Authorization': `Bearer ${githubToken}`,
+        'Authorization': `Bearer ${token}`,
         'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json',
       };
@@ -1031,15 +1004,24 @@
       const slug = document.getElementById('f-slug').value.trim();
 
       if (!name || !slug) { setStatus('error', 'Please enter at least a name.'); return; }
-      if (!githubToken)   { setStatus('error', 'No GitHub token saved. Add it in the setup section above.'); return; }
 
       const btn = document.getElementById('publish-btn');
       btn.disabled = true;
       btn.textContent = currentMode === 'edit' ? 'Saving…' : 'Publishing…';
 
+      let token;
+      try {
+        token = await ensureToken();
+      } catch (e) {
+        setStatus('error', e.message);
+        btn.disabled = false;
+        btn.textContent = currentMode === 'edit' ? btn.dataset.editLabel : btn.dataset.addLabel;
+        return;
+      }
+
       const owner = 'robynandgold', repo = 'website', branch = 'main';
       const headers = {
-        'Authorization': `Bearer ${githubToken}`,
+        'Authorization': `Bearer ${token}`,
         'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json',
       };
@@ -1093,8 +1075,9 @@
       } catch (err) {
         const badCreds = /\b401\b|bad credentials/i.test(err.message || '');
         if (badCreds) {
+          // The server's GITHUB_TOKEN (Vercel env var) is invalid/expired — an admin fix, not a shopkeeper one
           setStatus('error',
-            'GitHub rejected your token (Bad credentials). It has likely expired or been revoked. Click "Update token" above and paste a new personal access token (repo scope), then try again.',
+            'The server\'s GitHub token was rejected (Bad credentials). The GITHUB_TOKEN environment variable in Vercel needs to be refreshed.',
             err.detail);
         } else {
           setStatus('error', err.message, err.detail);
@@ -1103,9 +1086,6 @@
         btn.textContent = currentMode === 'edit' ? btn.dataset.editLabel : btn.dataset.addLabel;
       }
     });
-
-    // ── Init ──────────────────────────────────────────────────────
-    updateTokenStatus();
   </script>
 </body>
 </html>

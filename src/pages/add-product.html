@@ -372,7 +372,7 @@
 
           <div style="margin-bottom:2rem;">
             <p class="section-label">Videos <span style="font-size:0.75rem;text-transform:none;letter-spacing:0;color:var(--muted);">(optional)</span></p>
-            <p style="font-size:0.78rem;color:var(--muted);margin:-0.3rem 0 0.7rem;">iPhone <code>.mov</code> clips are automatically converted to web-friendly <code>.mp4</code> and compressed before publishing.</p>
+            <p style="font-size:0.78rem;color:var(--muted);margin:-0.3rem 0 0.7rem;">Upload straight from your phone — iPhone <code>.mov</code> clips are automatically converted to web-friendly <code>.mp4</code> and compressed about a minute after you publish.</p>
             <div class="media-list" id="video-list"></div>
             <button class="btn-add-media" id="add-video-btn">+ Add video</button>
           </div>
@@ -805,113 +805,15 @@
       list.appendChild(entry);
     }
 
-    // ── Video conversion (browser-side, via ffmpeg.wasm) ──────────
-    // iPhones record .mov, which browsers won't reliably play. Convert any
-    // non-mp4 (or oversized) video to compressed web mp4 before uploading.
-    const conversionsInProgress = new Set();
-    let _ffmpeg = null, _ffmpegLoading = null;
-
-    function loadScript(src) {
-      return new Promise((resolve, reject) => {
-        const s = document.createElement('script');
-        s.src = src;
-        s.onload = resolve;
-        s.onerror = () => reject(new Error('Could not load the video converter.'));
-        document.head.appendChild(s);
-      });
-    }
-
-    async function getFFmpeg() {
-      if (_ffmpeg) return _ffmpeg;
-      if (!_ffmpegLoading) {
-        _ffmpegLoading = (async () => {
-          await loadScript('https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js');
-          const { createFFmpeg } = window.FFmpeg;
-          const ff = createFFmpeg({ log: false, corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js' });
-          await ff.load();
-          _ffmpeg = ff;
-          return ff;
-        })();
-      }
-      return _ffmpegLoading;
-    }
-
-    async function convertToMp4(file, onProgress) {
-      const ff = await getFFmpeg();
-      const { fetchFile } = window.FFmpeg;
-      const inName = 'in_' + Date.now() + (file.name.match(/\.[^.]+$/) || ['.mov'])[0];
-      ff.FS('writeFile', inName, await fetchFile(file));
-      ff.setProgress(({ ratio }) => { if (onProgress && ratio >= 0 && ratio <= 1) onProgress(ratio); });
-      // 720px-wide H.264, web-streamable, muted (product clips autoplay silently)
-      await ff.run('-i', inName, '-vf', 'scale=720:-2', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '26', '-movflags', '+faststart', '-an', 'out.mp4');
-      const data = ff.FS('readFile', 'out.mp4');
-      try { ff.FS('unlink', inName); ff.FS('unlink', 'out.mp4'); } catch (e) {}
-      const base = file.name.replace(/\.[^.]+$/, '');
-      return new File([new Blob([data.buffer], { type: 'video/mp4' })], base + '.mp4', { type: 'video/mp4' });
-    }
-
-    function updatePublishLock() {
-      const btn = document.getElementById('publish-btn');
-      if (conversionsInProgress.size > 0) { btn.disabled = true; btn.dataset.convLock = '1'; }
-      else if (btn.dataset.convLock) { btn.disabled = false; delete btn.dataset.convLock; }
-    }
-
-    // Add a video: convert to mp4 first (with progress), then hand off to addMediaEntry
-    async function handleVideoSelection(listId, file) {
-      const list = document.getElementById(listId);
-      const ph = document.createElement('div');
-      ph.className = 'media-entry';
-      ph.innerHTML = `
-        <div class="media-thumb"><span class="thumb-placeholder">Video</span></div>
-        <div class="media-entry-right">
-          <span class="media-filename">${file.name}</span>
-          <span class="media-path conv-status">Preparing…</span>
-        </div>
-        <div></div>
-        <button class="btn-remove" aria-label="Remove">×</button>`;
-      let cancelled = false;
-      const finish = () => { conversionsInProgress.delete(file); updatePublishLock(); };
-      ph.querySelector('.btn-remove').addEventListener('click', () => { cancelled = true; ph.remove(); finish(); });
-      list.appendChild(ph);
-      const statusEl = ph.querySelector('.conv-status');
-
-      conversionsInProgress.add(file);
-      updatePublishLock();
-
-      try {
-        const needsConvert = !/\.mp4$/i.test(file.name) || file.size > 6 * 1024 * 1024;
-        let finalFile = file;
-        if (needsConvert) {
-          statusEl.textContent = 'Loading converter…';
-          finalFile = await convertToMp4(file, pct => { if (!cancelled) statusEl.textContent = `Converting… ${Math.round(pct * 100)}%`; });
-        }
-        if (cancelled) return;
-        ph.remove();
-        addMediaEntry(listId, 'video', finalFile);
-      } catch (err) {
-        if (cancelled) return;
-        ph.querySelector('.media-entry-right').innerHTML =
-          `<span class="media-filename">${file.name}</span>` +
-          `<span style="font-size:0.72rem;color:#b04040;">Couldn't convert automatically — please upload an .mp4 version of this clip.</span>`;
-        // Not added to pendingFiles, so it won't be published.
-      } finally {
-        finish();
-      }
-    }
-
+    // Videos are uploaded as-is (including iPhone .mov) and converted to
+    // web-friendly mp4 automatically by a GitHub Action after publishing.
     function openMediaPicker(listId, type) {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = type === 'video' ? 'video/*' : 'image/*';
       input.multiple = true;
       input.addEventListener('change', () => {
-        Array.from(input.files).forEach(file => {
-          if (type === 'video') {
-            handleVideoSelection(listId, file);
-          } else {
-            addMediaEntry(listId, type, file);
-          }
-        });
+        Array.from(input.files).forEach(file => addMediaEntry(listId, type, file));
       });
       input.click();
     }

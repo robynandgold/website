@@ -1467,6 +1467,16 @@ a {
   }
 }
 
+/* Cap the (portrait) hero image on tablet/desktop so it doesn't tower over
+   the copy — crop to a balanced landscape frame. */
+@media (min-width: 641px) {
+  .hero-image-panel img {
+    height: 460px !important;
+    object-fit: cover;
+    object-position: center;
+  }
+}
+
 /* =========================
    Floating mobile "Shop" CTA
    ========================= */

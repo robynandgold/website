@@ -285,7 +285,7 @@
     "id": "18ct-yellow-gold-diamond-belcher-style-solitaire-5pf2j",
     "name": "18ct Yellow Gold Diamond Belcher-style Solitaire",
     "slug": "18ct-yellow-gold-diamond-belcher-style-solitaire-5pf2j",
-    "description": "18ct yellow gold set with an approximately 0.15ct diamond. Diamond is extremely bright with excellent clarity. There is an â18ctâ fineness stamp but no additional hallmarks. Likely an antique piece. 3.5g.",
+    "description": "18ct yellow gold set with an approximately 0.15ct diamond. Diamond is extremely bright with excellent clarity. There is an Ã¢ÂÂ18ctÃ¢ÂÂ fineness stamp but no additional hallmarks. Likely an antique piece. 3.5g.",
     "size": "UK R.5",
     "price": 685,
     "currency": "EUR",
@@ -297,6 +297,25 @@
     ],
     "videos": [
       "/images/products/IMG_8121.mov"
+    ]
+  },
+  {
+    "id": "18ct-white-gold-princess-cut-diamond-trilogy-y4zcy",
+    "name": "18ct White Gold Princess-cut Diamond Trilogy",
+    "slug": "18ct-white-gold-princess-cut-diamond-trilogy-y4zcy",
+    "description": "18ct white gold band set with three princess-cut diamonds in a bezel-style setting. Diamonds are eye clean, extremely white and bright. Fully hallmarked.",
+    "size": "UK N/US 6.75",
+    "price": 580,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "images": [
+      "/images/products/IMG_4660.jpeg",
+      "/images/products/IMG_4661.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_4650.mov"
     ]
   }
 ]

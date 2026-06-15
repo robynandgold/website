@@ -1,0 +1,75 @@
+name: Convert product videos to mp4
+
+# When new product videos are uploaded (iPhones record .mov, which browsers
+# won't reliably play), transcode them to compressed web-friendly mp4 and
+# repoint products.json. Runs after the admin tool publishes.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/images/products/**'
+      - 'src/data/products.json'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: convert-videos
+  cancel-in-progress: false
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Look for .mov files
+        id: check
+        run: |
+          shopt -s nullglob nocaseglob
+          movs=(src/images/products/*.mov)
+          if [ ${#movs[@]} -eq 0 ]; then
+            echo "Found no .mov files — nothing to do."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Found ${#movs[@]} .mov file(s)."
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install ffmpeg
+        if: steps.check.outputs.found == 'true'
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Transcode .mov -> .mp4 and remove originals
+        if: steps.check.outputs.found == 'true'
+        run: |
+          shopt -s nullglob nocaseglob
+          cd src/images/products
+          for f in *.mov; do
+            base="${f%.*}"
+            echo "Converting $f -> ${base}.mp4"
+            ffmpeg -y -i "$f" \
+              -vf "scale='min(720,iw)':-2" \
+              -c:v libx264 -preset veryfast -crf 26 -movflags +faststart -an \
+              "${base}.mp4"
+            rm -f "$f"
+          done
+
+      - name: Repoint products.json to .mp4
+        if: steps.check.outputs.found == 'true'
+        run: |
+          sed -i -E 's/\.mov"/.mp4"/g; s/\.MOV"/.mp4"/g' src/data/products.json
+
+      - name: Commit converted videos
+        if: steps.check.outputs.found == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Auto-convert product videos to mp4 [skip ci]"
+            git push
+          fi

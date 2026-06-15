@@ -1146,6 +1146,9 @@ a {
   gap: 2.3rem;
 }
 
+/* The class rule above beats the [hidden] attribute, so make hiding explicit */
+.cart-layout[hidden] { display: none; }
+
 .cart-items-wrapper {
   background: #fdfbf8;
   border-radius: var(--radius-lg);

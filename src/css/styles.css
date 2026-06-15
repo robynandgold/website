@@ -1478,6 +1478,10 @@ a {
     object-fit: cover;
     object-position: center;
   }
+
+  /* Tighten the gap between the hero and the featured section */
+  .hero { padding-bottom: 2rem; }
+  .hero + .section { padding-top: 2.5rem; }
 }
 
 /* =========================

@@ -69,7 +69,21 @@ jobs:
           git add -A
           if git diff --cached --quiet; then
             echo "No changes to commit."
-          else
-            git commit -m "Auto-convert product videos to mp4 [skip ci]"
-            git push
+            exit 0
           fi
+          git commit -m "Auto-convert product videos to mp4 [skip ci]"
+
+          # Another publish can land on main between checkout and push, so the
+          # push gets rejected as non-fast-forward. Rebase onto the latest main
+          # and retry a few times before giving up.
+          for attempt in 1 2 3 4 5; do
+            if git push; then
+              echo "Pushed on attempt $attempt."
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt) — rebasing onto latest main and retrying."
+            git pull --rebase origin main
+          done
+
+          echo "Failed to push after multiple attempts."
+          exit 1

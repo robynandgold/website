@@ -328,7 +328,7 @@
           <div class="form-grid" style="margin-bottom:1.4rem;">
             <div class="field">
               <label for="f-size">Size *</label>
-              <input type="text" id="f-size" placeholder="e.g. UK N / US 6.5" />
+              <select id="f-size"></select>
             </div>
           </div>
 
@@ -702,7 +702,7 @@
       document.getElementById('f-name').value = product.name || '';
       document.getElementById('f-slug').value = product.slug || '';
       document.getElementById('f-description').value = product.description || '';
-      document.getElementById('f-size').value = product.size || '';
+      setSizeValue(product.size || '');
       document.getElementById('f-price').value = product.price || '';
       document.getElementById('f-category').value = product.category || 'rings';
       document.getElementById('f-available').checked = product.available !== false;
@@ -820,6 +820,47 @@
 
     document.getElementById('add-image-btn').addEventListener('click', () => openMediaPicker('image-list', 'image'));
     document.getElementById('add-video-btn').addEventListener('click', () => openMediaPicker('video-list', 'video'));
+
+    // ── Ring size dropdown (UK letter + US equivalent) ────────────
+    // UK→US conversion in decimals, anchored to UK N = US 6.75
+    // (UK A = US 0.25, +0.25 US per half-letter / +0.5 per full letter).
+    function usDecimal(n) {
+      return String(Math.round(n * 100) / 100); // e.g. 6, 6.25, 6.5, 6.75
+    }
+
+    function buildSizeOptions() {
+      const sel = document.getElementById('f-size');
+      if (!sel || sel.dataset.built) return;
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+      let html = '<option value="" disabled selected>Select a ring size…</option>';
+      let step = 0; // half-steps from A
+      letters.forEach(L => {
+        [false, true].forEach(isHalf => {
+          if (L === 'Z' && isHalf) return;            // stop at Z
+          const us = 0.25 + 0.25 * step;              // UK N = US 6.75
+          const label = 'UK ' + L + (isHalf ? '½' : '') + ' · US ' + usDecimal(us);
+          html += `<option value="${label}">${label}</option>`;
+          step++;
+        });
+      });
+      sel.innerHTML = html;
+      sel.dataset.built = '1';
+    }
+
+    // Select a size, preserving any legacy/free-text value from older products
+    function setSizeValue(val) {
+      const sel = document.getElementById('f-size');
+      buildSizeOptions();
+      if (val && !Array.from(sel.options).some(o => o.value === val)) {
+        const o = document.createElement('option');
+        o.value = val;
+        o.textContent = val + ' (current)';
+        sel.appendChild(o);
+      }
+      sel.value = val || '';
+    }
+
+    buildSizeOptions();
 
     // ── Slug generation (add mode only) ───────────────────────────
     function newSlugSuffix() {
@@ -1118,6 +1159,7 @@
       const slug = document.getElementById('f-slug').value.trim();
 
       if (!name || !slug) { setStatus('error', 'Please enter at least a name.'); return; }
+      if (!document.getElementById('f-size').value) { setStatus('error', 'Please select a ring size.'); return; }
 
       // Enforce the homepage featured cap (defensive — the checkbox is also disabled at cap)
       if (document.getElementById('f-featured').checked) {

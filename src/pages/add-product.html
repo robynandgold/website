@@ -822,14 +822,10 @@
     document.getElementById('add-video-btn').addEventListener('click', () => openMediaPicker('video-list', 'video'));
 
     // ── Ring size dropdown (UK letter + US equivalent) ────────────
-    // Standard UK→US conversion: UK A = US ½, +½ US per full letter
-    // (half letters step by ¼). Anchors match the usual chart: F≈3, L≈6, N≈7.
-    function usFraction(n) {
-      const whole = Math.floor(n);
-      const f = n - whole;
-      const sym = f === 0.25 ? '¼' : f === 0.5 ? '½' : f === 0.75 ? '¾' : '';
-      if (f === 0) return String(whole);
-      return (whole > 0 ? whole : '') + sym;
+    // UK→US conversion in decimals, anchored to UK N = US 6.75
+    // (UK A = US 0.25, +0.25 US per half-letter / +0.5 per full letter).
+    function usDecimal(n) {
+      return String(Math.round(n * 100) / 100); // e.g. 6, 6.25, 6.5, 6.75
     }
 
     function buildSizeOptions() {
@@ -841,8 +837,8 @@
       letters.forEach(L => {
         [false, true].forEach(isHalf => {
           if (L === 'Z' && isHalf) return;            // stop at Z
-          const us = 0.5 + 0.25 * step;
-          const label = 'UK ' + L + (isHalf ? '½' : '') + ' · US ' + usFraction(us);
+          const us = 0.25 + 0.25 * step;              // UK N = US 6.75
+          const label = 'UK ' + L + (isHalf ? '½' : '') + ' · US ' + usDecimal(us);
           html += `<option value="${label}">${label}</option>`;
           step++;
         });

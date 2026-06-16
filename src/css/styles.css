@@ -1442,6 +1442,31 @@ a {
   .product-detail-layout {
     grid-template-columns: 1fr;
   }
+
+  /* Compact filter panel once it stacks above the product grid:
+     trim padding and lay Category + Sort side by side so the box
+     no longer fills the screen and pushes pieces below the fold. */
+  .shop-filters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 0.9rem;
+    row-gap: 0.7rem;
+    padding: 1rem 1.1rem 1.1rem;
+  }
+
+  .filters-title {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+
+  .shop-filters .filter-group {
+    margin-bottom: 0;
+  }
+
+  #clear-filters {
+    grid-column: 1 / -1;
+    margin-top: 0.2rem;
+  }
 }
 
 @media (max-width: 640px) {

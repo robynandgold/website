@@ -307,7 +307,7 @@
     "size": "UK N/US 6.75",
     "price": 580,
     "currency": "EUR",
-    "featured": false,
+    "featured": true,
     "category": "rings",
     "available": true,
     "images": [

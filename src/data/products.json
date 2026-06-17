@@ -250,7 +250,7 @@
     "size": "UK L.5",
     "price": 975,
     "currency": "EUR",
-    "featured": true,
+    "featured": false,
     "category": "rings",
     "available": true,
     "images": [

@@ -496,7 +496,7 @@
           { headers: { 'Accept': 'application/vnd.github.v3+json' }, cache: 'no-store' });
         if (!res.ok) return;
         const fileData = await res.json();
-        const products = JSON.parse(atob(fileData.content.replace(/\n/g, '')));
+        const products = JSON.parse(decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, '')))));
         updateFeaturedState(products);
         featuredStateLoaded = true;
       } catch (e) { /* leave cap permissive if the catalogue can't be read */ }
@@ -585,7 +585,7 @@
         const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/src/data/products.json`, { headers, cache: 'no-store' });
         if (!res.ok) throw new Error('Failed to load products');
         const fileData = await res.json();
-        const products = JSON.parse(atob(fileData.content.replace(/\n/g, '')));
+        const products = JSON.parse(decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, '')))));
         updateFeaturedState(products);
         applyFeaturedCap(currentEditProduct?.id || null);
 
@@ -668,7 +668,7 @@
         const fetchRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, { headers, cache: 'no-store' });
         if (!fetchRes.ok) throw new Error('Failed to fetch products.json');
         const fileData = await fetchRes.json();
-        const allProducts = JSON.parse(atob(fileData.content.replace(/\n/g, '')));
+        const allProducts = JSON.parse(decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, '')))));
 
         const filtered = allProducts.filter(p => p.id !== product.id);
         if (filtered.length === allProducts.length) throw new Error('Product not found in products.json');
@@ -1117,7 +1117,7 @@
           throw err;
         }
         const fileData = await fetchRes.json();
-        const allProducts = JSON.parse(atob(fileData.content.replace(/\n/g, '')));
+        const allProducts = JSON.parse(decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, '')))));
 
         if (currentMode === 'edit') {
           const idx = allProducts.findIndex(p => p.id === product.id);

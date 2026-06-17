@@ -18,7 +18,9 @@ module.exports = async (req, res) => {
   }
 
   const adminPassword = process.env.ADMIN_PASSWORD;
-  const githubToken = process.env.GITHUB_TOKEN;
+  // Trim so a stray newline/space in the Vercel env var can't end up in the
+  // Authorization header and trigger a "Bad credentials" rejection from GitHub.
+  const githubToken = (process.env.GITHUB_TOKEN || '').trim();
 
   if (!adminPassword || !githubToken) {
     console.error('admin-token: ADMIN_PASSWORD or GITHUB_TOKEN not set');

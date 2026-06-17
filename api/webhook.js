@@ -86,7 +86,9 @@ module.exports = async function handler(req, res) {
 }
 
 async function markProductsAsSoldViaGitHub(productIds) {
-  const token = process.env.GITHUB_TOKEN;
+  // Trim so a stray newline/space in the Vercel env var can't end up in the
+  // Authorization header and trigger a "Bad credentials" rejection from GitHub.
+  const token = (process.env.GITHUB_TOKEN || '').trim();
   const owner = 'robynandgold';
   const repo = 'website';
   const filePath = 'src/data/products.json';

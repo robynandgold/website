@@ -130,7 +130,7 @@
       // First try to load products directly without waiting for ProductsAPI
       try {
         console.log('Trying direct fetch of products...');
-        const response = await fetch('../data/products.json');
+        const response = await fetch('../data/products.json', { cache: 'no-store' });
         console.log('Direct fetch response:', response.status, response.ok);
         
         if (response.ok) {

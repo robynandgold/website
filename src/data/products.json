@@ -414,5 +414,25 @@
     "videos": [
       "/images/products/IMG_7358.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-diamond-etoile-band-k8msk",
+    "name": "9ct Yellow Gold Diamond Etoile Band",
+    "slug": "9ct-yellow-gold-diamond-etoile-band-k8msk",
+    "description": "9ct yellow gold band flush-set with scattered diamonds totalling approximately 0.25cts. Fully hallmarked. 3.2g.\n\nPlease note that this ring is not suitable for resizing.",
+    "size": "UK N · US 6.75",
+    "price": 605,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "images": [
+      "/images/products/IMG_6724.jpeg",
+      "/images/products/IMG_6723.jpeg",
+      "/images/products/IMG_6722.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_6703.mov"
+    ]
   }
 ]

@@ -1122,6 +1122,8 @@
         if (currentMode === 'edit') {
           const idx = allProducts.findIndex(p => p.id === product.id);
           if (idx === -1) throw new Error(`Product "${product.id}" not found in products.json.`);
+          // Preserve the original date added rather than stamping "now" on every edit.
+          product.createdAt = allProducts[idx].createdAt || product.createdAt;
           allProducts[idx] = product;
         } else {
           if (allProducts.find(p => p.id === product.id)) {
@@ -1207,6 +1209,9 @@
           featured:    document.getElementById('f-featured').checked,
           category:    document.getElementById('f-category').value,
           available:   document.getElementById('f-available').checked,
+          // Date added — used by the shop's "Newest first" sort. For edits this is
+          // overwritten with the product's existing value in commitProductsJson().
+          createdAt:   new Date().toISOString(),
           images:      getMediaPaths('image-list'),
           videos:      getMediaPaths('video-list'),
         };

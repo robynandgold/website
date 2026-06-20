@@ -434,5 +434,24 @@
     "videos": [
       "/images/products/IMG_6703.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-hand-engraved-cigar-band-ojnb9",
+    "name": "9ct Yellow Gold Hand-engraved Cigar Band",
+    "slug": "9ct-yellow-gold-hand-engraved-cigar-band-ojnb9",
+    "description": "9ct yellow gold cigar band hand-engraved with foliate detailing. Fully hallmarked. 3.5g.",
+    "size": "UK P½ · US 8",
+    "price": 380,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "images": [
+      "/images/products/IMG_8125.jpeg",
+      "/images/products/247412FC-B742-4CB2-9A27-D9A037053B35.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_8118.mov"
+    ]
   }
 ]

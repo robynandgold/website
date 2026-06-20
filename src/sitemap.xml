@@ -20,6 +20,12 @@
   </url>
 
   <url>
+    <loc>https://robynandgold.com/pages/faq.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
     <loc>https://robynandgold.com/pages/contact.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -32,68 +38,110 @@
   </url>
 
   <url>
-    <loc>https://robynandgold.com/pages/product-detail.html?slug=18ct-yellow-gold-diamond-five-stone-ring</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://robynandgold.com/pages/terms.html</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <url>
+    <loc>https://robynandgold.com/pages/product/18ct-yellow-gold-diamond-five-stone-ring.html</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://robynandgold.com/pages/product-detail.html?slug=18ct-yellow-gold-sapphire-and-diamond-ring</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://robynandgold.com/pages/product/18ct-yellow-gold-sapphire-and-diamond-ring.html</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://robynandgold.com/pages/product-detail.html?slug=18ct-yellow-gold-diamond-five-stone-ring-zawc3</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://robynandgold.com/pages/product/18ct-yellow-gold-diamond-five-stone-ring-zawc3.html</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://robynandgold.com/pages/product-detail.html?slug=18ct-yellow-gold-diamond-five-stone-ring-vxm99</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://robynandgold.com/pages/product/18ct-yellow-gold-diamond-five-stone-ring-vxm99.html</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://robynandgold.com/pages/product-detail.html?slug=9ct-yellow-gold-sapphire-and-diamond-trefoil-ring-wzkq2</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://robynandgold.com/pages/product/9ct-white-gold-diamond-half-eternity-ring-p0jov.html</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://robynandgold.com/pages/product-detail.html?slug=9ct-white-gold-diamond-half-eternity-ring-p0jov</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://robynandgold.com/pages/product/18ct-white-gold-diamond-five-stone-ring-fzpdt.html</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://robynandgold.com/pages/product-detail.html?slug=18ct-white-gold-diamond-five-stone-ring-fzpdt</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://robynandgold.com/pages/product/18ct-white-gold-diamond-five-stone-ring-2715b.html</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://robynandgold.com/pages/product-detail.html?slug=9ct-yellow-gold-sapphire-and-diamond-ring-3tl0x</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://robynandgold.com/pages/product/18ct-yellow-gold-diamond-half-eternity-ring-62zd3.html</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://robynandgold.com/pages/product-detail.html?slug=18ct-white-gold-diamond-five-stone-ring-2715b</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://robynandgold.com/pages/product/18ct-yellow-gold-diamond-gypsy-ring-ogfy9.html</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://robynandgold.com/pages/product-detail.html?slug=9ct-bezel-set-sapphire-and-diamond-band-raa62</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://robynandgold.com/pages/product/18ct-yellow-gold-diamond-gypsy-ring-5qlwm.html</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://robynandgold.com/pages/product-detail.html?slug=9ct-yellow-gold-pear-cut-lab-diamond-solitaire-ohn9t</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://robynandgold.com/pages/product/18ct-white-gold-princess-cut-diamond-trilogy-y4zcy.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://robynandgold.com/pages/product/18ct-yellow-gold-bezel-set-diamond-trilogy-dc92g.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://robynandgold.com/pages/product/18ct-yellow-gold-diamond-trilogy-2ern2.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://robynandgold.com/pages/product/9ct-yellow-gold-diamond-trilogy-7vuzg.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://robynandgold.com/pages/product/18ct-yellow-gold-diamond-crossover-band-3z7x2.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://robynandgold.com/pages/product/9ct-yellow-gold-diamond-etoile-band-k8msk.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://robynandgold.com/pages/product/9ct-yellow-gold-hand-engraved-cigar-band-ojnb9.html</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 

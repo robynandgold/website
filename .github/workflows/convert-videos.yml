@@ -24,6 +24,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Look for .mov files
         id: check
         run: |
@@ -61,8 +65,13 @@ jobs:
         run: |
           sed -i -E 's/\.mov"/.mp4"/g; s/\.MOV"/.mp4"/g' src/data/products.json
 
-      - name: Commit converted videos
-        if: steps.check.outputs.found == 'true'
+      # Regenerate the static product pages and sitemap.xml from products.json.
+      # Runs on every change to products.json (or product media) so a newly
+      # added piece always gets its own crawlable page and a sitemap entry.
+      - name: Generate product pages and sitemap
+        run: node scripts/build.js
+
+      - name: Commit converted videos, generated pages and sitemap
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -71,7 +80,7 @@ jobs:
             echo "No changes to commit."
             exit 0
           fi
-          git commit -m "Auto-convert product videos to mp4 [skip ci]"
+          git commit -m "Auto-build: product pages, sitemap & converted videos [skip ci]"
 
           # Another publish can land on main between checkout and push, so the
           # push gets rejected as non-fast-forward. Rebase onto the latest main

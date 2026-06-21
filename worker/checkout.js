@@ -127,7 +127,7 @@ export async function handleCheckout(request, env) {
         {
           shipping_rate_data: {
             type: 'fixed_amount',
-            fixed_amount: { amount: 1000, currency: 'eur' },
+            fixed_amount: { amount: 0, currency: 'eur' }, // TEST: free shipping — revert to 1000 before going live
             display_name: 'Ireland shipping',
             delivery_estimate: {
               minimum: { unit: 'business_day', value: 2 },
@@ -138,7 +138,7 @@ export async function handleCheckout(request, env) {
         {
           shipping_rate_data: {
             type: 'fixed_amount',
-            fixed_amount: { amount: 1500, currency: 'eur' },
+            fixed_amount: { amount: 0, currency: 'eur' }, // TEST: free shipping — revert to 1500 before going live
             display_name: 'UK and European shipping',
             delivery_estimate: {
               minimum: { unit: 'business_day', value: 5 },
@@ -149,7 +149,7 @@ export async function handleCheckout(request, env) {
         {
           shipping_rate_data: {
             type: 'fixed_amount',
-            fixed_amount: { amount: 4500, currency: 'eur' },
+            fixed_amount: { amount: 0, currency: 'eur' }, // TEST: free shipping — revert to 4500 before going live
             display_name: 'Rest of the world shipping',
             delivery_estimate: {
               minimum: { unit: 'business_day', value: 7 },

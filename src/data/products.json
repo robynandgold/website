@@ -525,7 +525,7 @@
     "slug": "test-do-not-buy-checkout-test",
     "description": "Temporary low-value listing used to test live checkout end to end. This will be removed after testing. Please do not purchase.",
     "size": "n/a",
-    "price": 1,
+    "price": 0.5,
     "currency": "EUR",
     "featured": true,
     "category": "rings",

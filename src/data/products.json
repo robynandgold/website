@@ -518,5 +518,26 @@
     "videos": [
       "/images/products/IMG_8841.mp4"
     ]
+  },
+  {
+    "id": "18ct-yellow-gold-flush-set-diamond-band-f938z",
+    "name": "18ct Yellow Gold Flush-set Diamond Band",
+    "slug": "18ct-yellow-gold-flush-set-diamond-band-f938z",
+    "description": "18ct yellow gold band flush-set with three bright, white diamonds (etoile band). 3mm in width. Fully hallmarked with international hallmark convention. 2.8g.",
+    "size": "UK P · US 7.75",
+    "price": 585,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "createdAt": "2026-06-21T16:01:25.232Z",
+    "images": [
+      "/images/products/IMG_5899.jpeg",
+      "/images/products/IMG_5897.jpeg",
+      "/images/products/IMG_8870.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_8835.mov"
+    ]
   }
 ]

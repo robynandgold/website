@@ -539,5 +539,26 @@
     "videos": [
       "/images/products/IMG_8835.mov"
     ]
+  },
+  {
+    "id": "18ct-yellow-gold-flush-set-diamond-band-autqs",
+    "name": "18ct Yellow Gold Flush-set Diamond Band",
+    "slug": "18ct-yellow-gold-flush-set-diamond-band-autqs",
+    "description": "18ct yellow gold band flush-set with five bright, white diamonds. Fully hallmarked with international hallmark convention. 3mm in width. 2.7g.",
+    "size": "UK O½ · US 7.5",
+    "price": 625,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "createdAt": "2026-06-21T16:06:22.089Z",
+    "images": [
+      "/images/products/IMG_5903.jpeg",
+      "/images/products/IMG_5901.jpeg",
+      "/images/products/IMG_8874.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_8836.mov"
+    ]
   }
 ]

@@ -130,7 +130,7 @@
       // First try to load products directly without waiting for ProductsAPI
       try {
         console.log('Trying direct fetch of products...');
-        const response = await fetch('../data/products.json');
+        const response = await fetch('../data/products.json', { cache: 'no-store' });
         console.log('Direct fetch response:', response.status, response.ok);
         
         if (response.ok) {
@@ -139,7 +139,7 @@
           // Filter for available products
           allProducts = products.filter(product => product.available !== false);
           console.log('Available products:', allProducts.length);
-          renderProducts(allProducts);
+          filterProducts(); // applies the default "newest first" sort
           return; // Success, exit here
         }
       } catch (error) {
@@ -176,8 +176,8 @@
           grid.innerHTML = '<p class="cart-empty-message">No products available.</p>';
           return;
         }
-        
-        renderProducts(allProducts);
+
+        filterProducts(); // applies the default "newest first" sort
       } catch (error) {
         console.error('Error calling getAllProducts():', error);
         const grid = document.getElementById('product-list');
@@ -246,8 +246,16 @@
         filtered.sort((a, b) => a.price - b.price);
       } else if (sort === 'price-desc') {
         filtered.sort((a, b) => b.price - a.price);
+      } else if (sort === 'newest') {
+        // Newest first by date added. Items without a date sort last;
+        // ties (e.g. the original bulk import) keep their array order.
+        filtered.sort((a, b) => {
+          const da = a.createdAt ? Date.parse(a.createdAt) : -Infinity;
+          const db = b.createdAt ? Date.parse(b.createdAt) : -Infinity;
+          return db - da;
+        });
       }
-      
+
       renderProducts(filtered);
     }
     
@@ -255,7 +263,7 @@
     function clearFilters() {
       document.getElementById('filter-category').value = '';
       document.getElementById('filter-sort').value = 'newest';
-      renderProducts(allProducts);
+      filterProducts();
     }
 
     // Event listeners

@@ -42,7 +42,9 @@ find "$IMG_DIR" -type f \( -iname '*.mp4' -o -iname '*.mov' \) -print0 |
   while IFS= read -r -d '' f; do
     ext="${f##*.}"
     tmp="${f%.*}.opt.${ext}"
-    ffmpeg -y -loglevel error -i "$f" \
+    # -nostdin: ffmpeg must not read the loop's stdin (the find pipe), or it
+    # swallows the file list and hangs.
+    ffmpeg -nostdin -y -loglevel error -i "$f" \
       -vf "scale='min(1080,iw)':'-2'" \
       -c:v libx264 -preset slow -crf 28 -pix_fmt yuv420p \
       -an -movflags +faststart "$tmp" && mv "$tmp" "$f"

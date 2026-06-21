@@ -1,0 +1,11 @@
+# Cloudflare Pages configuration (replaces vercel.json for Cloudflare).
+#
+# - pages_build_output_dir: the static site lives in src/ (same as Vercel's
+#   outputDirectory). Functions in functions/ are picked up automatically and
+#   served at /api/*.
+# - nodejs_compat: lets the Stripe SDK and node:crypto / node:buffer run on
+#   the Workers runtime used by Pages Functions.
+name = "robynandgold"
+pages_build_output_dir = "src"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]

@@ -1,11 +1,16 @@
-# Cloudflare Pages configuration (replaces vercel.json for Cloudflare).
+# Cloudflare Worker configuration (replaces vercel.json).
 #
-# - pages_build_output_dir: the static site lives in src/ (same as Vercel's
-#   outputDirectory). Functions in functions/ are picked up automatically and
-#   served at /api/*.
+# This is a Worker with Static Assets: it serves the static site from src/
+# (via the ASSETS binding) and runs worker/index.js for the /api/* routes.
+#
 # - nodejs_compat: lets the Stripe SDK and node:crypto / node:buffer run on
-#   the Workers runtime used by Pages Functions.
-name = "robynandgold"
-pages_build_output_dir = "src"
+#   the Workers runtime.
+# - The default build deploy command (npx wrangler deploy) reads this file.
+name = "website"
+main = "worker/index.js"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "./src"
+binding = "ASSETS"

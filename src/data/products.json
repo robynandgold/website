@@ -497,5 +497,26 @@
     "videos": [
       "/images/products/IMG_8837.mp4"
     ]
+  },
+  {
+    "id": "9ct-white-gold-diamond-milgrain-half-eternity-pf0kt",
+    "name": "9ct White Gold Diamond Milgrain Half-eternity",
+    "slug": "9ct-white-gold-diamond-milgrain-half-eternity-pf0kt",
+    "description": "9ct white gold diamond half-eternity. Each diamond is individually set with  milgrain detail to the border. Fully hallmarked with the international hallmark convention. 1.7g.",
+    "size": "UK M · US 6.25",
+    "price": 345,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "createdAt": "2026-06-21T15:51:52.203Z",
+    "images": [
+      "/images/products/IMG_8879.jpeg",
+      "/images/products/IMG_8880.jpeg",
+      "/images/products/IMG_5889.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_8841.mov"
+    ]
   }
 ]

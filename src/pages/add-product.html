@@ -1122,11 +1122,14 @@
         if (currentMode === 'edit') {
           const idx = allProducts.findIndex(p => p.id === product.id);
           if (idx === -1) throw new Error(`Product "${product.id}" not found in products.json.`);
+          // Preserve the original creation date when editing.
+          product.createdAt = allProducts[idx].createdAt || product.createdAt || new Date().toISOString();
           allProducts[idx] = product;
         } else {
           if (allProducts.find(p => p.id === product.id)) {
             throw new Error(`A product with slug "${product.id}" already exists.`);
           }
+          if (!product.createdAt) product.createdAt = new Date().toISOString();
           allProducts.push(product);
         }
 

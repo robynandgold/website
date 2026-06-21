@@ -507,6 +507,7 @@
           available:   document.getElementById('f-available').checked,
           images:      getMediaPaths('image-list'),
           videos:      getMediaPaths('video-list'),
+          createdAt:   new Date().toISOString(),
         };
 
         // 3. Fetch current products.json from GitHub

@@ -115,6 +115,7 @@ function productJsonLd(product, url) {
   };
   if (material) product_ld.material = material;
   if (product.size) product_ld.size = product.size;
+  if (product.createdAt) product_ld.releaseDate = product.createdAt;
 
   return product_ld;
 }
@@ -385,12 +386,16 @@ function renderSitemap(products) {
     .filter(p => p.available !== false)
     .map(p => ({
       loc: `${SITE}/pages/product/${p.slug}.html`,
+      lastmod: p.createdAt ? String(p.createdAt).slice(0, 10) : undefined,
       changefreq: 'weekly',
       priority: '0.8'
     }));
 
   const urls = [...staticPages, ...productUrls]
-    .map(u => `  <url>\n    <loc>${u.loc}</loc>\n    <changefreq>${u.changefreq}</changefreq>\n    <priority>${u.priority}</priority>\n  </url>`)
+    .map(u => {
+      const lastmod = u.lastmod ? `\n    <lastmod>${u.lastmod}</lastmod>` : '';
+      return `  <url>\n    <loc>${u.loc}</loc>${lastmod}\n    <changefreq>${u.changefreq}</changefreq>\n    <priority>${u.priority}</priority>\n  </url>`;
+    })
     .join('\n\n');
 
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n${urls}\n\n</urlset>\n`;

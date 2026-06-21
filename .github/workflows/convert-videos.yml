@@ -2,7 +2,8 @@ name: Convert product videos to mp4
 
 # When new product videos are uploaded (iPhones record .mov, which browsers
 # won't reliably play), transcode them to compressed web-friendly mp4 and
-# repoint products.json. Runs after the admin tool publishes.
+# repoint products.json. Also regenerates the static product pages and
+# sitemap. Runs after the admin tool publishes.
 
 on:
   push:
@@ -28,70 +29,57 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Look for .mov files
-        id: check
-        run: |
-          shopt -s nullglob nocaseglob
-          movs=(src/images/products/*.mov)
-          if [ ${#movs[@]} -eq 0 ]; then
-            echo "Found no .mov files — nothing to do."
-            echo "found=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "Found ${#movs[@]} .mov file(s)."
-            echo "found=true" >> "$GITHUB_OUTPUT"
-          fi
-
+      # Installed unconditionally: a retry may reset to a newer main that still
+      # contains an unconverted .mov, so ffmpeg must always be available.
       - name: Install ffmpeg
-        if: steps.check.outputs.found == 'true'
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
-      - name: Transcode .mov -> .mp4 and remove originals
-        if: steps.check.outputs.found == 'true'
-        run: |
-          shopt -s nullglob nocaseglob
-          cd src/images/products
-          for f in *.mov; do
-            base="${f%.*}"
-            echo "Converting $f -> ${base}.mp4"
-            ffmpeg -y -i "$f" \
-              -vf "scale='min(720,iw)':-2" \
-              -c:v libx264 -preset veryfast -crf 26 -movflags +faststart -an \
-              "${base}.mp4"
-            rm -f "$f"
-          done
-
-      - name: Repoint products.json to .mp4
-        if: steps.check.outputs.found == 'true'
-        run: |
-          sed -i -E 's/\.mov"/.mp4"/g; s/\.MOV"/.mp4"/g' src/data/products.json
-
-      # Regenerate the static product pages and sitemap.xml from products.json.
-      # Runs on every change to products.json (or product media) so a newly
-      # added piece always gets its own crawlable page and a sitemap entry.
-      - name: Generate product pages and sitemap
-        run: node scripts/build.js
-
-      - name: Commit converted videos, generated pages and sitemap
+      # Everything below is deterministic and regenerable, so on a rejected
+      # push we simply reset to the latest main and redo it — rather than
+      # rebasing, which cannot auto-merge the binary .mp4 files and used to
+      # fail the whole job on an add/add conflict.
+      - name: Convert videos, build pages and sitemap, then push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-            exit 0
-          fi
-          git commit -m "Auto-build: product pages, sitemap & converted videos [skip ci]"
 
-          # Another publish can land on main between checkout and push, so the
-          # push gets rejected as non-fast-forward. Rebase onto the latest main
-          # and retry a few times before giving up.
           for attempt in 1 2 3 4 5; do
-            if git push; then
+            # 1. Transcode any iPhone .mov to web-friendly .mp4 and drop the original.
+            shopt -s nullglob nocaseglob
+            for f in src/images/products/*.mov; do
+              base="${f%.*}"
+              echo "Converting $f -> ${base}.mp4"
+              ffmpeg -y -i "$f" \
+                -vf "scale='min(720,iw)':-2" \
+                -c:v libx264 -preset veryfast -crf 26 -movflags +faststart -an \
+                "${base}.mp4"
+              rm -f "$f"
+            done
+
+            # 2. Repoint products.json at the .mp4 files.
+            sed -i -E 's/\.mov"/.mp4"/g; s/\.MOV"/.mp4"/g' src/data/products.json
+
+            # 3. Regenerate the static product pages and sitemap.xml so a newly
+            #    added piece always gets its own crawlable page and sitemap entry.
+            node scripts/build.js
+
+            git add -A
+            if git diff --cached --quiet; then
+              echo "No changes to commit."
+              exit 0
+            fi
+            git commit -m "Auto-build: product pages, sitemap & converted videos [skip ci]"
+
+            if git push origin HEAD:main; then
               echo "Pushed on attempt $attempt."
               exit 0
             fi
-            echo "Push rejected (attempt $attempt) — rebasing onto latest main and retrying."
-            git pull --rebase origin main
+
+            # Another publish landed on main first. Discard our commit, adopt the
+            # latest main, and redo the deterministic work on top of it next loop.
+            echo "Push rejected (attempt $attempt) — resetting to latest main and redoing."
+            git fetch origin main
+            git reset --hard origin/main
           done
 
           echo "Failed to push after multiple attempts."

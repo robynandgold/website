@@ -95,7 +95,9 @@ async function markProductsAsSoldViaGitHub(productIds, env) {
   const owner = 'robynandgold';
   const repo = 'website';
   const filePath = 'src/data/products.json';
-  const branch = 'main';
+  // TEST: commit the "sold" change to the test branch so the test product is
+  // found and updated. Revert to 'main' before going live.
+  const branch = 'claude/hosting-alternatives-vercel-49zlgj';
 
   if (!token) {
     console.error('GITHUB_TOKEN not set');

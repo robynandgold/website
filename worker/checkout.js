@@ -10,6 +10,9 @@ import { Buffer } from 'node:buffer';
 const GH_OWNER = 'robynandgold';
 const GH_REPO = 'website';
 const PRODUCTS_PATH = 'src/data/products.json';
+// TEST: read the catalogue from the test branch so the test product is found.
+// Revert to 'main' before going live.
+const PRODUCTS_REF = 'claude/hosting-alternatives-vercel-49zlgj';
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -28,7 +31,7 @@ async function getCurrentProducts(env) {
   if (token) {
     try {
       const resp = await fetch(
-        `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${PRODUCTS_PATH}?ref=main`,
+        `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${PRODUCTS_PATH}?ref=${PRODUCTS_REF}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -49,7 +52,7 @@ async function getCurrentProducts(env) {
 
   try {
     const resp = await fetch(
-      `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/${PRODUCTS_PATH}`,
+      `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${PRODUCTS_REF}/${PRODUCTS_PATH}`,
       { headers: { 'Cache-Control': 'no-cache' } }
     );
     if (resp.ok) return await resp.json();

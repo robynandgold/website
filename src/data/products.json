@@ -10,7 +10,6 @@
     "featured": false,
     "category": "rings",
     "available": true,
-    "createdAt": "2026-06-14T15:41:05+00:00",
     "images": [
       "/images/products/IMG_8584.jpeg",
       "/images/products/IMG_8581.jpeg",
@@ -19,7 +18,8 @@
     "videos": [
       "/images/products/IMG_8544.mp4",
       "/images/products/IMG_8445.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-13T14:24:13+01:00"
   },
   {
     "id": "18ct-yellow-gold-sapphire-and-diamond-ring",
@@ -32,7 +32,6 @@
     "featured": false,
     "category": "rings",
     "available": true,
-    "createdAt": "2026-06-14T15:41:05+00:00",
     "images": [
       "/images/products/IMG_8567.jpeg",
       "/images/products/IMG_8568.jpeg"
@@ -40,7 +39,8 @@
     "videos": [
       "/images/products/IMG_8594.mp4",
       "/images/products/IMG_8450.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-13T14:24:13+01:00"
   },
   {
     "id": "18ct-yellow-gold-diamond-five-stone-ring-zawc3",
@@ -53,7 +53,6 @@
     "featured": false,
     "category": "rings",
     "available": true,
-    "createdAt": "2026-06-14T15:41:05+00:00",
     "images": [
       "/images/products/IMG_8590.jpeg",
       "/images/products/IMG_8592.jpeg"
@@ -61,7 +60,8 @@
     "videos": [
       "/images/products/IMG_8543.mp4",
       "/images/products/IMG_8446.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-13T14:24:13+01:00"
   },
   {
     "id": "18ct-yellow-gold-diamond-five-stone-ring-vxm99",
@@ -74,14 +74,14 @@
     "featured": false,
     "category": "rings",
     "available": true,
-    "createdAt": "2026-06-14T15:41:05+00:00",
     "images": [
       "/images/products/IMG_8578.jpeg"
     ],
     "videos": [
       "/images/products/IMG_8545.mp4",
       "/images/products/IMG_8447.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-13T14:24:13+01:00"
   },
   {
     "id": "9ct-yellow-gold-sapphire-and-diamond-trefoil-ring-wzkq2",
@@ -94,7 +94,6 @@
     "featured": false,
     "category": "rings",
     "available": false,
-    "createdAt": "2026-06-14T15:41:05+00:00",
     "images": [
       "/images/products/IMG_8564.jpeg",
       "/images/products/IMG_8566.jpeg",
@@ -103,7 +102,8 @@
     "videos": [
       "/images/products/IMG_8553.mp4",
       "/images/products/IMG_8449.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-13T14:24:13+01:00"
   },
   {
     "id": "9ct-white-gold-diamond-half-eternity-ring-p0jov",
@@ -116,7 +116,6 @@
     "featured": false,
     "category": "rings",
     "available": true,
-    "createdAt": "2026-06-14T15:41:05+00:00",
     "images": [
       "/images/products/IMG_8560.jpeg",
       "/images/products/IMG_8534.jpeg"
@@ -124,7 +123,8 @@
     "videos": [
       "/images/products/IMG_8547.mp4",
       "/images/products/IMG_8451.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-13T14:24:13+01:00"
   },
   {
     "id": "18ct-white-gold-diamond-five-stone-ring-fzpdt",
@@ -137,7 +137,6 @@
     "featured": true,
     "category": "rings",
     "available": true,
-    "createdAt": "2026-06-14T15:41:05+00:00",
     "images": [
       "/images/products/IMG_8586.jpeg",
       "/images/products/IMG_8588.jpeg"
@@ -145,7 +144,8 @@
     "videos": [
       "/images/products/IMG_8542.mp4",
       "/images/products/IMG_8441.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-13T14:24:13+01:00"
   },
   {
     "id": "9ct-yellow-gold-sapphire-and-diamond-ring-3tl0x",
@@ -158,7 +158,6 @@
     "featured": false,
     "category": "rings",
     "available": false,
-    "createdAt": "2026-06-14T15:41:05+00:00",
     "images": [
       "/images/products/IMG_8563.jpeg",
       "/images/products/IMG_8561.jpeg"
@@ -166,7 +165,8 @@
     "videos": [
       "/images/products/IMG_8552.mp4",
       "/images/products/IMG_8442.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-13T14:24:13+01:00"
   },
   {
     "id": "18ct-white-gold-diamond-five-stone-ring-2715b",
@@ -179,7 +179,6 @@
     "featured": false,
     "category": "rings",
     "available": true,
-    "createdAt": "2026-06-14T15:41:05+00:00",
     "images": [
       "/images/products/IMG_8576.jpeg",
       "/images/products/IMG_8577.jpeg",
@@ -188,7 +187,8 @@
     "videos": [
       "/images/products/IMG_8546.mp4",
       "/images/products/IMG_8440.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-13T14:24:13+01:00"
   },
   {
     "id": "9ct-bezel-set-sapphire-and-diamond-band-raa62",
@@ -201,7 +201,6 @@
     "featured": false,
     "category": "rings",
     "available": false,
-    "createdAt": "2026-06-14T15:41:05+00:00",
     "images": [
       "/images/products/IMG_8573.jpeg",
       "/images/products/IMG_8571.jpeg"
@@ -209,7 +208,8 @@
     "videos": [
       "/images/products/IMG_8548.mp4",
       "/images/products/IMG_8443.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-13T14:24:13+01:00"
   },
   {
     "id": "9ct-yellow-gold-pear-cut-lab-diamond-solitaire-ohn9t",
@@ -222,7 +222,6 @@
     "featured": false,
     "category": "rings",
     "available": false,
-    "createdAt": "2026-06-14T15:41:05+00:00",
     "images": [
       "/images/products/IMG_8556.jpeg",
       "/images/products/IMG_8524.jpeg"
@@ -230,7 +229,8 @@
     "videos": [
       "/images/products/IMG_8555.mp4",
       "/images/products/IMG_8444.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-13T14:24:15+01:00"
   },
   {
     "id": "18ct-yellow-gold-diamond-half-eternity-ring-62zd3",
@@ -243,7 +243,6 @@
     "featured": true,
     "category": "rings",
     "available": true,
-    "createdAt": "2026-06-15T20:04:19+01:00",
     "images": [
       "/images/products/IMG_7389.jpeg",
       "/images/products/IMG_7391.jpeg",
@@ -252,7 +251,8 @@
     "videos": [
       "/images/products/IMG_7354.mp4",
       "/images/products/IMG_7287.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-15T22:20:57+01:00"
   },
   {
     "id": "18ct-yellow-gold-diamond-gypsy-ring-ogfy9",
@@ -265,7 +265,6 @@
     "featured": false,
     "category": "rings",
     "available": true,
-    "createdAt": "2026-06-15T20:04:19+01:00",
     "images": [
       "/images/products/IMG_8136.jpeg",
       "/images/products/IMG_8129.jpeg",
@@ -273,7 +272,8 @@
     ],
     "videos": [
       "/images/products/IMG_8117.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-15T22:20:57+01:00"
   },
   {
     "id": "18ct-yellow-gold-diamond-gypsy-ring-5qlwm",
@@ -286,14 +286,14 @@
     "featured": false,
     "category": "rings",
     "available": true,
-    "createdAt": "2026-06-15T20:04:19+01:00",
     "images": [
       "/images/products/IMG_8021.jpeg",
       "/images/products/IMG_8018.jpeg"
     ],
     "videos": [
       "/images/products/IMG_8116.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-15T22:20:57+01:00"
   },
   {
     "id": "18ct-yellow-gold-diamond-belcher-style-solitaire-5pf2j",
@@ -305,14 +305,14 @@
     "currency": "EUR",
     "featured": false,
     "category": "rings",
-    "available": true,
-    "createdAt": "2026-06-15T20:04:19+01:00",
+    "available": false,
     "images": [
       "/images/products/IMG_8122.jpeg"
     ],
     "videos": [
       "/images/products/IMG_8121.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-15T22:20:57+01:00"
   },
   {
     "id": "18ct-white-gold-princess-cut-diamond-trilogy-y4zcy",
@@ -325,14 +325,14 @@
     "featured": true,
     "category": "rings",
     "available": true,
-    "createdAt": "2026-06-15T22:15:18+01:00",
     "images": [
       "/images/products/IMG_4660.jpeg",
       "/images/products/IMG_4661.jpeg"
     ],
     "videos": [
       "/images/products/IMG_4650.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-15T22:20:57+01:00"
   },
   {
     "id": "18ct-yellow-gold-bezel-set-diamond-trilogy-dc92g",
@@ -345,14 +345,14 @@
     "featured": false,
     "category": "rings",
     "available": true,
-    "createdAt": "2026-06-15T22:21:03+01:00",
     "images": [
       "/images/products/IMG_4602.jpeg",
       "/images/products/IMG_4600.jpeg"
     ],
     "videos": [
       "/images/products/IMG_4586.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-15T22:21:03+01:00"
   },
   {
     "id": "18ct-yellow-gold-diamond-trilogy-2ern2",
@@ -365,14 +365,14 @@
     "featured": false,
     "category": "rings",
     "available": true,
-    "createdAt": "2026-06-15T22:30:03+01:00",
     "images": [
       "/images/products/IMG_4594.jpeg",
       "/images/products/IMG_4596.jpeg"
     ],
     "videos": [
       "/images/products/IMG_5642.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-15T22:30:03+01:00"
   },
   {
     "id": "9ct-yellow-gold-sapphire-and-opal-gypsy-ring-lz9rp",
@@ -384,15 +384,15 @@
     "currency": "EUR",
     "featured": false,
     "category": "rings",
-    "available": true,
-    "createdAt": "2026-06-17T21:22:36+01:00",
+    "available": false,
     "images": [
       "/images/products/IMG_8149.jpeg",
       "/images/products/IMG_8147.jpeg"
     ],
     "videos": [
       "/images/products/IMG_5646.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-17T21:22:36+01:00"
   },
   {
     "id": "9ct-yellow-gold-diamond-trilogy-7vuzg",
@@ -405,7 +405,6 @@
     "featured": false,
     "category": "rings",
     "available": true,
-    "createdAt": "2026-06-17T21:31:29+01:00",
     "images": [
       "/images/products/IMG_7383.jpeg",
       "/images/products/IMG_7381.jpeg",
@@ -413,7 +412,8 @@
     ],
     "videos": [
       "/images/products/IMG_7359.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-17T21:31:29+01:00"
   },
   {
     "id": "18ct-yellow-gold-diamond-crossover-band-3z7x2",
@@ -426,7 +426,6 @@
     "featured": false,
     "category": "rings",
     "available": true,
-    "createdAt": "2026-06-17T21:35:58+01:00",
     "images": [
       "/images/products/IMG_7375.jpeg",
       "/images/products/IMG_7374.jpeg",
@@ -434,7 +433,8 @@
     ],
     "videos": [
       "/images/products/IMG_7358.mp4"
-    ]
+    ],
+    "createdAt": "2026-06-17T21:35:58+01:00"
   },
   {
     "id": "9ct-yellow-gold-diamond-etoile-band-k8msk",
@@ -447,14 +447,34 @@
     "featured": false,
     "category": "rings",
     "available": true,
-    "createdAt": "2026-06-18T19:45:57+01:00",
     "images": [
       "/images/products/IMG_6724.jpeg",
       "/images/products/IMG_6723.jpeg",
       "/images/products/IMG_6722.jpeg"
     ],
     "videos": [
-      "/images/products/IMG_6703.mov"
-    ]
+      "/images/products/IMG_6703.mp4"
+    ],
+    "createdAt": "2026-06-18T19:45:57+01:00"
+  },
+  {
+    "id": "9ct-yellow-gold-hand-engraved-cigar-band-ojnb9",
+    "name": "9ct Yellow Gold Hand-engraved Cigar Band",
+    "slug": "9ct-yellow-gold-hand-engraved-cigar-band-ojnb9",
+    "description": "9ct yellow gold cigar band hand-engraved with foliate detailing. Fully hallmarked. 3.5g.",
+    "size": "UK P½ · US 8",
+    "price": 380,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "images": [
+      "/images/products/IMG_8125.jpeg",
+      "/images/products/247412FC-B742-4CB2-9A27-D9A037053B35.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_8118.mp4"
+    ],
+    "createdAt": "2026-06-20T20:57:53+01:00"
   }
 ]

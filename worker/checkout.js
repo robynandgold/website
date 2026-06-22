@@ -10,9 +10,8 @@ import { Buffer } from 'node:buffer';
 const GH_OWNER = 'robynandgold';
 const GH_REPO = 'website';
 const PRODUCTS_PATH = 'src/data/products.json';
-// TEST: read the catalogue from the test branch so the test product is found.
-// Revert to 'main' before going live.
-const PRODUCTS_REF = 'claude/hosting-alternatives-vercel-49zlgj';
+// Branch the live catalogue is read from for the pre-payment availability check.
+const PRODUCTS_REF = 'main';
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -130,7 +129,7 @@ export async function handleCheckout(request, env) {
         {
           shipping_rate_data: {
             type: 'fixed_amount',
-            fixed_amount: { amount: 0, currency: 'eur' }, // TEST: free shipping — revert to 1000 before going live
+            fixed_amount: { amount: 1000, currency: 'eur' },
             display_name: 'Ireland shipping',
             delivery_estimate: {
               minimum: { unit: 'business_day', value: 2 },
@@ -141,7 +140,7 @@ export async function handleCheckout(request, env) {
         {
           shipping_rate_data: {
             type: 'fixed_amount',
-            fixed_amount: { amount: 0, currency: 'eur' }, // TEST: free shipping — revert to 1500 before going live
+            fixed_amount: { amount: 1500, currency: 'eur' },
             display_name: 'UK and European shipping',
             delivery_estimate: {
               minimum: { unit: 'business_day', value: 5 },
@@ -152,7 +151,7 @@ export async function handleCheckout(request, env) {
         {
           shipping_rate_data: {
             type: 'fixed_amount',
-            fixed_amount: { amount: 0, currency: 'eur' }, // TEST: free shipping — revert to 4500 before going live
+            fixed_amount: { amount: 4500, currency: 'eur' },
             display_name: 'Rest of the world shipping',
             delivery_estimate: {
               minimum: { unit: 'business_day', value: 7 },

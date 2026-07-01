@@ -1,0 +1,53 @@
+name: Optimize media
+
+# Runs in GitHub CI (not the dev sandbox, which can't push binaries).
+# Triggered automatically when this workflow lands on the branch, and
+# can be re-run manually. The optimize step is idempotent via a marker
+# file, and the resulting commit carries [skip ci] so it does not loop.
+on:
+  push:
+    branches:
+      - claude/hosting-alternatives-vercel-49zlgj
+    paths:
+      - .github/workflows/optimize-media.yml
+      - scripts/optimize-media.sh
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: claude/hosting-alternatives-vercel-49zlgj
+          fetch-depth: 1
+
+      - name: Install ImageMagick and ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq imagemagick ffmpeg
+
+      - name: Report sizes (before)
+        run: du -sh src/images || true
+
+      - name: Optimize media
+        run: bash scripts/optimize-media.sh
+
+      - name: Report sizes (after)
+        run: du -sh src/images || true
+
+      - name: Commit optimized media
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git add -A
+          git commit -m "Optimize media: resize images <=1600px, re-encode videos (H.264 CRF 28) [skip ci]"
+          git push origin HEAD:claude/hosting-alternatives-vercel-49zlgj

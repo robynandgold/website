@@ -560,5 +560,22 @@
     "videos": [
       "/images/products/IMG_8836.mp4"
     ]
+  },
+  {
+    "id": "test-do-not-buy-checkout-test",
+    "name": "TEST — Do Not Buy (checkout test)",
+    "slug": "test-do-not-buy-checkout-test",
+    "description": "Temporary low-value listing used to test live checkout end to end. This will be removed shortly. Please do not purchase.",
+    "size": "n/a",
+    "price": 0.5,
+    "currency": "EUR",
+    "featured": true,
+    "category": "rings",
+    "available": true,
+    "createdAt": "2026-06-21T20:00:00.000Z",
+    "images": [
+      "/images/products/IMG_8879.jpeg"
+    ],
+    "videos": []
   }
 ]

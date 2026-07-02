@@ -768,7 +768,11 @@
 
     function addMediaEntry(listId, type, file) {
       const list = document.getElementById(listId);
-      const path = `/images/products/${file.name}`;
+      // Videos are staged in incoming/ and re-encoded to .mp4 by the GitHub
+      // Action, so the product record points at the final converted path.
+      const path = type === 'video'
+        ? `/images/products/${file.name.replace(/\.[^.]+$/, '')}.mp4`
+        : `/images/products/${file.name}`;
       const url = URL.createObjectURL(file);
       pendingFiles.set(file.name, file);
 
@@ -805,8 +809,9 @@
       list.appendChild(entry);
     }
 
-    // Videos are uploaded as-is (including iPhone .mov) and converted to
-    // web-friendly mp4 automatically by a GitHub Action after publishing.
+    // Videos (including iPhone .mov) are staged in incoming/ and converted to
+    // web-friendly mp4 in src/images/products/ by a GitHub Action after
+    // publishing; images are committed directly.
     function openMediaPicker(listId, type) {
       const input = document.createElement('input');
       input.type = 'file';
@@ -1074,7 +1079,13 @@
           binary += String.fromCharCode(...bytes.subarray(j, j + 8192));
         }
         const base64 = btoa(binary);
-        const filePath = `src/images/products/${filename}`;
+        // Raw videos are staged OUTSIDE src/ (the deployed assets directory):
+        // straight-off-the-phone files can exceed Cloudflare's 25MiB per-asset
+        // limit and would fail the deploy. The GitHub Action converts them to
+        // compressed .mp4 inside src/images/products/ and deletes the staged
+        // original.
+        const isVideo = (file.type || '').startsWith('video/') || /\.(mov|mp4|m4v|webm)$/i.test(filename);
+        const filePath = isVideo ? `incoming/${filename}` : `src/images/products/${filename}`;
         const sizeMB = file.size / 1024 / 1024;
 
         if (sizeMB > 10) {

@@ -560,5 +560,26 @@
     "videos": [
       "/images/products/IMG_8836.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-bespoke-diamond-signet-68li3",
+    "name": "9ct Yellow Gold Bespoke Diamond Signet",
+    "slug": "9ct-yellow-gold-bespoke-diamond-signet-68li3",
+    "description": "9ct yellow gold vintage signet ring (c. 2000) set with a 0.2/3 ct antique fancy yellow old mine cut diamond in a hand-engraved star setting. Diamond is bright, eye clean and fancy yellow in colour. Signet is fully hallmarked. 8.7g.\n\nThis vintage signet has been lovingly restored and reworked by a skilled goldsmith. The antique old mine cut diamond was sourced specifically for this ring. It is a one of a kind piece, a true heirloom, made to be treasured for generations to come.",
+    "size": "UK Q½ · US 8.5",
+    "price": 1295,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "createdAt": "2026-07-02T17:59:31.691Z",
+    "images": [
+      "/images/products/IMG_9145.jpeg",
+      "/images/products/IMG_9137.jpeg",
+      "/images/products/IMG_9122.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_9173.mov"
+    ]
   }
 ]

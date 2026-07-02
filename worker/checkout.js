@@ -2,8 +2,8 @@
 //
 // Runs on the Workers runtime: env comes from the Worker `env`, Stripe uses
 // its fetch HTTP client, and we return a Response. The on-disk products.json
-// fallback is dropped (no filesystem on Workers); we fall open if both GitHub
-// sources are unreachable, exactly as the original did.
+// fallback is dropped (no filesystem on Workers); if both GitHub sources are
+// unreachable we fail closed, since line items are priced from the catalogue.
 import Stripe from 'stripe';
 import { Buffer } from 'node:buffer';
 
@@ -83,44 +83,59 @@ export async function handleCheckout(request, env) {
       return json({ error: 'No items provided' }, 400);
     }
 
-    // Re-check availability before taking payment. Shrinks (but does not fully
-    // eliminate) the window where two people buy the same unique piece. If the
-    // catalogue can't be loaded we fail open so a transient outage doesn't
-    // block every sale.
+    // The request body is only trusted for *which* products are wanted.
+    // Name, price and currency always come from the live catalogue so a
+    // tampered request can't set its own price, and quantity is forced to 1
+    // because every piece is one of a kind. That means the catalogue is
+    // required: if it can't be loaded we fail closed rather than fall back
+    // to client-supplied prices.
     const products = await getCurrentProducts(env);
-    if (products) {
-      const byId = new Map(products.map((p) => [String(p.id), p]));
-      const unavailable = items
-        .filter((item) => {
-          const product = byId.get(String(item.id));
-          return !product || product.available === false;
-        })
-        .map((item) => ({ id: item.id, name: item.name }));
-
-      if (unavailable.length > 0) {
-        console.log('[checkout] Rejected — unavailable items:', unavailable.map((u) => u.id).join(', '));
-        return json({ error: 'Some items are no longer available', unavailable }, 409);
-      }
-    } else {
-      console.warn('[checkout] Could not verify availability; proceeding (fail open)');
+    if (!products) {
+      console.error('[checkout] Could not load catalogue; refusing checkout (fail closed)');
+      return json({ error: 'Checkout is temporarily unavailable. Please try again in a few minutes.' }, 503);
     }
 
-    const line_items = items.map((item) => ({
-      price_data: {
-        currency: item.currency || env.STRIPE_CURRENCY || 'eur',
-        product_data: {
-          name: item.name,
-          description: item.description || undefined,
-          metadata: { product_id: item.id },
+    const byId = new Map(products.map((p) => [String(p.id), p]));
+    const unavailable = [];
+    const line_items = [];
+
+    for (const item of items) {
+      const product = byId.get(String(item.id));
+      if (!product || product.available === false) {
+        unavailable.push({ id: item.id, name: (product && product.name) || item.name });
+        continue;
+      }
+      line_items.push({
+        price_data: {
+          currency: String(product.currency || env.STRIPE_CURRENCY || 'eur').toLowerCase(),
+          product_data: {
+            name: product.name,
+            description: product.description || undefined,
+            metadata: { product_id: product.id },
+          },
+          unit_amount: Math.round(product.price * 100),
         },
-        unit_amount: Math.round(item.price * 100),
-      },
-      quantity: item.quantity || 1,
-    }));
+        quantity: 1,
+      });
+    }
+
+    if (unavailable.length > 0) {
+      console.log('[checkout] Rejected — unavailable items:', unavailable.map((u) => u.id).join(', '));
+      return json({ error: 'Some items are no longer available', unavailable }, 409);
+    }
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
+      // No payment_method_types: let Stripe offer every method enabled in the
+      // Dashboard (cards, wallets, Link, …) based on the buyer's device/locale.
       mode: 'payment',
+      // One-of-a-kind stock: keep the session short so an abandoned checkout
+      // doesn't sit on a piece all day, and let Stripe issue a recovery URL
+      // (via the checkout.session.expired webhook) if it does lapse.
+      // Stripe's minimum is 30 minutes ahead; 35 leaves headroom for clock skew.
+      expires_at: Math.floor(Date.now() / 1000) + 35 * 60,
+      after_expiration: {
+        recovery: { enabled: true },
+      },
       line_items,
       shipping_address_collection: {
         allowed_countries: ['AC', 'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AQ', 'AR', 'AT', 'AU', 'AW', 'AX', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BL', 'BM', 'BN', 'BO', 'BQ', 'BR', 'BS', 'BT', 'BV', 'BW', 'BY', 'BZ', 'CA', 'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN', 'CO', 'CR', 'CV', 'CW', 'CY', 'CZ', 'DE', 'DJ', 'DK', 'DM', 'DO', 'DZ', 'EC', 'EE', 'EG', 'EH', 'ER', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FO', 'FR', 'GA', 'GB', 'GD', 'GE', 'GF', 'GG', 'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW', 'GY', 'HK', 'HN', 'HR', 'HT', 'HU', 'ID', 'IE', 'IL', 'IM', 'IN', 'IO', 'IQ', 'IS', 'IT', 'JE', 'JM', 'JO', 'JP', 'KE', 'KG', 'KH', 'KI', 'KM', 'KN', 'KR', 'KW', 'KY', 'KZ', 'LA', 'LB', 'LC', 'LI', 'LK', 'LR', 'LS', 'LT', 'LU', 'LV', 'LY', 'MA', 'MC', 'MD', 'ME', 'MF', 'MG', 'MK', 'ML', 'MM', 'MN', 'MO', 'MQ', 'MR', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA', 'NC', 'NE', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR', 'NU', 'NZ', 'OM', 'PA', 'PE', 'PF', 'PG', 'PH', 'PK', 'PL', 'PM', 'PN', 'PR', 'PS', 'PT', 'PY', 'QA', 'RE', 'RO', 'RS', 'RU', 'RW', 'SA', 'SB', 'SC', 'SE', 'SG', 'SH', 'SI', 'SJ', 'SK', 'SL', 'SM', 'SN', 'SO', 'SR', 'SS', 'ST', 'SV', 'SX', 'SZ', 'TA', 'TC', 'TD', 'TF', 'TG', 'TH', 'TJ', 'TK', 'TL', 'TM', 'TN', 'TO', 'TR', 'TT', 'TV', 'TW', 'TZ', 'UA', 'UG', 'US', 'UY', 'UZ', 'VA', 'VC', 'VE', 'VG', 'VN', 'VU', 'WF', 'WS', 'XK', 'YE', 'YT', 'ZA', 'ZM', 'ZW', 'ZZ'],

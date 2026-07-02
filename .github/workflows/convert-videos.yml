@@ -2,8 +2,9 @@ name: Convert product videos to mp4
 
 # When new product videos are uploaded (iPhones record .mov, which browsers
 # won't reliably play), transcode them to compressed web-friendly mp4 and
-# repoint products.json. Also regenerates the static product pages and
-# sitemap. Runs after the admin tool publishes.
+# repoint products.json. Oversized photos are shrunk for the web too. Also
+# regenerates the static product pages and sitemap. Runs after the admin
+# tool publishes, and can be run by hand from the Actions tab.
 
 on:
   push:
@@ -11,6 +12,7 @@ on:
     paths:
       - 'src/images/products/**'
       - 'src/data/products.json'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -31,8 +33,8 @@ jobs:
 
       # Installed unconditionally: a retry may reset to a newer main that still
       # contains an unconverted .mov, so ffmpeg must always be available.
-      - name: Install ffmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Install ffmpeg and ImageMagick
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg imagemagick
 
       # Everything below is deterministic and regenerable, so on a rejected
       # push we simply reset to the latest main and redo it — rather than
@@ -59,7 +61,18 @@ jobs:
             # 2. Repoint products.json at the .mp4 files.
             sed -i -E 's/\.mov"/.mp4"/g; s/\.MOV"/.mp4"/g' src/data/products.json
 
-            # 3. Regenerate the static product pages and sitemap.xml so a newly
+            # 3. Shrink oversized photos (straight-off-the-phone uploads are
+            #    ~2-4MB; the site displays them at ~600-1600px). Only files over
+            #    600KB are touched, and optimized output lands well under that,
+            #    so re-runs never double-compress.
+            find src/images/products -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) -size +600k -print0 |
+              while IFS= read -r -d '' f; do
+                echo "Optimizing $f"
+                convert "$f" -auto-orient -strip -resize '1600x1600>' \
+                  -interlace JPEG -quality 82 "$f.tmp" && mv "$f.tmp" "$f"
+              done
+
+            # 4. Regenerate the static product pages and sitemap.xml so a newly
             #    added piece always gets its own crawlable page and sitemap entry.
             node scripts/build.js
 
@@ -68,7 +81,12 @@ jobs:
               echo "No changes to commit."
               exit 0
             fi
-            git commit -m "Auto-build: product pages, sitemap & converted videos [skip ci]"
+            # No [skip ci] here: Cloudflare deploys the site straight from main
+            # and honours skip tags, so tagging this commit would leave the live
+            # site missing the converted videos and generated product pages.
+            # There is no Actions loop risk either way — pushes made with the
+            # workflow's GITHUB_TOKEN never trigger other workflow runs.
+            git commit -m "Auto-build: product pages, sitemap & converted videos"
 
             if git push origin HEAD:main; then
               echo "Pushed on attempt $attempt."

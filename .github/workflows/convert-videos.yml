@@ -10,6 +10,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'incoming/**'
       - 'src/images/products/**'
       - 'src/data/products.json'
   workflow_dispatch:
@@ -46,8 +47,25 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           for attempt in 1 2 3 4 5; do
-            # 1. Transcode any iPhone .mov to web-friendly .mp4 and drop the original.
+            # 1. Transcode staged videos to web-friendly .mp4. The admin tool
+            #    uploads raw videos to incoming/ (outside src/, so oversized
+            #    phone files never enter the deployed assets or trip
+            #    Cloudflare's 25MiB per-asset limit), and products.json
+            #    already points at the converted path.
             shopt -s nullglob nocaseglob
+            for f in incoming/*.mov incoming/*.mp4 incoming/*.m4v incoming/*.webm; do
+              name="$(basename "$f")"
+              out="src/images/products/${name%.*}.mp4"
+              echo "Converting $f -> $out"
+              ffmpeg -y -i "$f" \
+                -vf "scale='min(720,iw)':-2" \
+                -c:v libx264 -preset veryfast -crf 26 -movflags +faststart -an \
+                "$out"
+              rm -f "$f"
+            done
+
+            # 1b. Legacy: any raw .mov committed straight into the site
+            #     directory (uploads from before staging existed).
             for f in src/images/products/*.mov; do
               base="${f%.*}"
               echo "Converting $f -> ${base}.mp4"
@@ -72,7 +90,18 @@ jobs:
                   -interlace JPEG -quality 82 "$f.tmp" && mv "$f.tmp" "$f"
               done
 
-            # 4. Regenerate the static product pages and sitemap.xml so a newly
+            # 4. Site chrome: the logo displays at ~120x40 but originally
+            #    shipped as a 1.5MB PNG downloaded on every page view. Cap it
+            #    at 360px (3x for retina). Guarded by size so this runs once
+            #    and then no-ops instead of recompressing forever.
+            if [ -f src/images/rg-logo.png ] && [ "$(stat -c%s src/images/rg-logo.png)" -gt 150000 ]; then
+              echo "Optimizing rg-logo.png"
+              convert src/images/rg-logo.png -strip -resize '360x360>' \
+                -define png:compression-level=9 src/images/rg-logo.png.tmp \
+                && mv src/images/rg-logo.png.tmp src/images/rg-logo.png
+            fi
+
+            # 5. Regenerate the static product pages and sitemap.xml so a newly
             #    added piece always gets its own crawlable page and sitemap entry.
             node scripts/build.js
 

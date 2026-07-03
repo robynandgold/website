@@ -472,9 +472,9 @@ a {
   background: var(--bg-alt);
 }
 
-/* Video cards: the product photo sits on top of the video and is faded out
-   by lazyPlayVideos() once the video is presenting frames, so the handover
-   is a soft crossfade rather than a hard poster swap. */
+/* Video cards: the product photo sits on top of the video and is hidden
+   by lazyPlayVideos() only once the video is presenting frames, so the
+   handover is instant but never shows a blank element. */
 .product-media {
   position: relative;
   display: block;
@@ -486,7 +486,6 @@ a {
   height: 240px;
   object-fit: cover;
   pointer-events: none;
-  transition: opacity 0.45s ease;
 }
 .product-media .media-poster.is-hidden {
   opacity: 0;

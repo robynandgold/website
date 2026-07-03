@@ -105,6 +105,7 @@ function formatPrice(price, currency = 'EUR') {
  * autoplay if IntersectionObserver isn't available.
  */
 let _videoObserver = null;
+let _videoWarmObserver = null;
 function lazyPlayVideos(container) {
   const scope = container || document;
   const videos = scope.querySelectorAll('video');
@@ -113,6 +114,24 @@ function lazyPlayVideos(container) {
   if (!('IntersectionObserver' in window)) {
     videos.forEach(v => { v.muted = true; const p = v.play(); if (p) p.catch(() => {}); });
     return;
+  }
+
+  // Start buffering while a video is still ~600px below the fold, so that by
+  // the time it scrolls into view playback can begin on its first frame
+  // instead of dropping the poster and flashing an empty element while the
+  // first bytes download.
+  if (!_videoWarmObserver) {
+    _videoWarmObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const v = entry.target;
+        if (v.readyState === 0 && v.paused) {
+          v.preload = 'auto';
+          try { v.load(); } catch (e) { /* ignore */ }
+        }
+        _videoWarmObserver.unobserve(v);
+      });
+    }, { rootMargin: '600px 0px' });
   }
 
   if (!_videoObserver) {
@@ -133,6 +152,7 @@ function lazyPlayVideos(container) {
   videos.forEach(v => {
     v.muted = true;
     v.setAttribute('playsinline', '');
+    _videoWarmObserver.observe(v);
     _videoObserver.observe(v);
   });
 }

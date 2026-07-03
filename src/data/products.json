@@ -260,11 +260,12 @@
     "slug": "18ct-yellow-gold-diamond-gypsy-ring-ogfy9",
     "description": "18ct yellow gold band star-set with a .05ct diamond. Diamond is eye clean and bright. Fully hallmarked for Birmingham (date symbol is worn). 5.5g",
     "size": "UK L.5",
-    "price": 975,
+    "price": 925,
     "currency": "EUR",
     "featured": false,
     "category": "rings",
     "available": true,
+    "createdAt": "2026-06-15T22:20:57+01:00",
     "images": [
       "/images/products/IMG_8136.jpeg",
       "/images/products/IMG_8129.jpeg",
@@ -272,8 +273,7 @@
     ],
     "videos": [
       "/images/products/IMG_8117.mp4"
-    ],
-    "createdAt": "2026-06-15T22:20:57+01:00"
+    ]
   },
   {
     "id": "18ct-yellow-gold-diamond-gypsy-ring-5qlwm",

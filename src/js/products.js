@@ -149,9 +149,26 @@ function lazyPlayVideos(container) {
     }, { threshold: 0.25 });
   }
 
+  // Cards render the product photo as an overlay on top of the video
+  // (.product-media > .media-poster). Fade it out only once the video is
+  // actually presenting frames, so the photo-to-video handover is a soft
+  // crossfade instead of the browser's hard poster swap.
+  function fadePosterOnFirstFrame(v) {
+    const wrap = v.closest('.product-media');
+    const poster = wrap ? wrap.querySelector('.media-poster') : null;
+    if (!poster || poster.classList.contains('is-hidden')) return;
+    const hide = () => poster.classList.add('is-hidden');
+    if (typeof v.requestVideoFrameCallback === 'function') {
+      v.requestVideoFrameCallback(hide);
+    } else {
+      v.addEventListener('playing', hide, { once: true });
+    }
+  }
+
   videos.forEach(v => {
     v.muted = true;
     v.setAttribute('playsinline', '');
+    fadePosterOnFirstFrame(v);
     _videoWarmObserver.observe(v);
     _videoObserver.observe(v);
   });

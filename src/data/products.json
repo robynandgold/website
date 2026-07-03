@@ -27,11 +27,12 @@
     "slug": "18ct-yellow-gold-sapphire-and-diamond-ring",
     "description": "Set with oval-cut sapphires and brilliant cut diamonds. Stones are set into 18ct white gold. Fully hallmarked. 3g.",
     "size": "UK R / US 8.75",
-    "price": 925,
+    "price": 875,
     "currency": "EUR",
     "featured": false,
     "category": "rings",
     "available": true,
+    "createdAt": "2026-06-13T14:24:13+01:00",
     "images": [
       "/images/products/IMG_8567.jpeg",
       "/images/products/IMG_8568.jpeg"
@@ -39,8 +40,7 @@
     "videos": [
       "/images/products/IMG_8594.mp4",
       "/images/products/IMG_8450.mp4"
-    ],
-    "createdAt": "2026-06-13T14:24:13+01:00"
+    ]
   },
   {
     "id": "18ct-yellow-gold-diamond-five-stone-ring-zawc3",

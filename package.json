@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "npx serve src -l 3000",
-    "dev": "vercel dev",
+    "dev": "npx wrangler dev",
     "build": "node scripts/build.js"
   },
   "dependencies": {

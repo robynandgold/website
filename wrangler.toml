@@ -1,4 +1,4 @@
-# Cloudflare Worker configuration (replaces vercel.json).
+# Cloudflare Worker configuration.
 #
 # This is a Worker with Static Assets: it serves the static site from src/
 # (via the ASSETS binding) and runs worker/index.js for the /api/* routes.

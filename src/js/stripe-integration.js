@@ -3,7 +3,7 @@
  * ====================================================
  * 
  * Handles creating Stripe Checkout sessions via our serverless function
- * Environment variables needed (set in Vercel):
+ * Environment variables needed (set on the Cloudflare Worker):
  * - STRIPE_SECRET_KEY
  * - STRIPE_CURRENCY (default: gbp)
  * - SITE_URL

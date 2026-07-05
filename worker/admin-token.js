@@ -59,6 +59,35 @@ async function validateToken(token) {
         reason: `The GitHub token can read ${REPO} but lacks write access. Set its "Contents" permission to "Read and write" (fine-grained) or give it the "repo" scope (classic), then update the GITHUB_TOKEN secret on the Cloudflare Worker (Settings → Variables and Secrets).`,
       };
     }
+
+    // The publish page uploads large files (videos) through the Git Data
+    // API, which rejects some token types — notably fine-grained PATs — with
+    // a misleading "Bad credentials" even when the Contents API works.
+    // Probe it with a tiny orphan blob so a token that can't upload videos
+    // is caught here at login, with a plain-language reason. (Unreferenced
+    // blobs are garbage-collected by GitHub; nothing lands on any branch.)
+    try {
+      const blobResp = await fetch(`https://api.github.com/repos/${REPO}/git/blobs`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json',
+          'User-Agent': 'robynandgold-admin',
+        },
+        body: JSON.stringify({ content: 'robynandgold token probe', encoding: 'utf-8' }),
+      });
+      if (blobResp.status === 401 || blobResp.status === 403 || blobResp.status === 404) {
+        return {
+          ok: false,
+          status: 422,
+          reason: 'The token works for images but GitHub rejects it for the large-file (video) upload API. Use a CLASSIC personal access token with the "repo" scope (GitHub → Developer settings → Personal access tokens → Tokens (classic)), then update the GITHUB_TOKEN secret on the Cloudflare Worker.',
+        };
+      }
+    } catch (err) {
+      console.warn('admin-token: blob probe failed to run, allowing anyway —', err.message);
+    }
+
     return { ok: true };
   }
 

@@ -409,7 +409,7 @@
 
     // ── Admin auth (server-validated) ─────────────────────────────
     // One password unlocks the page AND yields the GitHub token used to
-    // publish. The token lives in Vercel env vars and is only held in memory
+    // publish. The token lives in the Cloudflare Worker's secrets and is only held in memory
     // for this tab session — never hard-coded in the page or saved to disk.
     const PW_KEY = 'rg_admin_pw';
     let githubToken = '';            // fetched from the server after login; in-memory only
@@ -1259,9 +1259,9 @@
       } catch (err) {
         const badCreds = /\b401\b|bad credentials/i.test(err.message || '');
         if (badCreds) {
-          // The server's GITHUB_TOKEN (Vercel env var) is invalid/expired — an admin fix, not a shopkeeper one
+          // The server's GITHUB_TOKEN secret is invalid/revoked — an admin fix, not a shopkeeper one
           setStatus('error',
-            'The server\'s GitHub token was rejected (Bad credentials). The GITHUB_TOKEN environment variable in Vercel needs to be refreshed.',
+            'The server\'s GitHub token was rejected (Bad credentials). Generate a new GitHub token and update the GITHUB_TOKEN secret on the Cloudflare Worker (Workers & Pages → website → Settings → Variables and Secrets).',
             err.detail);
         } else {
           setStatus('error', err.message, err.detail);

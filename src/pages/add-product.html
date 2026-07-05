@@ -775,6 +775,12 @@
         : `/images/products/${file.name}`;
       const url = URL.createObjectURL(file);
       pendingFiles.set(file.name, file);
+      // Raw videos are staged OUTSIDE src/ (the deployed assets directory):
+      // straight-off-the-phone files can exceed Cloudflare's 25MiB per-asset
+      // limit and would fail the deploy. The GitHub Action converts them to
+      // compressed .mp4 inside src/images/products/ and deletes the staged
+      // original.
+      const repoPath = type === 'video' ? `incoming/${file.name}` : `src/images/products/${file.name}`;
 
       const sizeMB = file.size / 1024 / 1024;
       const sizeLabel = sizeMB < 1 ? `${(file.size / 1024).toFixed(0)} KB` : `${sizeMB.toFixed(1)} MB`;
@@ -797,16 +803,23 @@
           <span class="media-filename">${file.name}</span>
           <span class="media-path">${path}</span>
           ${sizeWarning}
+          <span class="media-upload-state" style="font-size:0.72rem;color:var(--muted);"></span>
         </div>
         <div class="btn-reorder"><button class="btn-up" title="Move up">▲</button><button class="btn-down" title="Move down">▼</button></div>
         <button class="btn-remove" aria-label="Remove">×</button>
       `;
       entry.querySelector('.btn-remove').addEventListener('click', () => {
         pendingFiles.delete(file.name);
+        blobUploads.delete(file.name);
         entry.remove();
       });
       attachReorderButtons(entry, list);
       list.appendChild(entry);
+
+      // Start uploading immediately, in the background, while the rest of
+      // the form is being filled in. (An orphaned blob from a removed entry
+      // is harmless — GitHub garbage-collects it.)
+      startBlobUpload(file, entry, repoPath);
     }
 
     // Videos (including iPhone .mov) are staged in incoming/ and converted to
@@ -989,140 +1002,136 @@
       return withRetry(() => fetch(url, options), label || 'request');
     }
 
-    // ── Upload large file via Git Data API (bypasses Contents API body-size limit) ──
-    async function uploadFileViaGitDataAPI(owner, repo, branch, headers, filePath, base64, filename) {
-      const blobRes = await withRetry(() => xhrFetch('POST',
-        `https://api.github.com/repos/${owner}/${repo}/git/blobs`,
-        headers,
-        JSON.stringify({ content: base64, encoding: 'base64' }),
-        pct => setStatus('info', `Uploading ${filename}…`, null, pct * 0.8)
-      ), filename);
-      if (!blobRes.ok) {
-        const body = await blobRes.json().catch(() => ({}));
-        const err = new Error(`Blob upload failed (${blobRes.status}): ${body.message || filename}`);
-        err.detail = JSON.stringify(body, null, 2);
-        throw err;
-      }
-      const { sha: blobSha } = await blobRes.json();
+    // ── Background media uploads ──────────────────────────────────
+    // Files start uploading the moment they're picked, three at a time, as
+    // git blobs (content-addressed and orphaned until the publish commit
+    // references them — nothing appears on the site early). Publishing then
+    // creates ONE commit containing all media plus products.json, so the
+    // button press takes seconds and the site rebuilds once, not per file.
 
-      // Build the commit on the latest branch tip and move the ref. If main
-      // advanced in the meantime GitHub rejects the move as "not a fast
-      // forward" (422); re-read the tip and rebuild on top, then retry.
-      const maxAttempts = 4;
-      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        setStatus('info', `Uploading ${filename} — creating commit…`, null, 0.85);
-        const branchRes = await netFetch(`https://api.github.com/repos/${owner}/${repo}/branches/${branch}`, { headers, cache: 'no-store' }, 'branch lookup');
-        if (!branchRes.ok) {
-          const body = await branchRes.json().catch(() => ({}));
-          const err = new Error(`Get branch failed (${branchRes.status}): ${body.message || ''}`);
+    const GH_OWNER = 'robynandgold', GH_REPO = 'website', GH_BRANCH = 'main';
+
+    function ghHeaders(token) {
+      return {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+      };
+    }
+
+    // filename → { promise, sha, error, repoPath, entry, file }
+    const blobUploads = new Map();
+    const MAX_PARALLEL_UPLOADS = 3;
+    let activeUploads = 0;
+    const uploadWaiters = [];
+    function acquireUploadSlot() {
+      if (activeUploads < MAX_PARALLEL_UPLOADS) { activeUploads++; return Promise.resolve(); }
+      return new Promise(res => uploadWaiters.push(res)).then(() => { activeUploads++; });
+    }
+    function releaseUploadSlot() {
+      activeUploads--;
+      const next = uploadWaiters.shift();
+      if (next) next();
+    }
+
+    // Native base64 via FileReader — far faster than a manual byte loop.
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(',', 2)[1] || '');
+        reader.onerror = () => reject(new Error(`Could not read ${file.name}`));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function setEntryUploadState(entry, text, isError) {
+      if (!entry) return;
+      const el = entry.querySelector('.media-upload-state');
+      if (!el) return;
+      el.textContent = text;
+      el.style.color = isError ? '#b04040' : 'var(--muted)';
+    }
+
+    async function uploadBlob(file, entry) {
+      await acquireUploadSlot();
+      try {
+        const token = await ensureToken();
+        const base64 = await fileToBase64(file);
+        const res = await withRetry(() => xhrFetch('POST',
+          `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/git/blobs`,
+          ghHeaders(token),
+          JSON.stringify({ content: base64, encoding: 'base64' }),
+          pct => setEntryUploadState(entry, `uploading ${Math.round(pct * 100)}%`)
+        ), file.name);
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          const err = new Error(`Blob upload failed (${res.status}) for ${file.name}: ${body.message || ''}`);
           err.detail = JSON.stringify(body, null, 2);
           throw err;
         }
-        const branchData = await branchRes.json();
-        const currentCommitSha = branchData.commit.sha;
-        const currentTreeSha = branchData.commit.commit.tree.sha;
-
-        const treeRes = await netFetch(`https://api.github.com/repos/${owner}/${repo}/git/trees`, {
-          method: 'POST', headers,
-          body: JSON.stringify({ base_tree: currentTreeSha, tree: [{ path: filePath, mode: '100644', type: 'blob', sha: blobSha }] }),
-        }, 'commit');
-        if (!treeRes.ok) {
-          const body = await treeRes.json().catch(() => ({}));
-          const err = new Error(`Create tree failed (${treeRes.status}): ${body.message || ''}`);
-          err.detail = JSON.stringify(body, null, 2);
-          throw err;
-        }
-        const { sha: newTreeSha } = await treeRes.json();
-
-        setStatus('info', `Uploading ${filename} — finalising…`, null, 0.95);
-        const newCommitRes = await netFetch(`https://api.github.com/repos/${owner}/${repo}/git/commits`, {
-          method: 'POST', headers,
-          body: JSON.stringify({ message: `Add media: ${filename}`, tree: newTreeSha, parents: [currentCommitSha] }),
-        }, 'commit');
-        if (!newCommitRes.ok) {
-          const body = await newCommitRes.json().catch(() => ({}));
-          const err = new Error(`Create commit failed (${newCommitRes.status}): ${body.message || ''}`);
-          err.detail = JSON.stringify(body, null, 2);
-          throw err;
-        }
-        const { sha: newCommitSha } = await newCommitRes.json();
-
-        const updateRes = await netFetch(`https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${branch}`, {
-          method: 'PATCH', headers,
-          body: JSON.stringify({ sha: newCommitSha }),
-        }, 'branch update');
-        if (updateRes.ok) return;
-
-        const body = await updateRes.json().catch(() => ({}));
-        const notFastForward = updateRes.status === 422 || updateRes.status === 409;
-        if (notFastForward && attempt < maxAttempts) {
-          setStatus('info', `Branch moved — retrying ${filename}…`);
-          await new Promise(r => setTimeout(r, 400 * attempt));
-          continue;
-        }
-        const err = new Error(`Update branch failed (${updateRes.status}): ${body.message || ''}`);
-        err.detail = JSON.stringify(body, null, 2);
-        throw err;
+        const { sha } = await res.json();
+        setEntryUploadState(entry, '✓ uploaded');
+        return sha;
+      } finally {
+        releaseUploadSlot();
       }
     }
 
-    // ── Upload media files to GitHub ──────────────────────────────
-    async function uploadPendingFiles(owner, repo, branch, headers) {
+    function startBlobUpload(file, entry, repoPath) {
+      const rec = { sha: null, error: null, repoPath, entry, file };
+      rec.promise = uploadBlob(file, entry)
+        .then(sha => { rec.sha = sha; return sha; })
+        .catch(err => {
+          rec.error = err;
+          setEntryUploadState(entry, 'upload failed — will retry at publish', true);
+          throw err;
+        });
+      rec.promise.catch(() => {}); // handled at publish; avoids unhandled-rejection noise
+      blobUploads.set(file.name, rec);
+      return rec;
+    }
+
+    // Wait for every pending file's blob (restarting any that failed) and
+    // return [{ path, sha }] entries for the publish commit.
+    async function collectUploadedBlobs() {
+      const media = [];
       let i = 0;
       for (const [filename, file] of pendingFiles) {
         i++;
-        setStatus('info', `Uploading file ${i} of ${pendingFiles.size}: ${filename}…`);
-        const arrayBuffer = await file.arrayBuffer();
-        const bytes = new Uint8Array(arrayBuffer);
-        let binary = '';
-        for (let j = 0; j < bytes.length; j += 8192) {
-          binary += String.fromCharCode(...bytes.subarray(j, j + 8192));
+        let rec = blobUploads.get(filename);
+        if (!rec) {
+          const isVideo = (file.type || '').startsWith('video/') || /\.(mov|mp4|m4v|webm)$/i.test(filename);
+          rec = startBlobUpload(file, null, isVideo ? `incoming/${filename}` : `src/images/products/${filename}`);
         }
-        const base64 = btoa(binary);
-        // Raw videos are staged OUTSIDE src/ (the deployed assets directory):
-        // straight-off-the-phone files can exceed Cloudflare's 25MiB per-asset
-        // limit and would fail the deploy. The GitHub Action converts them to
-        // compressed .mp4 inside src/images/products/ and deletes the staged
-        // original.
-        const isVideo = (file.type || '').startsWith('video/') || /\.(mov|mp4|m4v|webm)$/i.test(filename);
-        const filePath = isVideo ? `incoming/${filename}` : `src/images/products/${filename}`;
-        const sizeMB = file.size / 1024 / 1024;
-
-        if (sizeMB > 10) {
-          // Files > 10 MB: use Git Data API to avoid Contents API JSON-body size limit
-          await uploadFileViaGitDataAPI(owner, repo, branch, headers, filePath, base64, filename);
-        } else {
-          let sha;
-          const checkRes = await netFetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, { headers, cache: 'no-store' }, filename);
-          if (checkRes.ok) { sha = (await checkRes.json()).sha; }
-          const uploadRes = await withRetry(() => xhrFetch('PUT',
-            `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
-            headers,
-            JSON.stringify({ message: `Add media: ${filename}`, content: base64, branch, ...(sha ? { sha } : {}) }),
-            pct => setStatus('info', `Uploading file ${i} of ${pendingFiles.size}: ${filename}…`, null, pct)
-          ), filename);
-          if (!uploadRes.ok) {
-            const body = await uploadRes.json().catch(() => ({}));
-            console.error(`Upload failed for ${filename}`, uploadRes.status, body);
-            const err = new Error(`Upload failed (${uploadRes.status}): ${body.message || filename}`);
-            err.detail = JSON.stringify(body, null, 2);
-            throw err;
-          }
+        setStatus('info', `Waiting for file ${i} of ${pendingFiles.size}: ${filename}…`);
+        try {
+          await rec.promise;
+        } catch (e) {
+          setStatus('info', `Retrying upload of ${filename}…`);
+          rec = startBlobUpload(file, rec.entry, rec.repoPath);
+          await rec.promise; // a second failure propagates to the publish handler
         }
+        media.push({ path: rec.repoPath, sha: rec.sha });
       }
+      return media;
     }
 
-    // ── Commit products.json with automatic SHA-conflict retry ────
-    async function commitProductsJson(owner, repo, branch, headers, product, commitMessage) {
+    // ── Publish commit: all media + products.json in ONE commit ───────────
+    // Built on the latest branch tip; if main advances mid-flight GitHub
+    // rejects the ref move as not-fast-forward (409/422), so we re-read
+    // everything and retry. The catalogue is re-fetched on every attempt so
+    // concurrent changes (another publish, a sale marking an item sold) are
+    // folded in rather than overwritten.
+    async function publishCommit(headers, mediaEntries, product, commitMessage) {
       const apiPath = 'src/data/products.json';
       const maxAttempts = 4;
 
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        setStatus('info', attempt === 1 ? 'Fetching products from GitHub…' : 'Retrying after conflict…');
-        const fetchRes = await netFetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, { headers, cache: 'no-store' }, 'products.json');
+        setStatus('info', attempt === 1 ? 'Saving to GitHub…' : 'Retrying after conflict…');
+
+        const fetchRes = await netFetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${apiPath}`, { headers, cache: 'no-store' }, 'products.json');
         if (!fetchRes.ok) {
           const body = await fetchRes.json().catch(() => ({}));
-          console.error('Fetch products.json failed', fetchRes.status, body);
           const err = new Error(`Fetch failed (${fetchRes.status}): ${body.message || 'could not load products.json'}`);
           err.detail = JSON.stringify(body, null, 2);
           throw err;
@@ -1143,27 +1152,61 @@
           allProducts.push(product);
         }
 
-        setStatus('info', 'Saving to GitHub…');
-        const newContent = btoa(unescape(encodeURIComponent(JSON.stringify(allProducts, null, 2))));
-        const commitRes = await netFetch(`https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`, {
-          method: 'PUT',
-          headers,
-          body: JSON.stringify({ message: commitMessage, content: newContent, sha: fileData.sha, branch }),
-        }, 'products.json');
+        const branchRes = await netFetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/branches/${GH_BRANCH}`, { headers, cache: 'no-store' }, 'branch lookup');
+        if (!branchRes.ok) {
+          const body = await branchRes.json().catch(() => ({}));
+          const err = new Error(`Get branch failed (${branchRes.status}): ${body.message || ''}`);
+          err.detail = JSON.stringify(body, null, 2);
+          throw err;
+        }
+        const branchData = await branchRes.json();
+        const baseCommitSha = branchData.commit.sha;
+        const baseTreeSha = branchData.commit.commit.tree.sha;
 
-        if (commitRes.ok) return;
+        const tree = mediaEntries.map(m => ({ path: m.path, mode: '100644', type: 'blob', sha: m.sha }));
+        tree.push({ path: apiPath, mode: '100644', type: 'blob', content: JSON.stringify(allProducts, null, 2) });
 
-        const body = await commitRes.json().catch(() => ({}));
-        console.error('Commit failed', commitRes.status, body);
+        const treeRes = await netFetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/git/trees`, {
+          method: 'POST', headers,
+          body: JSON.stringify({ base_tree: baseTreeSha, tree }),
+        }, 'commit tree');
+        if (!treeRes.ok) {
+          const body = await treeRes.json().catch(() => ({}));
+          const err = new Error(`Create tree failed (${treeRes.status}): ${body.message || ''}`);
+          err.detail = JSON.stringify(body, null, 2);
+          throw err;
+        }
+        const { sha: newTreeSha } = await treeRes.json();
 
-        if (commitRes.status === 409 && attempt < maxAttempts) {
-          await new Promise(r => setTimeout(r, 400 * attempt)); // SHA conflict — back off then re-fetch
+        const commitRes = await netFetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/git/commits`, {
+          method: 'POST', headers,
+          body: JSON.stringify({ message: commitMessage, tree: newTreeSha, parents: [baseCommitSha] }),
+        }, 'commit');
+        if (!commitRes.ok) {
+          const body = await commitRes.json().catch(() => ({}));
+          const err = new Error(`Create commit failed (${commitRes.status}): ${body.message || ''}`);
+          err.detail = JSON.stringify(body, null, 2);
+          throw err;
+        }
+        const { sha: newCommitSha } = await commitRes.json();
+
+        const updateRes = await netFetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/git/refs/heads/${GH_BRANCH}`, {
+          method: 'PATCH', headers,
+          body: JSON.stringify({ sha: newCommitSha }),
+        }, 'branch update');
+        if (updateRes.ok) return;
+
+        const body = await updateRes.json().catch(() => ({}));
+        const notFastForward = updateRes.status === 422 || updateRes.status === 409;
+        if (notFastForward && attempt < maxAttempts) {
+          await new Promise(r => setTimeout(r, 400 * attempt));
           continue;
         }
-        const commitErr = new Error(`Save failed (${commitRes.status}): ${body.message || 'could not commit to GitHub'}`);
-        commitErr.detail = JSON.stringify(body, null, 2);
-        throw commitErr;
+        const err = new Error(`Update branch failed (${updateRes.status}): ${body.message || ''}`);
+        err.detail = JSON.stringify(body, null, 2);
+        throw err;
       }
+      throw new Error('Could not save after multiple attempts — please try again.');
     }
 
     // ── Publish / Save ────────────────────────────────────────────
@@ -1197,17 +1240,12 @@
         return;
       }
 
-      const owner = 'robynandgold', repo = 'website', branch = 'main';
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json',
-      };
+      const headers = ghHeaders(token);
 
       try {
-        if (pendingFiles.size > 0) {
-          await uploadPendingFiles(owner, repo, branch, headers);
-        }
+        // Media has been uploading in the background since the files were
+        // picked; this just waits for stragglers (and retries any failures).
+        const mediaEntries = await collectUploadedBlobs();
 
         const product = {
           id: slug,
@@ -1221,19 +1259,20 @@
           category:    document.getElementById('f-category').value,
           available:   document.getElementById('f-available').checked,
           // Date added — used by the shop's "Newest first" sort. For edits this is
-          // overwritten with the product's existing value in commitProductsJson().
+          // overwritten with the product's existing value in publishCommit().
           createdAt:   new Date().toISOString(),
           images:      getMediaPaths('image-list'),
           videos:      getMediaPaths('video-list'),
         };
 
         const commitMessage = currentMode === 'edit' ? `Update product: ${name}` : `Add product: ${name}`;
-        await commitProductsJson(owner, repo, branch, headers, product, commitMessage);
+        await publishCommit(headers, mediaEntries, product, commitMessage);
 
         // Keep the featured cap in sync with what we just saved
         if (product.featured) featuredIds.add(product.id); else featuredIds.delete(product.id);
 
         pendingFiles.clear();
+        blobUploads.clear();
         const statusEl = document.getElementById('publish-status');
         statusEl.className = 'publish-status success';
         const actionLabel = currentMode === 'edit' ? 'updated' : 'published';

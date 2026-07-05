@@ -640,5 +640,24 @@
       "/images/products/IMG_9313.jpeg"
     ],
     "videos": []
+  },
+  {
+    "id": "18ct-yellow-gold-emerald-and-diamond-band-u3363",
+    "name": "18ct Yellow Gold Emerald and Diamond Band",
+    "slug": "18ct-yellow-gold-emerald-and-diamond-band-u3363",
+    "description": "An 18ct yellow gold band centred with a vibrant oval cabochon emerald, delicately framed by two flush-set diamonds. The smooth, tapered band and low-profile setting create an elegant, timeless silhouette that’s perfect for everyday wear. Stamped 750 for 18ct gold. 2.3g. \n\nNote: Emeralds are softer and more delicate than diamonds, so we recommend avoiding knocks and harsh chemicals. Clean gently with warm soapy water to keep your emerald looking its best.",
+    "size": "UK K · US 5.25",
+    "price": 635,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "createdAt": "2026-07-05T12:46:25.770Z",
+    "images": [
+      "/images/products/IMG_9261.jpeg",
+      "/images/products/IMG_9262.jpeg",
+      "/images/products/IMG_9322.jpeg"
+    ],
+    "videos": []
   }
 ]

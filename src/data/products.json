@@ -619,5 +619,24 @@
       "/images/products/IMG_9310.jpeg"
     ],
     "videos": []
+  },
+  {
+    "id": "18ct-yellow-gold-sapphire-and-diamond-band-zo5yu",
+    "name": "18ct Yellow Gold Sapphire and Diamond Band",
+    "slug": "18ct-yellow-gold-sapphire-and-diamond-band-zo5yu",
+    "description": "An 18ct yellow gold sapphire and diamond half hoop ring, set with alternating rich blue sapphires and sparkling old-cut diamonds. The stones are flush set within a softly rounded gold band, creating an elegant design that is both understated and endlessly wearable. Stamped ‘750’ for 18ct gold. 3.9g.\n\nNote: there is some engraving to the inside of the band, not fully legible as ring may have been resized at some point.",
+    "size": "UK O½ · US 7.5",
+    "price": 725,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "createdAt": "2026-07-05T12:34:15.391Z",
+    "images": [
+      "/images/products/IMG_9255.jpeg",
+      "/images/products/IMG_9253.jpeg",
+      "/images/products/IMG_9313.jpeg"
+    ],
+    "videos": []
   }
 ]

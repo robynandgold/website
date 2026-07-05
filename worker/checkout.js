@@ -166,7 +166,7 @@ export async function handleCheckout(request, env) {
         {
           shipping_rate_data: {
             type: 'fixed_amount',
-            fixed_amount: { amount: 4500, currency: 'eur' },
+            fixed_amount: { amount: 3500, currency: 'eur' },
             display_name: 'Rest of the world shipping',
             delivery_estimate: {
               minimum: { unit: 'business_day', value: 7 },

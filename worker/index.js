@@ -1,6 +1,5 @@
 // Cloudflare Worker entry — serves the static site (src/, via the ASSETS
-// binding) and handles the three /api/* endpoints. Replaces the Vercel
-// api/ functions and the Pages functions/ approach.
+// binding) and handles the three /api/* endpoints.
 import { handleCheckout } from './checkout.js';
 import { handleWebhook } from './webhook.js';
 import { handleAdminToken } from './admin-token.js';

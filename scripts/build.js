@@ -16,7 +16,7 @@
  * all baked into the markup. It also regenerates src/sitemap.xml so every live
  * product is listed.
  *
- * It runs at build time on Vercel (npm run build) and can be run by hand:
+ * It runs in the convert-videos GitHub Action after each publish and can be run by hand:
  *     node scripts/build.js
  */
 

@@ -1238,7 +1238,7 @@
         statusEl.className = 'publish-status success';
         const actionLabel = currentMode === 'edit' ? 'updated' : 'published';
         const nextLabel = currentMode === 'edit' ? 'Edit another product' : 'Add another product';
-        statusEl.innerHTML = `✓ "${name}" ${actionLabel} successfully. Vercel will redeploy in ~30 seconds.<br><br><button class="btn btn-ghost" id="next-action-btn" style="margin-top:0.5rem;">${nextLabel}</button>`;
+        statusEl.innerHTML = `✓ "${name}" ${actionLabel} successfully. The site will rebuild and update in a minute or two.<br><br><button class="btn btn-ghost" id="next-action-btn" style="margin-top:0.5rem;">${nextLabel}</button>`;
         btn.textContent = currentMode === 'edit' ? 'Saved!' : 'Published!';
 
         if (currentMode === 'edit') {

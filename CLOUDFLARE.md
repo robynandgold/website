@@ -1,12 +1,8 @@
-# Cloudflare Workers migration
+# Cloudflare Workers hosting
 
-This repo is hosted on **Cloudflare Workers (with Static Assets)** instead of
-Vercel. One Worker serves the static site from `src/` and handles the three
-`/api/*` endpoints. Config that used to live in `vercel.json` now lives in
-`wrangler.toml`.
-
-Your live Vercel deploy is untouched — Vercel only reads `api/` and
-`vercel.json`, which are left in place for rollback.
+This site runs on **Cloudflare Workers (with Static Assets)**. One Worker
+serves the static site from `src/` and handles the three `/api/*` endpoints.
+Hosting config lives in `wrangler.toml`.
 
 ## What's where
 | Purpose | File |
@@ -15,60 +11,57 @@ Your live Vercel deploy is untouched — Vercel only reads `api/` and
 | Checkout endpoint | `worker/checkout.js` → `/api/create-checkout-session` |
 | Stripe webhook | `worker/webhook.js` → `/api/webhook` |
 | Admin login | `worker/admin-token.js` → `/api/admin-token` |
-| Config (output + runtime) | `wrangler.toml` |
+| Config (assets + runtime) | `wrangler.toml` |
 
-Same `/api/*` URLs as before, so no frontend changes were needed. Runtime
-adaptations vs. the Vercel handlers: env from the Worker `env`, Stripe's fetch
-HTTP client, async webhook verification via Web Crypto, `Response` objects.
-`nodejs_compat` is enabled so the Stripe SDK, `node:crypto`, and `node:buffer`
-work.
+Runtime notes: env comes from the Worker `env`, Stripe uses its fetch HTTP
+client, webhook verification is async via Web Crypto, handlers return
+`Response` objects. `nodejs_compat` is enabled so the Stripe SDK,
+`node:crypto`, and `node:buffer` work.
 
-## Your steps
+## How deploys happen
 
-### 1. The Worker project (already created)
-The "website" Worker in **Workers & Pages** builds from `main` with:
-- **Build command:** *(blank)*
-- **Deploy command:** `npx wrangler deploy`  ← the default; correct now that
-  `wrangler.toml` exists.
+- **Normally:** every push to `main` triggers Cloudflare Workers Builds
+  (Worker → Settings → Build), which runs `npx wrangler deploy`.
+- **Failsafe:** if Cloudflare's build queue is delayed or stuck
+  (check cloudflarestatus.com), run the **"Deploy to Cloudflare (failsafe)"**
+  workflow from the GitHub Actions tab — it deploys the latest `main`
+  directly. Afterwards, cancel any stale queued Cloudflare builds so they
+  can't later overwrite it with an older commit.
 
-Once this code is on `main`, **Retry deployment**. The build now finds a Worker
-script (not just static assets), so the "variables" restriction goes away.
+## Variables and secrets
 
-### 2. Add variables and secrets
-Worker → **Settings → Variables and Secrets**. Add (mark the secret ones as
+Worker → **Settings → Variables and Secrets** (mark the secret ones as
 "Secret"):
 
 - `STRIPE_SECRET_KEY` (secret)
-- `STRIPE_WEBHOOK_SECRET` (secret — fresh value from step 4)
+- `STRIPE_WEBHOOK_SECRET` (secret)
 - `STRIPE_CURRENCY` (e.g. `eur`)
-- `SITE_URL` (your real domain, no trailing slash)
-- `GITHUB_TOKEN` (secret)
+- `SITE_URL` (the live domain, no trailing slash)
+- `GITHUB_TOKEN` (secret — fine-grained token scoped to this repo with
+  "Contents: Read and write"; used by the sold-marking webhook and handed to
+  the admin publish page after password login)
 - `ADMIN_PASSWORD` (secret)
 
-Redeploy after adding them.
+The GitHub Actions failsafe additionally needs two **repository secrets**
+(GitHub → Settings → Secrets and variables → Actions): `CLOUDFLARE_API_TOKEN`
+and `CLOUDFLARE_ACCOUNT_ID`.
 
-### 3. Test on the *.workers.dev URL first
-- Open the workers.dev URL, add a product to cart, hit checkout → you should
-  reach Stripe Checkout. Use a Stripe **test** key + card `4242 4242 4242 4242`.
-- Log into `/pages/add-product.html` with `ADMIN_PASSWORD` to confirm admin login.
+## Publishing pipeline
 
-### 4. Point Stripe at the new domain
-1. Stripe Dashboard → Developers → Webhooks → endpoint
-   `https://YOURDOMAIN/api/webhook`, event `checkout.session.completed`
-2. Copy the new **Signing secret** into `STRIPE_WEBHOOK_SECRET`, redeploy.
-
-### 5. Go live
-1. Worker → **Settings → Domains & Routes** → add your custom domain (it's
-   already in your Cloudflare account, so this is just a couple of taps).
-2. Do one **real** low-value purchase end-to-end: checkout → payment → the
-   webhook flips the item to sold (a "Mark products as sold" commit appears on
-   `main`).
-3. Once confirmed, you can remove the project from Vercel.
+The admin page (`/pages/add-product.html`) commits images to
+`src/images/products/` and stages raw videos in `incoming/` (outside the
+deployed assets, so oversized phone files can't break a deploy). The
+`convert-videos` GitHub Action then transcodes videos to web-friendly mp4,
+shrinks oversized photos, regenerates the product pages and sitemap, and
+pushes — which deploys the finished state.
 
 ## Rollback
-Nothing here deletes the Vercel setup. If anything misbehaves, point DNS back to
-Vercel — the `api/` functions and `vercel.json` are still in the repo.
+
+Previous Worker versions are kept by Cloudflare: Worker → Deployments →
+roll back to an earlier version. Code-level rollback is plain git
+(`git revert`) — every deploy corresponds to a commit on `main`.
 
 ## Local dev
-Test the Worker locally with `npx wrangler dev` (after `npm install`).
-`npm run dev` still runs `vercel dev` if you prefer the old path.
+
+Test the Worker locally with `npm run dev` (wrangler dev) after
+`npm install`.

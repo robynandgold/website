@@ -1259,10 +1259,14 @@
       } catch (err) {
         const badCreds = /\b401\b|bad credentials/i.test(err.message || '');
         if (badCreds) {
-          // The server's GITHUB_TOKEN secret is invalid/revoked — an admin fix, not a shopkeeper one
+          // The server's GITHUB_TOKEN secret is invalid, revoked, or the
+          // wrong type (fine-grained tokens fail on the large-file API) — an
+          // admin fix, not a shopkeeper one. Keep the friendly summary but
+          // put the failing step (err.message) in the expandable detail so
+          // the actual error is always inspectable.
           setStatus('error',
-            'The server\'s GitHub token was rejected (Bad credentials). Generate a new GitHub token and update the GITHUB_TOKEN secret on the Cloudflare Worker (Workers & Pages → website → Settings → Variables and Secrets).',
-            err.detail);
+            'GitHub rejected the server\'s token (Bad credentials). If images work but videos fail, the token is fine-grained — use a CLASSIC token with "repo" scope instead. Update the GITHUB_TOKEN secret on the Cloudflare Worker (Workers & Pages → website → Settings → Variables and Secrets), then log in again.',
+            (err.message ? 'Failing step: ' + err.message + '\n\n' : '') + (err.detail || ''));
         } else {
           setStatus('error', err.message, err.detail);
         }

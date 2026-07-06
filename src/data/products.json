@@ -665,5 +665,26 @@
     "videos": [
       "/images/products/IMG_9248.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-sapphire-and-diamond-band-61cya",
+    "name": "9ct Yellow Gold Sapphire and Diamond Band",
+    "slug": "9ct-yellow-gold-sapphire-and-diamond-band-61cya",
+    "description": "A delicate and timeless vintage band crafted in 9ct yellow gold, set with alternating round-cut sapphires and brilliant-cut diamonds in a classic claw setting. The slim profile and gently scalloped gallery allow maximum light to pass through each stone, creating beautiful sparkle. Elegant worn alone, it also layers effortlessly with engagement rings or other stacking bands, making it a wonderfully versatile everyday piece. Fully hallmarked. 1.9g.",
+    "size": "UK L · US 5.75",
+    "price": 385,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "createdAt": "2026-07-06T12:19:11.440Z",
+    "images": [
+      "/images/products/IMG_7371.jpeg",
+      "/images/products/IMG_7367.jpeg",
+      "/images/products/IMG_7369.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_8840.mp4"
+    ]
   }
 ]

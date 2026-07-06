@@ -132,6 +132,7 @@ async function sendRecoveryEmail(session, env) {
       ? session.metadata.product_ids.split(',')
       : [];
   let names = [];
+  let photoUrl = null;
   try {
     const resp = await fetch(
       'https://raw.githubusercontent.com/robynandgold/website/main/src/data/products.json',
@@ -147,6 +148,9 @@ async function sendRecoveryEmail(session, env) {
           return;
         }
         names.push(p.name);
+        if (!photoUrl && p.images && p.images[0]) {
+          photoUrl = 'https://robynandgold.com' + p.images[0];
+        }
       }
     }
   } catch (err) {
@@ -164,6 +168,9 @@ async function sendRecoveryEmail(session, env) {
       </p>
       <p style="font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:#8b7355; text-align:center; margin:0 0 26px;">Vintage Jewellery</p>
       <h1 style="font-size:22px; font-weight:500; margin:0 0 14px;">Still thinking it over?</h1>
+      ${photoUrl ? `<p style="text-align:center; margin:0 0 18px;">
+        <img src="${photoUrl}" alt="${pieceLabel.replace(/&[a-z]+;/g, '')}" width="456" style="width:100%; max-width:456px; height:auto; border-radius:8px; display:inline-block;" />
+      </p>` : ''}
       <p style="font-size:15px; line-height:1.7; margin:0 0 12px;">
         You were moments away from bringing ${pieceLabel} home. Your bag is saved &mdash;
         you can pick up right where you left off.
@@ -173,6 +180,10 @@ async function sendRecoveryEmail(session, env) {
       </p>
       <p style="text-align:center; margin:0 0 24px;">
         <a href="${recoveryUrl}" style="display:inline-block; background:#3d372e; color:#fdfbf8; text-decoration:none; padding:13px 30px; border-radius:999px; font-size:14px; letter-spacing:0.06em;">Complete your order</a>
+      </p>
+      <p style="font-size:13px; line-height:1.7; color:#8a8172; margin:0 0 10px;">
+        Prefer to spread the cost? Klarna instalments are available at checkout in Ireland, the UK and
+        most of Europe.
       </p>
       <p style="font-size:13px; line-height:1.7; color:#8a8172; margin:0;">
         Questions about sizing, or want more photos first? Just reply to this email &mdash; we'd rather you

@@ -159,7 +159,10 @@ async function sendRecoveryEmail(session, env) {
   const html = `
   <div style="font-family: Georgia, 'Times New Roman', serif; background:#faf7f2; padding:32px 16px;">
     <div style="max-width:520px; margin:0 auto; background:#fdfbf8; border:1px solid #ddd1c2; border-radius:10px; padding:36px 32px; color:#3d372e;">
-      <p style="font-size:12px; letter-spacing:0.2em; text-transform:uppercase; color:#8b7355; margin:0 0 18px;">Robyn &amp; Gold · Vintage Jewellery</p>
+      <p style="text-align:center; margin:0 0 8px;">
+        <img src="https://robynandgold.com/images/rg-logo.png" alt="Robyn &amp; Gold" width="120" style="width:120px; height:auto; display:inline-block;" />
+      </p>
+      <p style="font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:#8b7355; text-align:center; margin:0 0 26px;">Vintage Jewellery</p>
       <h1 style="font-size:22px; font-weight:500; margin:0 0 14px;">Still thinking it over?</h1>
       <p style="font-size:15px; line-height:1.7; margin:0 0 12px;">
         You were moments away from bringing ${pieceLabel} home. Your bag is saved —

@@ -169,7 +169,7 @@ async function sendRecoveryEmail(session, env) {
       <p style="font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:#8b7355; text-align:center; margin:0 0 26px;">Vintage Jewellery</p>
       <h1 style="font-size:22px; font-weight:500; text-align:center; margin:0 0 18px;">Still thinking it over?</h1>
       ${photoUrl ? `<p style="text-align:center; margin:0 0 18px;">
-        <img src="${photoUrl}" alt="${pieceLabel.replace(/&[a-z]+;/g, '')}" width="240" style="width:240px; max-width:100%; height:auto; border-radius:8px; display:inline-block;" />
+        <img src="${photoUrl}" alt="${pieceLabel.replace(/&[a-z]+;/g, '')}" width="190" style="width:190px; max-width:100%; height:auto; border-radius:8px; display:inline-block;" />
       </p>` : ''}
       <p style="font-size:15px; line-height:1.7; margin:0 0 12px;">
         You were moments away from bringing ${pieceLabel} home. Your bag is saved &mdash;

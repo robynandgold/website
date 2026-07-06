@@ -154,7 +154,7 @@ async function sendRecoveryEmail(session, env) {
   }
 
   const pieceLabel =
-    names.length === 1 ? `“${names[0]}”` : names.length > 1 ? 'the pieces in your bag' : 'your piece';
+    names.length === 1 ? `&ldquo;${names[0]}&rdquo;` : names.length > 1 ? 'the pieces in your bag' : 'your piece';
 
   const html = `
   <div style="font-family: Georgia, 'Times New Roman', serif; background:#faf7f2; padding:32px 16px;">
@@ -165,7 +165,7 @@ async function sendRecoveryEmail(session, env) {
       <p style="font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:#8b7355; text-align:center; margin:0 0 26px;">Vintage Jewellery</p>
       <h1 style="font-size:22px; font-weight:500; margin:0 0 14px;">Still thinking it over?</h1>
       <p style="font-size:15px; line-height:1.7; margin:0 0 12px;">
-        You were moments away from bringing ${pieceLabel} home. Your bag is saved —
+        You were moments away from bringing ${pieceLabel} home. Your bag is saved &mdash;
         you can pick up right where you left off.
       </p>
       <p style="font-size:15px; line-height:1.7; margin:0 0 24px;">
@@ -175,12 +175,12 @@ async function sendRecoveryEmail(session, env) {
         <a href="${recoveryUrl}" style="display:inline-block; background:#3d372e; color:#fdfbf8; text-decoration:none; padding:13px 30px; border-radius:999px; font-size:14px; letter-spacing:0.06em;">Complete your order</a>
       </p>
       <p style="font-size:13px; line-height:1.7; color:#8a8172; margin:0;">
-        Questions about sizing, or want more photos first? Just reply to this email — we'd rather you
+        Questions about sizing, or want more photos first? Just reply to this email &mdash; we'd rather you
         feel completely confident before you buy.
       </p>
     </div>
     <p style="max-width:520px; margin:14px auto 0; font-size:11px; color:#a99; text-align:center;">
-      Robyn &amp; Gold · robynandgold.com · This is a one-time reminder about the order you started.
+      Robyn &amp; Gold &middot; robynandgold.com &middot; This is a one-time reminder about the order you started.
     </p>
   </div>`;
 

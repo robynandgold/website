@@ -172,13 +172,14 @@
     "id": "18ct-white-gold-diamond-five-stone-ring-2715b",
     "name": "18ct White Gold Diamond Five Stone Ring",
     "slug": "18ct-white-gold-diamond-five-stone-ring-2715b",
-    "description": "Set with five brilliant-cut diamonds totalling approximately 1ct. Diamonds are all eye clean, bright and well-matched. Fully hallmarked. \n3.16g.",
+    "description": "Set with five brilliant-cut diamonds totalling approximately 1ct. Diamonds are all eye clean, bright and well-matched. Fully hallmarked. \n3.16g.\n\nTotal diamond weight is a mounted estimate.",
     "size": "UK M / US 6.25",
     "price": 1350,
     "currency": "EUR",
     "featured": false,
     "category": "rings",
     "available": true,
+    "createdAt": "2026-06-13T14:24:13+01:00",
     "images": [
       "/images/products/IMG_8576.jpeg",
       "/images/products/IMG_8577.jpeg",
@@ -187,8 +188,7 @@
     "videos": [
       "/images/products/IMG_8546.mp4",
       "/images/products/IMG_8440.mp4"
-    ],
-    "createdAt": "2026-06-13T14:24:13+01:00"
+    ]
   },
   {
     "id": "9ct-bezel-set-sapphire-and-diamond-band-raa62",

@@ -80,6 +80,15 @@ export async function handleWebhook(request, env) {
         console.log('[Webhook] GitHub commit flow completed');
       }
 
+      // Send the buyer a branded order confirmation. Wrapped so an email
+      // problem can never fail the webhook (which would make Stripe retry and
+      // re-run the sold-marking); the sale is already recorded above.
+      try {
+        await sendConfirmationEmail(session, productIds, env);
+      } catch (mailErr) {
+        console.error('[Webhook] Confirmation email failed:', mailErr);
+      }
+
       return json({ received: true }, 200);
     } catch (err) {
       console.error('[Webhook] Error processing webhook:', err);
@@ -102,6 +111,142 @@ export async function handleWebhook(request, env) {
   }
 
   return json({ received: true }, 200);
+}
+
+// Look up the purchased pieces in the live catalogue to get their names and a
+// photo for the confirmation email. Best-effort: returns [] on any failure.
+async function lookupProducts(productIds) {
+  try {
+    const resp = await fetch(
+      'https://raw.githubusercontent.com/robynandgold/website/main/src/data/products.json',
+      { headers: { 'Cache-Control': 'no-cache' } }
+    );
+    if (!resp.ok) return [];
+    const products = await resp.json();
+    const byId = new Map(products.map((p) => [String(p.id), p]));
+    return productIds.map((id) => byId.get(String(id))).filter(Boolean);
+  } catch (err) {
+    console.warn('[Webhook] Could not load catalogue for email:', err.message);
+    return [];
+  }
+}
+
+function money(amountMinor, currency) {
+  const cur = (currency || 'eur').toUpperCase();
+  const symbol = cur === 'EUR' ? '€' : cur === 'GBP' ? '£' : cur === 'USD' ? '$' : cur + ' ';
+  return `${symbol}${(Number(amountMinor || 0) / 100).toFixed(2)}`;
+}
+
+function escapeHtml(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Order confirmation, sent on checkout.session.completed. A completed session
+// always carries the buyer's email (they paid), so unlike the recovery email
+// this fires reliably every time.
+async function sendConfirmationEmail(session, productIds, env) {
+  if (!env.RESEND_API_KEY) {
+    console.log('[Webhook] Purchase completed but RESEND_API_KEY is not set — skipping confirmation email');
+    return;
+  }
+
+  const email =
+    (session.customer_details && session.customer_details.email) || session.customer_email;
+  if (!email) {
+    console.log('[Webhook] Completed session had no customer email — cannot send confirmation');
+    return;
+  }
+
+  const name =
+    (session.customer_details && session.customer_details.name) || 'there';
+  const firstName = String(name).split(' ')[0];
+
+  const products = await lookupProducts(productIds);
+  const photoUrl =
+    products.find((p) => p.images && p.images[0]) &&
+    'https://robynandgold.com' + products.find((p) => p.images && p.images[0]).images[0];
+
+  const currency = session.currency || 'eur';
+  const shippingAmount =
+    (session.shipping_cost && session.shipping_cost.amount_total) || 0;
+  const shippingName =
+    (session.shipping_cost &&
+      session.shipping_cost.shipping_rate &&
+      typeof session.shipping_cost.shipping_rate === 'object' &&
+      session.shipping_cost.shipping_rate.display_name) ||
+    'Shipping';
+
+  const ship = session.shipping_details || session.customer_details;
+  const addr = ship && ship.address;
+  const addressLines = addr
+    ? [ship.name, addr.line1, addr.line2, [addr.postal_code, addr.city].filter(Boolean).join(' '), addr.state, addr.country]
+        .filter(Boolean)
+        .map((l) => escapeHtml(l))
+        .join('<br>')
+    : '';
+
+  const itemRows = (products.length
+    ? products.map((p) => `${escapeHtml(p.name)}`)
+    : ['Your order']
+  )
+    .map(
+      (n) =>
+        `<tr><td style="padding:6px 0; font-size:14px; color:#3d372e;">${n}</td></tr>`
+    )
+    .join('');
+
+  const html = `
+  <div style="font-family: Georgia, 'Times New Roman', serif; background:#faf7f2; padding:32px 16px;">
+    <div style="max-width:520px; margin:0 auto; background:#fdfbf8; border:1px solid #ddd1c2; border-radius:10px; padding:36px 32px; color:#3d372e;">
+      <p style="text-align:center; margin:0 0 8px;">
+        <img src="https://robynandgold.com/images/rg-logo.png" alt="Robyn &amp; Gold" width="120" style="width:120px; height:auto; display:inline-block;" />
+      </p>
+      <p style="font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:#8b7355; text-align:center; margin:0 0 26px;">Vintage Jewellery</p>
+      <h1 style="font-size:22px; font-weight:500; text-align:center; margin:0 0 6px;">Thank you, ${escapeHtml(firstName)}</h1>
+      <p style="font-size:14px; line-height:1.7; text-align:center; color:#8a8172; margin:0 0 22px;">Your order is confirmed &mdash; here are the details.</p>
+      ${photoUrl ? `<p style="text-align:center; margin:0 0 22px;"><img src="${photoUrl}" alt="" width="190" style="width:190px; max-width:100%; height:auto; border-radius:8px; display:inline-block;" /></p>` : ''}
+      <table style="width:100%; border-collapse:collapse; margin:0 0 18px;">
+        ${itemRows}
+      </table>
+      <table style="width:100%; border-collapse:collapse; border-top:1px solid #eadfce; padding-top:10px;">
+        <tr><td style="padding:8px 0 2px; font-size:13px; color:#8a8172;">${escapeHtml(shippingName)}</td><td style="padding:8px 0 2px; font-size:13px; color:#8a8172; text-align:right;">${money(shippingAmount, currency)}</td></tr>
+        <tr><td style="padding:2px 0; font-size:15px; color:#3d372e;"><strong>Total paid</strong></td><td style="padding:2px 0; font-size:15px; color:#3d372e; text-align:right;"><strong>${money(session.amount_total, currency)}</strong></td></tr>
+      </table>
+      ${addressLines ? `<p style="font-size:13px; line-height:1.7; color:#8a8172; margin:22px 0 0;"><strong style="color:#3d372e;">Shipping to</strong><br>${addressLines}</p>` : ''}
+      <p style="font-size:14px; line-height:1.7; margin:24px 0 0;">
+        Each piece is checked and lovingly prepared before it's sent, fully insured, from Ireland.
+        We'll be in touch when your order is on its way.
+      </p>
+      <p style="font-size:13px; line-height:1.7; color:#8a8172; margin:14px 0 0;">
+        Any questions? Just reply to this email &mdash; we'd love to help.
+      </p>
+    </div>
+    <p style="max-width:520px; margin:14px auto 0; font-size:11px; color:#a99; text-align:center;">
+      Robyn &amp; Gold &middot; robynandgold.com
+    </p>
+  </div>`;
+
+  const resp = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: 'Robyn & Gold <info@robynandgold.com>',
+      reply_to: 'info@robynandgold.com',
+      to: [email],
+      subject: 'Your order is confirmed — Robyn & Gold',
+      html,
+    }),
+  });
+
+  if (!resp.ok) {
+    const body = await resp.text();
+    throw new Error(`Resend rejected the confirmation (${resp.status}): ${body}`);
+  }
+  console.log(`[Webhook] Confirmation email sent to ${email} for session ${session.id}`);
 }
 
 async function sendRecoveryEmail(session, env) {

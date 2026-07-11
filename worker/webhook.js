@@ -177,10 +177,19 @@ async function sendConfirmationEmail(session, productIds, env) {
       session.shipping_cost.shipping_rate.display_name) ||
     'Shipping';
 
-  const ship = session.shipping_details || session.customer_details;
+  // The delivery address location differs by Stripe API version: newer
+  // versions (2024+) nest it under collected_information.shipping_details;
+  // older ones expose session.shipping_details. Fall back through both, then
+  // to the billing address in customer_details, so we read it wherever it is.
+  const ship =
+    (session.collected_information && session.collected_information.shipping_details) ||
+    session.shipping_details ||
+    session.customer_details ||
+    null;
   const addr = ship && ship.address;
+  const shipName = (ship && ship.name) || (session.customer_details && session.customer_details.name);
   const addressLines = addr
-    ? [ship.name, addr.line1, addr.line2, [addr.postal_code, addr.city].filter(Boolean).join(' '), addr.state, addr.country]
+    ? [shipName, addr.line1, addr.line2, [addr.postal_code, addr.city].filter(Boolean).join(' '), addr.state, addr.country]
         .filter(Boolean)
         .map((l) => escapeHtml(l))
         .join('<br>')

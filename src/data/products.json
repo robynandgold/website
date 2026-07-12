@@ -707,5 +707,25 @@
     "videos": [
       "/images/products/IMG_9573.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-diamond-heart-signet-jjz5x",
+    "name": "9ct Yellow Gold Diamond Heart Signet",
+    "slug": "9ct-yellow-gold-diamond-heart-signet-jjz5x",
+    "description": "A beautifully crafted 9ct yellow gold signet ring featuring an illusion pavé heart, accented by a sparkling diamond at its centre. The textured setting catches the light beautifully, creating the appearance of a heart filled with diamonds while retaining the timeless simplicity of a classic signet. A sweet and distinctive piece that’s perfect worn alone or stacked with your favourites. \n\nStamped ‘375’ for 9ct gold. 1.2g. Resizable.",
+    "size": "UK L · US 5.75",
+    "price": 260,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "createdAt": "2026-07-12T15:29:57.772Z",
+    "images": [
+      "/images/products/IMG_9575.jpeg",
+      "/images/products/IMG_9577.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_9574.mp4"
+    ]
   }
 ]

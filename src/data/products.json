@@ -686,5 +686,26 @@
     "videos": [
       "/images/products/IMG_8840.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-diamond-signet-ring-ox6n6",
+    "name": "9ct Yellow Gold Diamond Signet Ring",
+    "slug": "9ct-yellow-gold-diamond-signet-ring-ox6n6",
+    "description": "A beautifully understated vintage 9ct yellow gold signet ring, set with a sparkling natural diamond in a delicate star setting. The polished shield-shaped face gives this piece a timeless appeal balancing the bold character of a traditional signet with the subtle brilliance of a single diamond. Perfect worn alone as an everyday signature piece or stacked with other favourites.\n\nFully hallmarked, 1.3g. Resizable.",
+    "size": "UK M · US 6.25",
+    "price": 290,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "createdAt": "2026-07-12T15:24:15.756Z",
+    "images": [
+      "/images/products/IMG_9585.jpeg",
+      "/images/products/IMG_9581.jpeg",
+      "/images/products/IMG_9582.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_9573.mp4"
+    ]
   }
 ]

@@ -6,6 +6,8 @@ An elegant ecommerce site for antique rings and jewellery, featuring a minimalis
 
 ## Architecture
 
+Full tech-stack documentation, diagrams and data flows: **`ARCHITECTURE.md`**.
+
 - **Platform**: Cloudflare Workers with Static Assets (see `CLOUDFLARE.md` for the full hosting guide)
 - **Backend**: One Worker (`worker/index.js`) handles the `/api/*` endpoints
 - **Frontend**: Static HTML/CSS/JavaScript served from `src/`

@@ -6,6 +6,8 @@ An elegant ecommerce site for antique rings and jewellery, featuring a minimalis
 
 ## Architecture
 
+Full tech-stack documentation, diagrams and data flows: **`ARCHITECTURE.md`**.
+
 - **Platform**: Cloudflare Workers with Static Assets (see `CLOUDFLARE.md` for the full hosting guide)
 - **Backend**: One Worker (`worker/index.js`) handles the `/api/*` endpoints
 - **Frontend**: Static HTML/CSS/JavaScript served from `src/`
@@ -124,7 +126,9 @@ Set `"featured": true`. The homepage displays the first 3 featured products.
 - **Keys**: Dashboard → Developers → API keys. Set `STRIPE_SECRET_KEY` on the
   Worker (see `CLOUDFLARE.md`).
 - **Webhook**: Dashboard → Developers → Webhooks → endpoint
-  `https://robynandgold.com/api/webhook`, event `checkout.session.completed`.
+  `https://robynandgold.com/api/webhook`, events `checkout.session.completed`
+  (marks items sold + sends the order confirmation) and
+  `checkout.session.expired` (sends the abandoned-checkout recovery email).
   Put the signing secret in the Worker's `STRIPE_WEBHOOK_SECRET`.
 - **Payment methods** (cards, Apple Pay, Google Pay, Klarna, …) are managed in
   Dashboard → Settings → Payment methods; the checkout offers whatever is
@@ -180,9 +184,10 @@ robynandgold/
 - Open the browser console (F12) for JavaScript errors
 
 ### Publish fails with "Bad credentials"
-The Worker's `GITHUB_TOKEN` secret is invalid or revoked. Generate a new
-fine-grained token (repo: this one; Contents: Read and write) and update the
-secret on the Worker, then log in to the admin page again.
+The Worker's `GITHUB_TOKEN` secret is invalid, revoked, or the wrong type.
+Generate a new **classic** token with the `repo` scope (fine-grained tokens
+pass basic checks but fail the large-file API used for video uploads),
+update the secret on the Worker, then log in to the admin page again.
 
 ### A new product isn't appearing on the live site
 Give the pipeline 2–3 minutes (convert → build → deploy). Then check the

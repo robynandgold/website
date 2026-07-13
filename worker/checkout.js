@@ -19,6 +19,56 @@ const json = (data, status = 200) =>
     headers: { 'Content-Type': 'application/json' },
   });
 
+// Shipping zones. Stripe shows every offered rate to every customer (it does
+// not match rates to the delivery address), so we offer ONLY the rate for the
+// visitor's country — which Cloudflare provides on each request. The webhook
+// cross-checks the paid rate against the actual delivery country after
+// payment and alerts the shop if they don't match (e.g. an Irish visitor
+// shipping a gift abroad).
+export const SHIPPING_ZONES = {
+  ireland: { amount: 1000, name: 'Ireland shipping', minDays: 2, maxDays: 5 },
+  europe: { amount: 1500, name: 'UK and European shipping', minDays: 5, maxDays: 10 },
+  world: { amount: 3500, name: 'Rest of the world shipping', minDays: 7, maxDays: 14 },
+};
+
+// UK + Europe for the €15 tier (Ireland has its own tier).
+export const EUROPE_COUNTRIES = new Set([
+  'GB', 'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE',
+  'GR', 'HU', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK',
+  'SI', 'ES', 'SE', 'CH', 'NO', 'IS', 'LI', 'MC', 'SM', 'VA', 'AD', 'GG',
+  'JE', 'IM', 'GI', 'FO', 'AX', 'AL', 'BA', 'MD', 'ME', 'MK', 'RS', 'UA', 'XK',
+]);
+
+export function zoneForCountry(country) {
+  if (!country) return null;
+  if (country === 'IE') return 'ireland';
+  return EUROPE_COUNTRIES.has(country) ? 'europe' : 'world';
+}
+
+function shippingOptionFor(zoneKey) {
+  const z = SHIPPING_ZONES[zoneKey];
+  return {
+    shipping_rate_data: {
+      type: 'fixed_amount',
+      fixed_amount: { amount: z.amount, currency: 'eur' },
+      display_name: z.name,
+      delivery_estimate: {
+        minimum: { unit: 'business_day', value: z.minDays },
+        maximum: { unit: 'business_day', value: z.maxDays },
+      },
+    },
+  };
+}
+
+function shippingOptionsForRequest(request) {
+  const country = request && request.cf && request.cf.country;
+  const zone = zoneForCountry(country);
+  // Unknown location: fall back to offering all three tiers.
+  return zone
+    ? [shippingOptionFor(zone)]
+    : [shippingOptionFor('ireland'), shippingOptionFor('europe'), shippingOptionFor('world')];
+}
+
 /**
  * Load the current product catalogue, preferring the freshest source so a
  * just-sold item is caught even before the site finishes rebuilding.
@@ -140,41 +190,7 @@ export async function handleCheckout(request, env) {
       shipping_address_collection: {
         allowed_countries: ['AC', 'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AQ', 'AR', 'AT', 'AU', 'AW', 'AX', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BL', 'BM', 'BN', 'BO', 'BQ', 'BR', 'BS', 'BT', 'BV', 'BW', 'BY', 'BZ', 'CA', 'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN', 'CO', 'CR', 'CV', 'CW', 'CY', 'CZ', 'DE', 'DJ', 'DK', 'DM', 'DO', 'DZ', 'EC', 'EE', 'EG', 'EH', 'ER', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FO', 'FR', 'GA', 'GB', 'GD', 'GE', 'GF', 'GG', 'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW', 'GY', 'HK', 'HN', 'HR', 'HT', 'HU', 'ID', 'IE', 'IL', 'IM', 'IN', 'IO', 'IQ', 'IS', 'IT', 'JE', 'JM', 'JO', 'JP', 'KE', 'KG', 'KH', 'KI', 'KM', 'KN', 'KR', 'KW', 'KY', 'KZ', 'LA', 'LB', 'LC', 'LI', 'LK', 'LR', 'LS', 'LT', 'LU', 'LV', 'LY', 'MA', 'MC', 'MD', 'ME', 'MF', 'MG', 'MK', 'ML', 'MM', 'MN', 'MO', 'MQ', 'MR', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA', 'NC', 'NE', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR', 'NU', 'NZ', 'OM', 'PA', 'PE', 'PF', 'PG', 'PH', 'PK', 'PL', 'PM', 'PN', 'PR', 'PS', 'PT', 'PY', 'QA', 'RE', 'RO', 'RS', 'RU', 'RW', 'SA', 'SB', 'SC', 'SE', 'SG', 'SH', 'SI', 'SJ', 'SK', 'SL', 'SM', 'SN', 'SO', 'SR', 'SS', 'ST', 'SV', 'SX', 'SZ', 'TA', 'TC', 'TD', 'TF', 'TG', 'TH', 'TJ', 'TK', 'TL', 'TM', 'TN', 'TO', 'TR', 'TT', 'TV', 'TW', 'TZ', 'UA', 'UG', 'US', 'UY', 'UZ', 'VA', 'VC', 'VE', 'VG', 'VN', 'VU', 'WF', 'WS', 'XK', 'YE', 'YT', 'ZA', 'ZM', 'ZW', 'ZZ'],
       },
-      shipping_options: [
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: { amount: 1000, currency: 'eur' },
-            display_name: 'Ireland shipping',
-            delivery_estimate: {
-              minimum: { unit: 'business_day', value: 2 },
-              maximum: { unit: 'business_day', value: 5 },
-            },
-          },
-        },
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: { amount: 1500, currency: 'eur' },
-            display_name: 'UK and European shipping',
-            delivery_estimate: {
-              minimum: { unit: 'business_day', value: 5 },
-              maximum: { unit: 'business_day', value: 10 },
-            },
-          },
-        },
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: { amount: 3500, currency: 'eur' },
-            display_name: 'Rest of the world shipping',
-            delivery_estimate: {
-              minimum: { unit: 'business_day', value: 7 },
-              maximum: { unit: 'business_day', value: 14 },
-            },
-          },
-        },
-      ],
+      shipping_options: shippingOptionsForRequest(request),
       success_url: successUrl || `${env.SITE_URL}/pages/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: cancelUrl || `${env.SITE_URL}/pages/cart.html`,
       metadata: {

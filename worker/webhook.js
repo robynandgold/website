@@ -6,6 +6,7 @@
 // before verifying.
 import Stripe from 'stripe';
 import { Buffer } from 'node:buffer';
+import { SHIPPING_ZONES, zoneForCountry } from './checkout.js';
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -89,6 +90,15 @@ export async function handleWebhook(request, env) {
         console.error('[Webhook] Confirmation email failed:', mailErr);
       }
 
+      // Cross-check the shipping rate the buyer paid against where the order
+      // actually ships (e.g. paid Ireland €10 but delivering to Poland) and
+      // alert the shop on a mismatch so it can be settled before dispatch.
+      try {
+        await alertOnShippingMismatch(session, env);
+      } catch (alertErr) {
+        console.error('[Webhook] Shipping mismatch check failed:', alertErr);
+      }
+
       return json({ received: true }, 200);
     } catch (err) {
       console.error('[Webhook] Error processing webhook:', err);
@@ -140,6 +150,50 @@ function money(amountMinor, currency) {
 function escapeHtml(str) {
   return String(str == null ? '' : str)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// If the delivery country's shipping zone doesn't match what the buyer paid,
+// email the shop so the difference can be settled (or absorbed) before
+// dispatch. Only checked for EUR sessions — currency-converted totals can't
+// be compared against the EUR zone amounts cent-for-cent.
+async function alertOnShippingMismatch(session, env) {
+  if (!env.RESEND_API_KEY) return;
+  if ((session.currency || 'eur').toLowerCase() !== 'eur') return;
+
+  const ship =
+    (session.collected_information && session.collected_information.shipping_details) ||
+    session.shipping_details ||
+    session.customer_details ||
+    null;
+  const country = ship && ship.address && ship.address.country;
+  const paid = session.shipping_cost && session.shipping_cost.amount_total;
+  if (!country || paid == null) return;
+
+  const zone = zoneForCountry(country);
+  const expected = zone && SHIPPING_ZONES[zone].amount;
+  if (!expected || paid >= expected) return;
+
+  const money = (m) => `€${(m / 100).toFixed(2)}`;
+  const resp = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: 'Robyn & Gold <info@robynandgold.com>',
+      to: ['info@robynandgold.com'],
+      subject: `Shipping underpaid on an order — ${country} paid ${money(paid)}`,
+      html: `<p>An order is shipping to <strong>${country}</strong> (${SHIPPING_ZONES[zone].name} zone, ${money(expected)}) but the buyer paid <strong>${money(paid)}</strong> — a shortfall of ${money(expected - paid)}.</p>
+<p>Stripe session: ${session.id}</p>
+<p>Options: absorb the difference, or contact the buyer before dispatch.</p>`,
+    }),
+  });
+  if (!resp.ok) {
+    console.error('[Webhook] Shipping mismatch alert failed:', resp.status, await resp.text());
+  } else {
+    console.log(`[Webhook] Shipping mismatch alert sent (${country}, paid ${paid}, expected ${expected})`);
+  }
 }
 
 // Order confirmation, sent on checkout.session.completed. A completed session

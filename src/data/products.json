@@ -115,7 +115,7 @@
     "currency": "EUR",
     "featured": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "images": [
       "/images/products/IMG_8560.jpeg",
       "/images/products/IMG_8534.jpeg"
@@ -508,7 +508,7 @@
     "currency": "EUR",
     "featured": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "createdAt": "2026-06-21T15:51:52.203Z",
     "images": [
       "/images/products/IMG_8879.jpeg",

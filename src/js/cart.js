@@ -9,16 +9,28 @@
 const CART_KEY = 'robyn_gold_cart';
 
 /**
- * Send a custom analytics event to Plausible (no-op if not loaded).
+ * Send a custom analytics event to Umami (no-op if not loaded).
  * `revenue` should be { currency, amount } to record sales value.
  */
 function trackEvent(name, props, revenue) {
   try {
-    if (typeof window !== 'undefined' && typeof window.plausible === 'function') {
-      const options = {};
-      if (props) options.props = props;
-      if (revenue) options.revenue = revenue;
-      window.plausible(name, Object.keys(options).length ? options : undefined);
+    if (typeof window === 'undefined') return;
+    const data = Object.assign({}, props);
+    if (revenue) {
+      data.revenue = revenue.amount;
+      data.currency = revenue.currency;
+    }
+    const payload = Object.keys(data).length ? data : undefined;
+    if (window.umami && typeof window.umami.track === 'function') {
+      window.umami.track(name, payload);
+    } else {
+      // The Umami script loads with `defer`, so events fired from inline
+      // scripts (e.g. Purchase on the success page) must wait for it.
+      window.addEventListener('load', function () {
+        if (window.umami && typeof window.umami.track === 'function') {
+          window.umami.track(name, payload);
+        }
+      });
     }
   } catch (error) {
     /* analytics should never break the app */

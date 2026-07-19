@@ -855,5 +855,26 @@
     "videos": [
       "/images/products/IMG_9730.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-claw-set-diamond-band-r48ww",
+    "name": "9ct Yellow Gold Claw-set Diamond Band",
+    "slug": "9ct-yellow-gold-claw-set-diamond-band-r48ww",
+    "description": "Simple, timeless and endlessly versatile, this beautiful vintage 9ct gold band is set with a row of natural diamonds in a classic claw setting, allowing each stone to catch the light beautifully. Its elegant profile makes it perfect worn alone as a delicate statement or stacked effortlessly with an engagement ring or other favourite bands.\n\nWhether chosen as a wedding band, anniversary ring or simply an everyday piece, this is a classic design that will never go out of style.\n\nDublin hallmarks, partially rubbed. 1.7g.",
+    "size": "UK R · US 8.75",
+    "price": 405,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "createdAt": "2026-07-19T11:42:45.546Z",
+    "images": [
+      "/images/products/IMG_9746.jpeg",
+      "/images/products/IMG_9748.jpeg",
+      "/images/products/IMG_9747.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_9739.mp4"
+    ]
   }
 ]

@@ -953,6 +953,13 @@
     function updateDropVisibility() {
       const on = document.getElementById('f-drop-enabled').checked;
       document.getElementById('drop-schedule-row').style.display = on ? '' : 'none';
+      // "Drop now" only makes sense for pulling an *already-scheduled* piece
+      // forward to now — so only show it when editing a piece that currently
+      // has a future drop. For a new piece you'd just leave the drop off.
+      const editingScheduled = currentMode === 'edit' && currentEditProduct &&
+        currentEditProduct.dropAt && !isNaN(Date.parse(currentEditProduct.dropAt)) &&
+        Date.parse(currentEditProduct.dropAt) > Date.now();
+      document.getElementById('drop-now-btn').style.display = editingScheduled ? '' : 'none';
     }
 
     // datetime-local value ("YYYY-MM-DDTHH:mm") → ISO UTC instant, treating the

@@ -834,5 +834,26 @@
     "videos": [
       "/images/products/IMG_9735.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-diamond-knot-ring-j2nhj",
+    "name": "9ct Yellow Gold Diamond Knot Ring",
+    "slug": "9ct-yellow-gold-diamond-knot-ring-j2nhj",
+    "description": "A beautiful take on a timeless design, this vintage 9ct gold knot ring is set with a combination of sparkling round brilliant and elegant baguette-cut natural diamonds. The intertwining knot creates a graceful focal point, while the mix of diamond cuts adds depth, texture and light from every angle.\n\nA knot is a traditional symbol of enduring love, friendship and unbreakable bonds, making this a meaningful piece to mark a special occasion or simply to treasure as part of your everyday jewellery collection. Striking enough to wear alone yet refined enough to pair with other favourites, it is a wonderfully versatile design.\n\nStamped ‘375’ and ‘10pts’ for 9ct gold and 0.1ct diamonds. 2.7g.",
+    "size": "UK O · US 7.25",
+    "price": 395,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "createdAt": "2026-07-19T11:40:05.761Z",
+    "images": [
+      "/images/products/IMG_9750.jpeg",
+      "/images/products/IMG_9749.jpeg",
+      "/images/products/IMG_9751.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_9730.mp4"
+    ]
   }
 ]

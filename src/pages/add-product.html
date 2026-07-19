@@ -325,7 +325,7 @@
             </div>
           </div>
 
-          <div class="form-grid" style="margin-bottom:1.4rem;">
+          <div class="form-grid" style="margin-bottom:1.4rem;" id="size-field-row">
             <div class="field">
               <label for="f-size">Size *</label>
               <select id="f-size"></select>
@@ -598,9 +598,10 @@
             : `<div class="product-pick-thumb"></div>`;
           const status = product.available === false ? 'Sold' : `€${product.price}`;
           const badge = product.featured === true ? ' <span class="product-pick-featured-badge">★ Featured</span>' : '';
+          const meta = product.size ? `${product.size} · ${status}` : status;
           const item = document.createElement('div');
           item.className = 'product-pick-item' + (product.featured === true ? ' is-featured' : '');
-          item.innerHTML = `${thumb}<div class="product-pick-info"><div class="product-pick-name">${product.name}</div><div class="product-pick-meta">${product.size} · ${status}${badge}</div></div><button class="btn-delete-product" title="Delete product">Delete</button>`;
+          item.innerHTML = `${thumb}<div class="product-pick-info"><div class="product-pick-name">${product.name}</div><div class="product-pick-meta">${meta}${badge}</div></div><button class="btn-delete-product" title="Delete product">Delete</button>`;
           item.querySelector('.product-pick-info').addEventListener('click', () => {
             list.querySelectorAll('.product-pick-item').forEach(el => el.classList.remove('selected'));
             item.classList.add('selected');
@@ -705,6 +706,7 @@
       setSizeValue(product.size || '');
       document.getElementById('f-price').value = product.price || '';
       document.getElementById('f-category').value = product.category || 'rings';
+      updateSizeVisibility();
       document.getElementById('f-available').checked = product.available !== false;
       document.getElementById('f-featured').checked = product.featured === true;
       applyFeaturedCap(product.id);
@@ -880,6 +882,26 @@
 
     buildSizeOptions();
 
+    // ── Size applies to rings only ────────────────────────────────
+    // The size selector is a ring-size dropdown, so it's meaningless for
+    // necklaces/chains, bracelets, earrings and brooches. Hide it (and drop
+    // the requirement) for any non-ring category.
+    function categoryHasSize() {
+      const cat = document.getElementById('f-category').value;
+      return cat === 'rings';
+    }
+
+    function updateSizeVisibility() {
+      const row = document.getElementById('size-field-row');
+      if (!row) return;
+      const hasSize = categoryHasSize();
+      row.style.display = hasSize ? '' : 'none';
+      if (!hasSize) document.getElementById('f-size').value = '';
+    }
+
+    document.getElementById('f-category').addEventListener('change', updateSizeVisibility);
+    updateSizeVisibility();
+
     // ── Slug generation (add mode only) ───────────────────────────
     function newSlugSuffix() {
       return Math.random().toString(36).slice(2, 7);
@@ -930,6 +952,7 @@
         document.getElementById(id).value = '';
       });
       document.getElementById('f-category').value = 'rings';
+      updateSizeVisibility();
       document.getElementById('f-available').checked = true;
       document.getElementById('f-featured').checked = false;
       document.getElementById('image-list').innerHTML = '';
@@ -1215,7 +1238,7 @@
       const slug = document.getElementById('f-slug').value.trim();
 
       if (!name || !slug) { setStatus('error', 'Please enter at least a name.'); return; }
-      if (!document.getElementById('f-size').value) { setStatus('error', 'Please select a ring size.'); return; }
+      if (categoryHasSize() && !document.getElementById('f-size').value) { setStatus('error', 'Please select a ring size.'); return; }
 
       // Enforce the homepage featured cap (defensive — the checkbox is also disabled at cap)
       if (document.getElementById('f-featured').checked) {
@@ -1252,7 +1275,7 @@
           name,
           slug,
           description: document.getElementById('f-description').value.trim(),
-          size:        document.getElementById('f-size').value.trim(),
+          size:        categoryHasSize() ? document.getElementById('f-size').value.trim() : '',
           price:       parseFloat(document.getElementById('f-price').value) || 0,
           currency:    'EUR',
           featured:    document.getElementById('f-featured').checked,

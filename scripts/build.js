@@ -200,7 +200,7 @@ function infoMarkup(product) {
   return `
         <div class="product-detail-info">
           <h1 class="product-detail-title">${escapeHtml(product.name)}</h1>
-          <p class="product-detail-meta">Size ${escapeHtml(product.size || '')}</p>
+          ${product.size ? `<p class="product-detail-meta">Size ${escapeHtml(product.size)}</p>` : ''}
           <p class="product-detail-price">${price}</p>
           ${isSold ? '' : `<p class="product-detail-oneoff">✦ One of a kind — only one available</p>`}
           ${buyBlock}

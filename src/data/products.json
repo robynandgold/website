@@ -134,9 +134,10 @@
     "size": "UK K½ / US 5.5",
     "price": 1150,
     "currency": "EUR",
-    "featured": true,
+    "featured": false,
     "category": "rings",
     "available": true,
+    "createdAt": "2026-06-13T14:24:13+01:00",
     "images": [
       "/images/products/IMG_8586.jpeg",
       "/images/products/IMG_8588.jpeg"
@@ -144,8 +145,7 @@
     "videos": [
       "/images/products/IMG_8542.mp4",
       "/images/products/IMG_8441.mp4"
-    ],
-    "createdAt": "2026-06-13T14:24:13+01:00"
+    ]
   },
   {
     "id": "9ct-yellow-gold-sapphire-and-diamond-ring-3tl0x",

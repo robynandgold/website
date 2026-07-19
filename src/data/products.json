@@ -549,7 +549,7 @@
     "size": "UK Q½ · US 8.5",
     "price": 1295,
     "currency": "EUR",
-    "featured": false,
+    "featured": true,
     "category": "rings",
     "available": true,
     "createdAt": "2026-07-02T17:59:31.691Z",

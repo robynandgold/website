@@ -962,5 +962,23 @@
     "videos": [
       "/images/products/IMG_9830.mp4"
     ]
+  },
+  {
+    "id": "test-eiptq",
+    "name": "Test",
+    "slug": "test-eiptq",
+    "description": "Test",
+    "size": "",
+    "price": 1000,
+    "currency": "EUR",
+    "featured": false,
+    "category": "earrings",
+    "available": true,
+    "dropAt": "2026-07-26T20:10:00.000Z",
+    "createdAt": "2026-07-19T19:11:52.339Z",
+    "images": [
+      "/images/products/E1C8EC37-2074-418E-90B5-D77102EC8696.jpeg"
+    ],
+    "videos": []
   }
 ]

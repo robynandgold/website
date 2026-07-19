@@ -718,7 +718,7 @@
     "currency": "EUR",
     "featured": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "createdAt": "2026-07-19T11:12:51.759Z",
     "images": [
       "/images/products/IMG_9785.jpeg",

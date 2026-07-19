@@ -791,5 +791,27 @@
     "videos": [
       "/images/products/IMG_9729.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-half-bezel-amethyst-ring-vfws0",
+    "name": "9ct Yellow Gold Half-bezel Amethyst Ring",
+    "slug": "9ct-yellow-gold-half-bezel-amethyst-ring-vfws0",
+    "description": "Elegant in its simplicity, this 9ct gold ring showcases a beautifully cut oval natural amethyst in a sleek half-bezel setting. The warm yellow gold curves gently around either side of the gemstone, creating a clean, contemporary silhouette while allowing the vibrant violet amethyst to take centre stage.\n\nAmethyst has long been associated with peace, clarity and inner strength, making this a thoughtful gift or a meaningful addition to any jewellery collection. The half-bezel setting offers a refined, streamlined look while providing excellent protection for the stone, making it a wonderful choice for everyday wear.\n\nStamped ‘375’ and ‘9K’. 4.6g.",
+    "size": "UK N · US 6.75",
+    "price": 465,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "createdAt": "2026-07-19T11:32:58.989Z",
+    "images": [
+      "/images/products/IMG_9765.jpeg",
+      "/images/products/IMG_9762.jpeg",
+      "/images/products/IMG_9767.jpeg",
+      "/images/products/IMG_9769.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_9732.mp4"
+    ]
   }
 ]

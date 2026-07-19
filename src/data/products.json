@@ -950,7 +950,7 @@
     "currency": "EUR",
     "featured": false,
     "category": "bracelets",
-    "available": true,
+    "available": false,
     "createdAt": "2026-07-19T13:09:16.489Z",
     "images": [
       "/images/products/IMG_9831.jpeg",

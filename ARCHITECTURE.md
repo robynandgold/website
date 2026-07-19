@@ -91,6 +91,13 @@ from `src/` via the assets binding:
   carousel and cart buttons.
 - **Cart** is `localStorage` (`cart.js`) — one of each piece only, since
   everything is one of a kind. Nothing is reserved until payment.
+- **Drops** (optional per piece): a product can carry a `dropAt` (ISO UTC
+  instant) set from the add-product page. Until that GMT time it's hidden
+  from the shop, homepage and "you might also like", left out of the
+  sitemap, and its own page shows "Available &lt;date&gt; GMT" instead of an
+  Add-to-cart button — all enforced client-side against the current time, so
+  it goes live automatically at the drop. No `dropAt` means the piece
+  publishes live immediately; a "Drop now" override clears the schedule.
 - **Grid videos** (`products.js`): an IntersectionObserver starts buffering
   each card's video ~600px before it scrolls into view; the product photo
   overlays the video and is removed only once frames are actually

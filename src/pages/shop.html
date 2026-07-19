@@ -115,7 +115,18 @@
   <script src="../js/cart.js"></script>
   <script>
     let allProducts = [];
-    
+
+    // A piece is shown when it isn't sold and any scheduled GMT drop has passed.
+    function isLive(product) {
+      if (window.ProductsAPI && window.ProductsAPI.isPubliclyLive) return window.ProductsAPI.isPubliclyLive(product);
+      if (product.available === false) return false;
+      if (product.dropAt) {
+        const t = Date.parse(product.dropAt);
+        if (!isNaN(t) && t > Date.now()) return false;
+      }
+      return true;
+    }
+
     // Load and render products
     async function loadShopProducts() {
       console.log('=== SHOP PAGE: Starting to load products ===');
@@ -129,8 +140,8 @@
         if (response.ok) {
           const products = await response.json();
           console.log('Direct fetch successful, got', products.length, 'products');
-          // Filter for available products
-          allProducts = products.filter(product => product.available !== false);
+          // Filter for available products (and hide any piece whose GMT drop hasn't happened yet)
+          allProducts = products.filter(isLive);
           console.log('Available products:', allProducts.length);
           populateCategories();
           filterProducts(); // applies the default "newest first" sort

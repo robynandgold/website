@@ -929,7 +929,7 @@
     "currency": "EUR",
     "featured": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "createdAt": "2026-07-19T12:11:44.921Z",
     "images": [
       "/images/products/IMG_9741.jpeg",

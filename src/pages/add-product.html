@@ -211,6 +211,14 @@
       flex-shrink: 0; transition: background 0.15s;
     }
     .btn-delete-product:hover { background: #fdf0f0; }
+    .btn-copy-link {
+      background: none; border: 1px solid var(--accent-soft); color: var(--ink);
+      border-radius: var(--radius-md); padding: 0.25rem 0.6rem;
+      font-size: 0.72rem; font-family: inherit; cursor: pointer;
+      flex-shrink: 0; transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .btn-copy-link:hover { background: rgba(198,168,120,0.12); }
+    .btn-copy-link.copied { border-color: #a8d5b5; color: #3a7a52; background: #edf7f0; }
     .product-pick-item.is-featured { background: rgba(198,168,120,0.06); }
     .product-pick-featured-badge {
       font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em;
@@ -621,11 +629,15 @@
           const meta = (product.size ? `${product.size} · ${status}` : status) + dropNote;
           const item = document.createElement('div');
           item.className = 'product-pick-item' + (product.featured === true ? ' is-featured' : '');
-          item.innerHTML = `${thumb}<div class="product-pick-info"><div class="product-pick-name">${product.name}</div><div class="product-pick-meta">${meta}${badge}</div></div><button class="btn-delete-product" title="Delete product">Delete</button>`;
+          item.innerHTML = `${thumb}<div class="product-pick-info"><div class="product-pick-name">${product.name}</div><div class="product-pick-meta">${meta}${badge}</div></div><button class="btn-copy-link" title="Copy the shareable link to this piece">Copy link</button><button class="btn-delete-product" title="Delete product">Delete</button>`;
           item.querySelector('.product-pick-info').addEventListener('click', () => {
             list.querySelectorAll('.product-pick-item').forEach(el => el.classList.remove('selected'));
             item.classList.add('selected');
             loadProductForEdit(product);
+          });
+          item.querySelector('.btn-copy-link').addEventListener('click', e => {
+            e.stopPropagation();
+            copyProductLink(product, e.currentTarget);
           });
           item.querySelector('.btn-delete-product').addEventListener('click', e => {
             e.stopPropagation();
@@ -977,6 +989,43 @@
       }
     });
     updateDropVisibility();
+
+    // ── Shareable product link ────────────────────────────────────
+    // The canonical link to a piece's page. It works even before a drop goes
+    // live — the page exists, it's just unlisted (shop/home/sitemap) until the
+    // drop — so it's the link to hand out for an early preview.
+    const PRODUCT_URL_BASE = 'https://robynandgold.com/pages/product/';
+    function productUrl(product) {
+      return PRODUCT_URL_BASE + product.slug + '.html';
+    }
+    async function copyProductLink(product, btn) {
+      const url = productUrl(product);
+      let ok = false;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(url);
+          ok = true;
+        }
+      } catch (e) { /* fall through to the legacy path below */ }
+      if (!ok) {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+          document.body.appendChild(ta); ta.focus(); ta.select();
+          ok = document.execCommand('copy');
+          document.body.removeChild(ta);
+        } catch (e) { ok = false; }
+      }
+      if (btn) {
+        const original = btn.textContent;
+        btn.textContent = ok ? 'Copied!' : 'Copy failed';
+        btn.classList.toggle('copied', ok);
+        setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 1600);
+      }
+      // If the clipboard is blocked, surface the URL so it can still be copied by hand.
+      if (!ok) window.prompt('Copy this link:', url);
+      return ok;
+    }
 
     // ── Slug generation (add mode only) ───────────────────────────
     function newSlugSuffix() {

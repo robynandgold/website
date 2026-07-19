@@ -749,5 +749,26 @@
     "videos": [
       "/images/products/IMG_9726.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-diamond-knot-ring-60aqu",
+    "name": "9ct Yellow Gold Diamond Knot Ring",
+    "slug": "9ct-yellow-gold-diamond-knot-ring-60aqu",
+    "description": "Delicate, timeless and full of meaning, this beautiful 9ct gold knot ring is a piece you’ll reach for every day. The elegant crossover knot is accented with a row of sparkling natural diamonds, creating just the right amount of understated brilliance.\n\nThe knot has long symbolised an unbreakable bond, representing love, friendship, loyalty and connection, making this a wonderfully sentimental piece to gift or treasure for yourself. Its dainty profile makes it perfect worn alone for a minimalist look or stacked effortlessly with your favourite rings.\n\nStamped ‘375’ for 9ct gold and ‘DIA’ for diamonds. 1.4g.",
+    "size": "UK K½ · US 5.5",
+    "price": 305,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "createdAt": "2026-07-19T11:23:48.819Z",
+    "images": [
+      "/images/products/IMG_9761.jpeg",
+      "/images/products/IMG_9758.jpeg",
+      "/images/products/IMG_9760.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_9738.mp4"
+    ]
   }
 ]

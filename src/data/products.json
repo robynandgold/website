@@ -707,5 +707,26 @@
     "videos": [
       "/images/products/IMG_9574.mp4"
     ]
+  },
+  {
+    "id": "18ct-yellow-gold-antique-gold-diamond-band-kc741",
+    "name": "18ct Yellow Gold Antique Gold Diamond Band",
+    "slug": "18ct-yellow-gold-antique-gold-diamond-band-kc741",
+    "description": "A truly one-of-a-kind piece, this beautiful 18ct gold band began its life as a plain wedding ring over 125 years ago before being thoughtfully reimagined with five sparkling lab diamonds in delicate star settings. The result is a ring that honours its history while giving it a new chapter to tell.\n\nInside, the original inscription remains beautifully preserved:\n\n“Fernand et Juliette unis 23 October 1900.”\n\nA touching reminder of the couple who first exchanged this ring, it transforms the piece from simply antique jewellery into a tangible piece of someone’s love story. More than a century later, it is ready to become part of another.\n\nThe star setting is a classic antique technique, with each diamond appearing to shine like a tiny star across the polished gold band. Traditionally symbolising guidance, hope and everlasting love, it feels especially fitting for a ring that has already witnessed a lifetime.\n\nUnmarked but tests as 18ct gold. 3.5g.",
+    "size": "UK K½ · US 5.5",
+    "price": 750,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "createdAt": "2026-07-19T11:12:51.759Z",
+    "images": [
+      "/images/products/IMG_9785.jpeg",
+      "/images/products/IMG_9782.jpeg",
+      "/images/products/IMG_9783.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_9734.mp4"
+    ]
   }
 ]

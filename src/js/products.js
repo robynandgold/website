@@ -52,11 +52,26 @@ async function loadProducts() {
 }
 
 /**
+ * Whether a product should be shown to shoppers right now.
+ * A piece is public when it isn't sold and any scheduled drop (an ISO UTC
+ * instant in `dropAt`) has already passed. A missing/empty dropAt means it's
+ * live immediately.
+ */
+function isPubliclyLive(product) {
+  if (product.available === false) return false;
+  if (product.dropAt) {
+    const dropTime = Date.parse(product.dropAt);
+    if (!isNaN(dropTime) && dropTime > Date.now()) return false;
+  }
+  return true;
+}
+
+/**
  * Get all products
  */
 async function getAllProducts() {
   const products = await loadProducts();
-  return products.filter(product => product.available !== false);
+  return products.filter(isPubliclyLive);
 }
 
 /**
@@ -64,8 +79,8 @@ async function getAllProducts() {
  */
 async function getFeaturedProducts() {
   const products = await loadProducts();
-  return products.filter(product => 
-    product.featured === true && product.available !== false
+  return products.filter(product =>
+    product.featured === true && isPubliclyLive(product)
   );
 }
 
@@ -184,6 +199,7 @@ if (typeof window !== 'undefined') {
     getProductBySlug,
     getProductById,
     formatPrice,
+    isPubliclyLive,
     lazyPlayVideos
   };
 }

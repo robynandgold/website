@@ -364,6 +364,22 @@
             <p class="featured-note ok" id="featured-note"></p>
           </div>
 
+          <div style="margin-bottom:1.6rem;">
+            <p class="section-label">Drop (scheduled release)</p>
+            <label class="toggle-field" style="margin-bottom:0.8rem;">
+              <input type="checkbox" id="f-drop-enabled" />
+              Schedule this piece as a drop
+            </label>
+            <div id="drop-schedule-row" style="display:none;">
+              <div class="field" style="margin-bottom:0.8rem;">
+                <label for="f-drop-datetime">Drop date &amp; time (GMT)</label>
+                <input type="datetime-local" id="f-drop-datetime" />
+              </div>
+              <button type="button" class="btn btn-ghost" id="drop-now-btn" style="padding:0.45rem 1rem;font-size:0.8rem;">Drop now — release immediately</button>
+              <p id="drop-hint" style="font-size:0.75rem;color:var(--muted);margin:0.6rem 0 0;">Leave the drop off to publish the piece live straight away. All times are GMT.</p>
+            </div>
+          </div>
+
           <div style="margin-bottom:1.4rem;">
             <p class="section-label">Images</p>
             <div class="media-list" id="image-list"></div>
@@ -598,7 +614,11 @@
             : `<div class="product-pick-thumb"></div>`;
           const status = product.available === false ? 'Sold' : `€${product.price}`;
           const badge = product.featured === true ? ' <span class="product-pick-featured-badge">★ Featured</span>' : '';
-          const meta = product.size ? `${product.size} · ${status}` : status;
+          const dropsFuture = product.dropAt && !isNaN(Date.parse(product.dropAt)) && Date.parse(product.dropAt) > Date.now();
+          const dropNote = dropsFuture
+            ? ' · Drops ' + new Date(product.dropAt).toLocaleString('en-GB', { timeZone: 'UTC', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' GMT'
+            : '';
+          const meta = (product.size ? `${product.size} · ${status}` : status) + dropNote;
           const item = document.createElement('div');
           item.className = 'product-pick-item' + (product.featured === true ? ' is-featured' : '');
           item.innerHTML = `${thumb}<div class="product-pick-info"><div class="product-pick-name">${product.name}</div><div class="product-pick-meta">${meta}${badge}</div></div><button class="btn-delete-product" title="Delete product">Delete</button>`;
@@ -707,6 +727,7 @@
       document.getElementById('f-price').value = product.price || '';
       document.getElementById('f-category').value = product.category || 'rings';
       updateSizeVisibility();
+      setDropValue(product.dropAt || '');
       document.getElementById('f-available').checked = product.available !== false;
       document.getElementById('f-featured').checked = product.featured === true;
       applyFeaturedCap(product.id);
@@ -902,6 +923,61 @@
     document.getElementById('f-category').addEventListener('change', updateSizeVisibility);
     updateSizeVisibility();
 
+    // ── Drops (scheduled release, all times GMT) ──────────────────
+    // A piece can be held back until a set GMT date/time. The datetime-local
+    // input is read as literal GMT wall-clock (not the admin's local zone), so
+    // the stored `dropAt` is an accurate UTC instant regardless of where the
+    // shopkeeper is. No schedule → the piece goes live as soon as it's published.
+    function updateDropVisibility() {
+      const on = document.getElementById('f-drop-enabled').checked;
+      document.getElementById('drop-schedule-row').style.display = on ? '' : 'none';
+    }
+
+    // datetime-local value ("YYYY-MM-DDTHH:mm") → ISO UTC instant, treating the
+    // entered wall-clock as GMT.
+    function dropInputToISO() {
+      if (!document.getElementById('f-drop-enabled').checked) return '';
+      const v = document.getElementById('f-drop-datetime').value;
+      if (!v) return '';
+      const m = v.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+      if (!m) return '';
+      const [, y, mo, d, h, mi] = m.map(Number);
+      return new Date(Date.UTC(y, mo - 1, d, h, mi)).toISOString();
+    }
+
+    // Stored ISO UTC → datetime-local value showing the GMT wall-clock.
+    function isoToDropInput(iso) {
+      const t = Date.parse(iso);
+      if (isNaN(t)) return '';
+      const dt = new Date(t);
+      const p = n => String(n).padStart(2, '0');
+      return `${dt.getUTCFullYear()}-${p(dt.getUTCMonth() + 1)}-${p(dt.getUTCDate())}T${p(dt.getUTCHours())}:${p(dt.getUTCMinutes())}`;
+    }
+
+    // Load a product's saved drop into the form. Only a *future* drop is still a
+    // pending schedule; a past drop means the piece is already live, so show it
+    // as unscheduled.
+    function setDropValue(iso) {
+      const future = iso && !isNaN(Date.parse(iso)) && Date.parse(iso) > Date.now();
+      document.getElementById('f-drop-enabled').checked = !!future;
+      document.getElementById('f-drop-datetime').value = future ? isoToDropInput(iso) : '';
+      updateDropVisibility();
+    }
+
+    document.getElementById('f-drop-enabled').addEventListener('change', updateDropVisibility);
+    document.getElementById('drop-now-btn').addEventListener('click', () => {
+      // Release right now: drop the schedule so the piece is immediately live.
+      document.getElementById('f-drop-enabled').checked = false;
+      document.getElementById('f-drop-datetime').value = '';
+      updateDropVisibility();
+      // If we're editing an already-scheduled piece, publishing is what actually
+      // makes it live — so kick off the publish straight away.
+      if (currentMode === 'edit' && currentEditProduct) {
+        document.getElementById('publish-btn').click();
+      }
+    });
+    updateDropVisibility();
+
     // ── Slug generation (add mode only) ───────────────────────────
     function newSlugSuffix() {
       return Math.random().toString(36).slice(2, 7);
@@ -953,6 +1029,7 @@
       });
       document.getElementById('f-category').value = 'rings';
       updateSizeVisibility();
+      setDropValue('');
       document.getElementById('f-available').checked = true;
       document.getElementById('f-featured').checked = false;
       document.getElementById('image-list').innerHTML = '';
@@ -1239,6 +1316,10 @@
 
       if (!name || !slug) { setStatus('error', 'Please enter at least a name.'); return; }
       if (categoryHasSize() && !document.getElementById('f-size').value) { setStatus('error', 'Please select a ring size.'); return; }
+      if (document.getElementById('f-drop-enabled').checked && !document.getElementById('f-drop-datetime').value) {
+        setStatus('error', 'Please set a drop date and time (GMT), or turn the drop off / use “Drop now”.');
+        return;
+      }
 
       // Enforce the homepage featured cap (defensive — the checkbox is also disabled at cap)
       if (document.getElementById('f-featured').checked) {
@@ -1281,6 +1362,8 @@
           featured:    document.getElementById('f-featured').checked,
           category:    document.getElementById('f-category').value,
           available:   document.getElementById('f-available').checked,
+          // Scheduled drop as an ISO UTC instant; '' means live immediately.
+          dropAt:      dropInputToISO(),
           // Date added — used by the shop's "Newest first" sort. For edits this is
           // overwritten with the product's existing value in publishCommit().
           createdAt:   new Date().toISOString(),

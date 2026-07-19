@@ -29,6 +29,42 @@
     return `${symbol}${Number(price).toFixed(2)}`;
   }
 
+  // A piece scheduled as a drop is not yet purchasable — its GMT drop time
+  // is still in the future.
+  function isScheduled(product) {
+    if (!product || !product.dropAt) return false;
+    const t = Date.parse(product.dropAt);
+    return !isNaN(t) && t > Date.now();
+  }
+
+  function formatDropTime(iso) {
+    const d = new Date(iso);
+    return d.toLocaleString('en-GB', {
+      timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'long',
+      hour: '2-digit', minute: '2-digit'
+    }) + ' GMT';
+  }
+
+  // If this piece hasn't dropped yet, replace the buy controls with a
+  // "coming soon" note so it can't be added to the cart before its time.
+  function applyDropGate() {
+    if (!isScheduled(currentProduct)) return false;
+    const label = `Available ${formatDropTime(currentProduct.dropAt)}`;
+
+    const btn = document.getElementById('add-to-cart-btn');
+    if (btn) {
+      const note = document.createElement('p');
+      note.className = 'product-detail-oneoff';
+      note.style.marginTop = '1.5rem';
+      note.textContent = '✦ ' + label;
+      btn.replaceWith(note);
+    }
+    const message = document.getElementById('cart-message');
+    if (message) message.style.display = 'none';
+
+    return true;
+  }
+
   // ---- Carousel (images + videos) ---------------------------------------
   let currentSlideIndex = 0;
   function setupCarousel() {
@@ -105,6 +141,7 @@
 
   // ---- Add to cart ------------------------------------------------------
   function setupAddToCart() {
+    if (isScheduled(currentProduct)) return;
     const btn = document.getElementById('add-to-cart-btn');
     const message = document.getElementById('cart-message');
     if (!btn || !window.CartAPI) return;
@@ -124,6 +161,7 @@
   }
 
   function setupStickyBar() {
+    if (isScheduled(currentProduct)) return;
     const bar = document.getElementById('product-sticky-bar');
     if (!bar) return;
     const addBtn = document.getElementById('psb-add-btn');
@@ -154,7 +192,7 @@
     } catch (e) { return; }
 
     const others = products
-      .filter(p => p.slug !== currentProduct.slug && p.available !== false)
+      .filter(p => p.slug !== currentProduct.slug && p.available !== false && !isScheduled(p))
       .slice(0, 3);
 
     if (others.length === 0) { section.hidden = true; return; }
@@ -194,6 +232,7 @@
     const yearEl = document.getElementById('year');
     if (yearEl) yearEl.textContent = new Date().getFullYear();
     setupCarousel();
+    applyDropGate();
     setupAddToCart();
     setupStickyBar();
     renderRelated();

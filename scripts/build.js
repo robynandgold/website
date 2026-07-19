@@ -364,6 +364,18 @@ ${stickyBarMarkup(product)}
 
 // --- sitemap ----------------------------------------------------------------
 
+// A product belongs in the sitemap once it's sellable: not sold, and any
+// scheduled GMT drop (dropAt, an ISO UTC instant) has already passed at build
+// time. Scheduled pieces are kept out until a build runs after their drop.
+function isSitemapEligible(product) {
+  if (product.available === false) return false;
+  if (product.dropAt) {
+    const t = Date.parse(product.dropAt);
+    if (!isNaN(t) && t > Date.now()) return false;
+  }
+  return true;
+}
+
 function renderSitemap(products) {
   const staticPages = [
     { loc: `${SITE}/`, changefreq: 'weekly', priority: '1.0' },
@@ -376,7 +388,7 @@ function renderSitemap(products) {
   ];
 
   const productUrls = products
-    .filter(p => p.available !== false)
+    .filter(isSitemapEligible)
     .map(p => ({
       loc: `${SITE}/pages/product/${p.slug}.html`,
       lastmod: p.createdAt ? String(p.createdAt).slice(0, 10) : undefined,
@@ -416,7 +428,7 @@ function main() {
   fs.writeFileSync(SITEMAP_FILE, renderSitemap(products));
 
   console.log(`Generated ${written} product page(s) in src/pages/product/`);
-  console.log(`Wrote sitemap with ${products.filter(p => p.available !== false).length} live product URL(s)`);
+  console.log(`Wrote sitemap with ${products.filter(isSitemapEligible).length} live product URL(s)`);
 }
 
 main();

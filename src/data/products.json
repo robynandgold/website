@@ -800,7 +800,7 @@
     "size": "UK N · US 6.75",
     "price": 465,
     "currency": "EUR",
-    "featured": false,
+    "featured": true,
     "category": "rings",
     "available": true,
     "createdAt": "2026-07-19T11:32:58.989Z",

@@ -876,5 +876,26 @@
     "videos": [
       "/images/products/IMG_9739.mp4"
     ]
+  },
+  {
+    "id": "18ct-yellow-gold-sapphire-and-diamond-snake-ring-hwrvl",
+    "name": "18ct Yellow Gold Sapphire and Diamond Snake Ring",
+    "slug": "18ct-yellow-gold-sapphire-and-diamond-snake-ring-hwrvl",
+    "description": "Elegant with a touch of symbolism, this vintage 18ct gold snake ring features a rich blue sapphire set between two delicate natural diamond accents. Its sleek crossover design creates the graceful illusion of a serpent wrapping around the finger, making it a timeless and distinctive piece.\n\nFor centuries, snake jewellery has symbolised eternal love, wisdom and renewal, with its unbroken form representing everlasting devotion and new beginnings. Combined with the deep blue sapphire, long associated with loyalty and sincerity, this ring carries a sense of meaning while remaining effortlessly wearable.\n\nFully hallmarked and stamped ‘750’. 3g.",
+    "size": "UK O½ · US 7.5",
+    "price": 650,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "createdAt": "2026-07-19T11:47:10.405Z",
+    "images": [
+      "/images/products/IMG_9744.jpeg",
+      "/images/products/IMG_9743.jpeg",
+      "/images/products/IMG_9745.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_9736.mp4"
+    ]
   }
 ]

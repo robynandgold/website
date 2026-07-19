@@ -81,7 +81,7 @@
             <span class="filter-label">Category</span>
             <select id="filter-category" class="filter-select">
               <option value="">All categories</option>
-              <option value="rings">Rings</option>
+              <!-- Category options are populated from the live catalogue in JS -->
             </select>
           </label>
 
@@ -132,6 +132,7 @@
           // Filter for available products
           allProducts = products.filter(product => product.available !== false);
           console.log('Available products:', allProducts.length);
+          populateCategories();
           filterProducts(); // applies the default "newest first" sort
           return; // Success, exit here
         }
@@ -170,6 +171,7 @@
           return;
         }
 
+        populateCategories();
         filterProducts(); // applies the default "newest first" sort
       } catch (error) {
         console.error('Error calling getAllProducts():', error);
@@ -220,6 +222,36 @@
 
       // Play videos only while they're in view
       if (window.lazyPlayVideos) window.lazyPlayVideos(grid);
+    }
+
+    // Build the category dropdown from the categories actually in stock, so a
+    // category only appears once there's a piece to show (and never goes stale).
+    const CATEGORY_LABELS = {
+      rings: 'Rings',
+      necklaces: 'Necklaces',
+      bracelets: 'Bracelets',
+      earrings: 'Earrings',
+      brooches: 'Brooches'
+    };
+    function populateCategories() {
+      const select = document.getElementById('filter-category');
+      if (!select) return;
+      const current = select.value;
+      const present = [...new Set(allProducts.map(p => (p.category || '').toLowerCase()).filter(Boolean))];
+      // Show known categories in a stable order, then any others alphabetically.
+      const order = Object.keys(CATEGORY_LABELS);
+      present.sort((a, b) => {
+        const ia = order.indexOf(a), ib = order.indexOf(b);
+        if (ia !== -1 && ib !== -1) return ia - ib;
+        if (ia !== -1) return -1;
+        if (ib !== -1) return 1;
+        return a.localeCompare(b);
+      });
+      const label = c => CATEGORY_LABELS[c] || (c.charAt(0).toUpperCase() + c.slice(1));
+      select.innerHTML = '<option value="">All categories</option>' +
+        present.map(c => `<option value="${c}">${label(c)}</option>`).join('');
+      // Preserve the shopper's selection if it's still available.
+      select.value = present.includes(current) ? current : '';
     }
 
     // Filter and sort products

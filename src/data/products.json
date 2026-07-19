@@ -897,5 +897,26 @@
     "videos": [
       "/images/products/IMG_9736.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-topaz-and-amethyst-ring-9nssp",
+    "name": "9ct Yellow Gold Topaz and Amethyst Ring",
+    "slug": "9ct-yellow-gold-topaz-and-amethyst-ring-9nssp",
+    "description": "A pretty and easy-to-wear 9ct gold band set with a graduating row of brilliant-cut topaz and oval-cut amethyst gemstones. The soft blue and lilac tones sit beautifully against the warm yellow gold, while the smooth bezel-style settings give the ring a neat, contemporary finish.\n\nDelicate enough for everyday wear, it looks lovely worn alone or added to a colourful ring stack.\n\nFully hallmarked with the International Convention hallmark. 2.4g.",
+    "size": "UK O · US 7.25",
+    "price": 365,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "createdAt": "2026-07-19T11:52:53.730Z",
+    "images": [
+      "/images/products/IMG_9828.jpeg",
+      "/images/products/IMG_9827.jpeg",
+      "/images/products/IMG_9826.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_9821.mp4"
+    ]
   }
 ]

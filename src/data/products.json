@@ -728,5 +728,26 @@
     "videos": [
       "/images/products/IMG_9734.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-diamond-band-twsw9",
+    "name": "9ct Yellow Gold Diamond Band",
+    "slug": "9ct-yellow-gold-diamond-band-twsw9",
+    "description": "Delicate, elegant and beautifully detailed, this vintage 9ct gold band is set with sparkling natural diamonds, each nestled within finely engraved star settings. The subtle milgrain edging and intricate hand-engraved detailing give the ring a wonderfully antique-inspired feel, despite its understated design.\n\nPerfect worn alone as a minimalist diamond band or stacked with your favourite rings, this is an effortlessly versatile piece that adds just a touch of sparkle. The traditional star setting has long symbolised guidance, hope and enduring love, making it as meaningful as it is timeless.\n\nFully hallmarked, London 1989. 1.3g.",
+    "size": "UK M · US 6.25",
+    "price": 325,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "createdAt": "2026-07-19T11:17:48.661Z",
+    "images": [
+      "/images/products/IMG_9788.jpeg",
+      "/images/products/IMG_9789.jpeg",
+      "/images/products/IMG_9790.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_9726.mp4"
+    ]
   }
 ]

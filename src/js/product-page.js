@@ -24,6 +24,13 @@
     return;
   }
 
+  // A `?vip=<token>` link grants early access: it lets this one scheduled piece
+  // be bought before its public drop. The token is carried into the cart and
+  // re-verified server-side at checkout, so a bogus value just fails there.
+  const vipParam = new URLSearchParams(window.location.search).get('vip') || '';
+  if (vipParam) currentProduct.vipToken = vipParam;
+  const hasEarlyAccess = !!vipParam;
+
   function formatPrice(price, currency = 'EUR') {
     const symbol = currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
     return `${symbol}${Number(price).toFixed(2)}`;
@@ -45,10 +52,25 @@
     }) + ' GMT';
   }
 
+  // Insert an "early access" note above the buy button for a VIP visitor
+  // reaching a scheduled piece before its public drop.
+  function markEarlyAccess() {
+    const btn = document.getElementById('add-to-cart-btn');
+    if (!btn) return;
+    const note = document.createElement('p');
+    note.className = 'product-detail-oneoff';
+    note.style.marginTop = '1.5rem';
+    note.style.marginBottom = '0';
+    note.textContent = `✦ Early access — yours before the ${formatDropTime(currentProduct.dropAt)} drop`;
+    btn.parentNode.insertBefore(note, btn);
+  }
+
   // If this piece hasn't dropped yet, replace the buy controls with a
-  // "coming soon" note so it can't be added to the cart before its time.
+  // "coming soon" note so it can't be added to the cart before its time —
+  // unless the visitor arrived with a valid early-access (VIP) link.
   function applyDropGate() {
     if (!isScheduled(currentProduct)) return false;
+    if (hasEarlyAccess) { markEarlyAccess(); return false; }
     const label = `Available ${formatDropTime(currentProduct.dropAt)}`;
 
     const btn = document.getElementById('add-to-cart-btn');
@@ -141,7 +163,7 @@
 
   // ---- Add to cart ------------------------------------------------------
   function setupAddToCart() {
-    if (isScheduled(currentProduct)) return;
+    if (isScheduled(currentProduct) && !hasEarlyAccess) return;
     const btn = document.getElementById('add-to-cart-btn');
     const message = document.getElementById('cart-message');
     if (!btn || !window.CartAPI) return;
@@ -161,7 +183,7 @@
   }
 
   function setupStickyBar() {
-    if (isScheduled(currentProduct)) return;
+    if (isScheduled(currentProduct) && !hasEarlyAccess) return;
     const bar = document.getElementById('product-sticky-bar');
     if (!bar) return;
     const addBtn = document.getElementById('psb-add-btn');

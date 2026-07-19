@@ -6,6 +6,7 @@
 // unreachable we fail closed, since line items are priced from the catalogue.
 import Stripe from 'stripe';
 import { Buffer } from 'node:buffer';
+import { purchaseAllowed } from './vip.js';
 
 const GH_OWNER = 'robynandgold';
 const GH_REPO = 'website';
@@ -153,6 +154,13 @@ export async function handleCheckout(request, env) {
       const product = byId.get(String(item.id));
       if (!product || product.available === false) {
         unavailable.push({ id: item.id, name: (product && product.name) || item.name });
+        continue;
+      }
+      // A piece scheduled as a future drop can only be bought with a valid VIP
+      // token for it — otherwise it's treated as unavailable, just like a sold
+      // piece. Live pieces are unaffected.
+      if (!(await purchaseAllowed(product, item && item.vip, env))) {
+        unavailable.push({ id: item.id, name: product.name });
         continue;
       }
       line_items.push({

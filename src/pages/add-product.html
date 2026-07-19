@@ -219,6 +219,8 @@
     }
     .btn-copy-link:hover { background: rgba(198,168,120,0.12); }
     .btn-copy-link.copied { border-color: #a8d5b5; color: #3a7a52; background: #edf7f0; }
+    .btn-copy-vip { border-color: var(--accent); color: var(--accent); }
+    .btn-copy-vip:hover { background: rgba(198,168,120,0.16); }
     .product-pick-item.is-featured { background: rgba(198,168,120,0.06); }
     .product-pick-featured-badge {
       font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em;
@@ -629,7 +631,10 @@
           const meta = (product.size ? `${product.size} · ${status}` : status) + dropNote;
           const item = document.createElement('div');
           item.className = 'product-pick-item' + (product.featured === true ? ' is-featured' : '');
-          item.innerHTML = `${thumb}<div class="product-pick-info"><div class="product-pick-name">${product.name}</div><div class="product-pick-meta">${meta}${badge}</div></div><button class="btn-copy-link" title="Copy the shareable link to this piece">Copy link</button><button class="btn-delete-product" title="Delete product">Delete</button>`;
+          const vipBtnHtml = dropsFuture
+            ? `<button class="btn-copy-link btn-copy-vip" title="Copy an early-access VIP link — lets the recipient buy this piece before its public drop">Copy VIP link</button>`
+            : '';
+          item.innerHTML = `${thumb}<div class="product-pick-info"><div class="product-pick-name">${product.name}</div><div class="product-pick-meta">${meta}${badge}</div></div><button class="btn-copy-link" title="Copy the shareable link to this piece">Copy link</button>${vipBtnHtml}<button class="btn-delete-product" title="Delete product">Delete</button>`;
           item.querySelector('.product-pick-info').addEventListener('click', () => {
             list.querySelectorAll('.product-pick-item').forEach(el => el.classList.remove('selected'));
             item.classList.add('selected');
@@ -638,6 +643,11 @@
           item.querySelector('.btn-copy-link').addEventListener('click', e => {
             e.stopPropagation();
             copyProductLink(product, e.currentTarget);
+          });
+          const vipBtn = item.querySelector('.btn-copy-vip');
+          if (vipBtn) vipBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            copyVipLink(product, e.currentTarget);
           });
           item.querySelector('.btn-delete-product').addEventListener('click', e => {
             e.stopPropagation();
@@ -998,33 +1008,71 @@
     function productUrl(product) {
       return PRODUCT_URL_BASE + product.slug + '.html';
     }
-    async function copyProductLink(product, btn) {
-      const url = productUrl(product);
-      let ok = false;
+    async function copyToClipboard(url) {
       try {
         if (navigator.clipboard && navigator.clipboard.writeText) {
           await navigator.clipboard.writeText(url);
-          ok = true;
+          return true;
         }
       } catch (e) { /* fall through to the legacy path below */ }
-      if (!ok) {
-        try {
-          const ta = document.createElement('textarea');
-          ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
-          document.body.appendChild(ta); ta.focus(); ta.select();
-          ok = document.execCommand('copy');
-          document.body.removeChild(ta);
-        } catch (e) { ok = false; }
-      }
-      if (btn) {
-        const original = btn.textContent;
-        btn.textContent = ok ? 'Copied!' : 'Copy failed';
-        btn.classList.toggle('copied', ok);
-        setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 1600);
-      }
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+      } catch (e) { return false; }
+    }
+
+    function flashCopied(btn, ok, label) {
+      if (!btn) return;
+      const restore = label != null ? label : btn.textContent;
+      btn.textContent = ok ? 'Copied!' : 'Copy failed';
+      btn.classList.toggle('copied', ok);
+      setTimeout(() => { btn.textContent = restore; btn.classList.remove('copied'); }, 1600);
+    }
+
+    async function copyProductLink(product, btn) {
+      const url = productUrl(product);
+      const ok = await copyToClipboard(url);
+      flashCopied(btn, ok);
       // If the clipboard is blocked, surface the URL so it can still be copied by hand.
       if (!ok) window.prompt('Copy this link:', url);
       return ok;
+    }
+
+    // Mint a VIP early-access link (lets the recipient buy this scheduled piece
+    // before its public drop). The signing secret stays on the Worker; we just
+    // ask it, proving admin with the session password, for the per-piece token.
+    async function copyVipLink(product, btn) {
+      const pw = sessionStorage.getItem(PW_KEY);
+      if (!pw) { setStatus('error', 'Please log in again before creating a VIP link.'); return false; }
+      const label = btn ? btn.textContent : '';
+      if (btn) { btn.textContent = 'Working…'; btn.disabled = true; }
+      try {
+        const res = await fetch('/api/vip-link', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pw, id: product.id }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (btn) btn.disabled = false;
+        if (!res.ok || !data.token) {
+          if (btn) btn.textContent = label;
+          setStatus('error', data.error || 'Could not create a VIP link.');
+          return false;
+        }
+        const url = productUrl(product) + '?vip=' + encodeURIComponent(data.token);
+        const ok = await copyToClipboard(url);
+        flashCopied(btn, ok, label);
+        if (!ok) window.prompt('Copy this VIP early-access link:', url);
+        return ok;
+      } catch (e) {
+        if (btn) { btn.textContent = label; btn.disabled = false; }
+        setStatus('error', 'Could not reach the server to create a VIP link.');
+        return false;
+      }
     }
 
     // ── Slug generation (add mode only) ───────────────────────────

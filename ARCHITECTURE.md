@@ -98,6 +98,13 @@ from `src/` via the assets binding:
   Add-to-cart button — all enforced client-side against the current time, so
   it goes live automatically at the drop. No `dropAt` means the piece
   publishes live immediately; a "Drop now" override clears the schedule.
+- **VIP early access**: the admin can copy a `?vip=<token>` link for a
+  scheduled piece (token = HMAC of the product id, signed on the Worker with
+  `VIP_SECRET` and minted via `/api/vip-link`, password-gated). That link
+  shows an Add-to-cart button before the public drop and the token rides
+  through the cart to checkout, where `checkout.js` re-verifies it — so a
+  scheduled piece is genuinely unbuyable without a valid token, not just
+  hidden in the UI.
 - **Grid videos** (`products.js`): an IntersectionObserver starts buffering
   each card's video ~600px before it scrolls into view; the product photo
   overlays the video and is removed only once frames are actually
@@ -165,6 +172,7 @@ Variables and Secrets):
 | `GITHUB_TOKEN` | webhook, admin login | **Classic** token, `repo` scope — fine-grained tokens fail the Git Data API used for video uploads |
 | `ADMIN_PASSWORD` | admin login | Publish-page password |
 | `RESEND_API_KEY` | webhook | Confirmation + recovery emails |
+| `VIP_SECRET` | checkout, vip-link | Signs per-piece early-access (drop) links; unset → early purchase is never allowed |
 
 **GitHub repository secrets** (for the failsafe deploy):
 `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.

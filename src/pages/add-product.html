@@ -211,16 +211,10 @@
       flex-shrink: 0; transition: background 0.15s;
     }
     .btn-delete-product:hover { background: #fdf0f0; }
-    .btn-copy-link {
-      background: none; border: 1px solid var(--accent-soft); color: var(--ink);
-      border-radius: var(--radius-md); padding: 0.25rem 0.6rem;
-      font-size: 0.72rem; font-family: inherit; cursor: pointer;
-      flex-shrink: 0; transition: background 0.15s, color 0.15s, border-color 0.15s;
-    }
-    .btn-copy-link:hover { background: rgba(198,168,120,0.12); }
-    .btn-copy-link.copied { border-color: #a8d5b5; color: #3a7a52; background: #edf7f0; }
+    /* Share buttons on the edit form */
     .btn-copy-vip { border-color: var(--accent); color: var(--accent); }
     .btn-copy-vip:hover { background: rgba(198,168,120,0.16); }
+    .btn.copied { border-color: #a8d5b5; color: #3a7a52; background: #edf7f0; }
     .product-pick-item.is-featured { background: rgba(198,168,120,0.06); }
     .product-pick-featured-badge {
       font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em;
@@ -372,6 +366,15 @@
               </label>
             </div>
             <p class="featured-note ok" id="featured-note"></p>
+          </div>
+
+          <div id="share-links" style="display:none;margin-bottom:1.6rem;">
+            <p class="section-label">Share this piece</p>
+            <div style="display:flex;flex-wrap:wrap;gap:0.6rem;">
+              <button type="button" class="btn btn-ghost" id="share-copy-link" style="padding:0.45rem 1.1rem;font-size:0.8rem;">Copy link</button>
+              <button type="button" class="btn btn-ghost btn-copy-vip" id="share-copy-vip" style="padding:0.45rem 1.1rem;font-size:0.8rem;">Copy VIP link</button>
+            </div>
+            <p id="share-hint" style="font-size:0.75rem;color:var(--muted);margin:0.6rem 0 0;"></p>
           </div>
 
           <div style="margin-bottom:1.6rem;">
@@ -591,6 +594,7 @@
         document.getElementById('page-intro').textContent = 'Select a product below to load its details, make changes, then save.';
         picker.style.display = 'block';
         publishBtn.textContent = publishBtn.dataset.editLabel;
+        currentEditProduct = null;   // nothing selected yet — keeps the share block hidden
         clearForm();
         loadProductPicker();
       }
@@ -631,23 +635,11 @@
           const meta = (product.size ? `${product.size} · ${status}` : status) + dropNote;
           const item = document.createElement('div');
           item.className = 'product-pick-item' + (product.featured === true ? ' is-featured' : '');
-          const vipBtnHtml = dropsFuture
-            ? `<button class="btn-copy-link btn-copy-vip" title="Copy an early-access VIP link — lets the recipient buy this piece before its public drop">Copy VIP link</button>`
-            : '';
-          item.innerHTML = `${thumb}<div class="product-pick-info"><div class="product-pick-name">${product.name}</div><div class="product-pick-meta">${meta}${badge}</div></div><button class="btn-copy-link" title="Copy the shareable link to this piece">Copy link</button>${vipBtnHtml}<button class="btn-delete-product" title="Delete product">Delete</button>`;
+          item.innerHTML = `${thumb}<div class="product-pick-info"><div class="product-pick-name">${product.name}</div><div class="product-pick-meta">${meta}${badge}</div></div><button class="btn-delete-product" title="Delete product">Delete</button>`;
           item.querySelector('.product-pick-info').addEventListener('click', () => {
             list.querySelectorAll('.product-pick-item').forEach(el => el.classList.remove('selected'));
             item.classList.add('selected');
             loadProductForEdit(product);
-          });
-          item.querySelector('.btn-copy-link').addEventListener('click', e => {
-            e.stopPropagation();
-            copyProductLink(product, e.currentTarget);
-          });
-          const vipBtn = item.querySelector('.btn-copy-vip');
-          if (vipBtn) vipBtn.addEventListener('click', e => {
-            e.stopPropagation();
-            copyVipLink(product, e.currentTarget);
           });
           item.querySelector('.btn-delete-product').addEventListener('click', e => {
             e.stopPropagation();
@@ -750,6 +742,7 @@
       document.getElementById('f-category').value = product.category || 'rings';
       updateSizeVisibility();
       setDropValue(product.dropAt || '');
+      updateShareLinks();
       document.getElementById('f-available').checked = product.available !== false;
       document.getElementById('f-featured').checked = product.featured === true;
       applyFeaturedCap(product.id);
@@ -1082,6 +1075,28 @@
       }
     }
 
+    // The share buttons live on the form (more room than the list rows) and only
+    // show while editing a loaded piece. The VIP link — early purchase before a
+    // drop — only appears for a piece that's currently scheduled.
+    function updateShareLinks() {
+      const box = document.getElementById('share-links');
+      if (!box) return;
+      const editing = currentMode === 'edit' && currentEditProduct;
+      box.style.display = editing ? '' : 'none';
+      if (!editing) return;
+      const scheduled = currentEditProduct.dropAt && !isNaN(Date.parse(currentEditProduct.dropAt)) && Date.parse(currentEditProduct.dropAt) > Date.now();
+      document.getElementById('share-copy-vip').style.display = scheduled ? '' : 'none';
+      document.getElementById('share-hint').textContent = scheduled
+        ? 'Copy link opens a preview page (shows the drop date — it can’t be bought yet). Copy VIP link is early access: it lets whoever you send it to buy before the public drop.'
+        : 'Copies the public link to this piece.';
+    }
+    document.getElementById('share-copy-link').addEventListener('click', () => {
+      if (currentEditProduct) copyProductLink(currentEditProduct, document.getElementById('share-copy-link'));
+    });
+    document.getElementById('share-copy-vip').addEventListener('click', () => {
+      if (currentEditProduct) copyVipLink(currentEditProduct, document.getElementById('share-copy-vip'));
+    });
+
     // ── Slug generation (add mode only) ───────────────────────────
     function newSlugSuffix() {
       return Math.random().toString(36).slice(2, 7);
@@ -1134,6 +1149,7 @@
       document.getElementById('f-category').value = 'rings';
       updateSizeVisibility();
       setDropValue('');
+      updateShareLinks();
       document.getElementById('f-available').checked = true;
       document.getElementById('f-featured').checked = false;
       document.getElementById('image-list').innerHTML = '';

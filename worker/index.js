@@ -3,6 +3,7 @@
 import { handleCheckout } from './checkout.js';
 import { handleWebhook } from './webhook.js';
 import { handleAdminToken } from './admin-token.js';
+import { handleVipLink } from './vip.js';
 
 const methodNotAllowed = () =>
   new Response(JSON.stringify({ error: 'Method not allowed' }), {
@@ -14,6 +15,7 @@ const routes = {
   '/api/create-checkout-session': handleCheckout,
   '/api/webhook': handleWebhook,
   '/api/admin-token': handleAdminToken,
+  '/api/vip-link': handleVipLink,
 };
 
 export default {

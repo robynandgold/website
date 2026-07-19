@@ -91,7 +91,9 @@ function addToCart(product) {
     price: product.price,
     currency: product.currency || 'EUR',
     image: product.images[0],
-    quantity: 1
+    quantity: 1,
+    // Early-access token for a piece bought before its public drop (if any).
+    vipToken: product.vipToken || undefined
   });
   
   saveCart(cart);
@@ -173,7 +175,9 @@ function formatCartForCheckout() {
     name: item.name,
     price: item.price,
     quantity: item.quantity,
-    currency: item.currency || 'EUR'
+    currency: item.currency || 'EUR',
+    // Only present for an early-access (pre-drop) purchase; the Worker verifies it.
+    vip: item.vipToken || undefined
   }));
 }
 

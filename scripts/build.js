@@ -350,6 +350,7 @@ ${stickyBarMarkup(product)}
         <a href="/pages/contact.html" class="footer-link">Contact</a>
         <a href="/pages/terms.html" class="footer-link">T&amp;Cs</a>
         <a href="/pages/returns.html" class="footer-link">Returns</a>
+        <a href="/pages/care.html" class="footer-link">Jewellery care</a>
       </div>
       <p class="footer-meta">© <span id="year"></span> Robyn &amp; Gold. All rights reserved.</p>
     </div>
@@ -382,6 +383,7 @@ function renderSitemap(products) {
     { loc: `${SITE}/pages/shop.html`, changefreq: 'weekly', priority: '0.9' },
     { loc: `${SITE}/pages/about.html`, changefreq: 'monthly', priority: '0.7' },
     { loc: `${SITE}/pages/faq.html`, changefreq: 'monthly', priority: '0.7' },
+    { loc: `${SITE}/pages/care.html`, changefreq: 'yearly', priority: '0.5' },
     { loc: `${SITE}/pages/contact.html`, changefreq: 'monthly', priority: '0.6' },
     { loc: `${SITE}/pages/returns.html`, changefreq: 'monthly', priority: '0.5' },
     { loc: `${SITE}/pages/terms.html`, changefreq: 'yearly', priority: '0.4' }

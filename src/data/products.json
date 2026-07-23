@@ -941,5 +941,27 @@
     "videos": [
       "/images/products/IMG_9830.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-tourmaline-and-diamond-ring-ate97",
+    "name": "9ct Yellow Gold Tourmaline and Diamond Ring",
+    "slug": "9ct-yellow-gold-tourmaline-and-diamond-ring-ate97",
+    "description": "A beautifully unusual vintage 9ct yellow gold ring featuring two elegant marquise-cut natural tourmalines, nestled one above the other in a striking crossover design. Delicate diamond accents add just the right amount of sparkle, while the tourmalines display a captivating colour shift, appearing deep blue-grey in some lights before revealing flashes of violet and green as they catch the light.\n\nTourmaline is often known as the stone of protection, treasured not only for its beauty but also for its remarkable range of colours. This unique piece is effortlessly wearable, making it just as perfect for everyday wear as it is for special occasions.\n\nFully hallmarked. 2.3g.",
+    "size": "UK K · US 5.25",
+    "price": 370,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "",
+    "createdAt": "2026-07-23T18:14:31.899Z",
+    "images": [
+      "/images/products/IMG_7388.jpeg",
+      "/images/products/IMG_7387.jpeg",
+      "/images/products/IMG_7384.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_7293.mp4"
+    ]
   }
 ]

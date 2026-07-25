@@ -1095,5 +1095,28 @@
     "videos": [
       "/images/products/IMG_0026.mp4"
     ]
+  },
+  {
+    "id": "18ct-yellow-gold-antique-diamond-five-stone-ring-9rrla",
+    "name": "18ct Yellow Gold Antique Diamond Five Stone Ring",
+    "slug": "18ct-yellow-gold-antique-diamond-five-stone-ring-9rrla",
+    "description": "A truly exceptional Victorian five stone diamond ring, hallmarked 1885 and crafted in solid 18ct yellow gold. Set with five beautifully lively old mine cut diamonds (approximately 0.5ct total weight), each stone is individually claw set to maximise light and showcase the distinctive charm of these hand-cut diamonds. The gallery features exquisite openwork detailing, with delicate heart-like motifs beneath each stone that allow even more light to reach the diamonds while celebrating the craftsmanship of the period. Rich in history and full of character, this is an heirloom-quality piece that has already stood the test of time.\n\nFully hallmarked Birmingham, 1885. 3.5g.",
+    "size": "UK N · US 6.75",
+    "price": 905,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "2026-07-26T17:00:00.000Z",
+    "createdAt": "2026-07-25T14:07:24.112Z",
+    "images": [
+      "/images/products/IMG_0047.jpeg",
+      "/images/products/IMG_0049.jpeg",
+      "/images/products/IMG_0051.jpeg",
+      "/images/products/IMG_0048.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_0022.mp4"
+    ]
   }
 ]

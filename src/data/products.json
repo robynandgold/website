@@ -1007,5 +1007,27 @@
     "videos": [
       "/images/products/IMG_0020.mp4"
     ]
+  },
+  {
+    "id": "18ct-yellow-gold-channel-set-full-eternity-rblyq",
+    "name": "18ct Yellow Gold Channel-set Full Eternity",
+    "slug": "18ct-yellow-gold-channel-set-full-eternity-rblyq",
+    "description": "A beautifully understated 18ct gold full eternity ring, set with a continuous row of natural round brilliant-cut diamonds in a sleek channel setting. Designed to sparkle from every angle, this timeless piece is perfect as a wedding band, anniversary ring or elegant stacking ring. Crafted in solid 18ct gold, it offers effortless sophistication and everyday wearability.\n\nFully hallmarked and stamped 18K. 3g.\n\nPlease note that this ring is not sizeable.",
+    "size": "UK Q · US 8.25",
+    "price": 870,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "2026-07-26T17:00:00.000Z",
+    "createdAt": "2026-07-25T13:38:14.943Z",
+    "images": [
+      "/images/products/IMG_0057.jpeg",
+      "/images/products/IMG_0058.jpeg",
+      "/images/products/IMG_0059.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_0023.mp4"
+    ]
   }
 ]

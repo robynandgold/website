@@ -1073,5 +1073,27 @@
     "videos": [
       "/images/products/IMG_0019.mp4"
     ]
+  },
+  {
+    "id": "18ct-yellow-gold-diamond-solitaire-103y9",
+    "name": "18ct Yellow Gold Diamond Solitaire",
+    "slug": "18ct-yellow-gold-diamond-solitaire-103y9",
+    "description": "A timeless 18ct yellow gold diamond solitaire ring, featuring a sparkling round brilliant-cut natural diamond flanked by diamond-set shoulders for added brilliance. Delicate, elegant and effortlessly wearable, this classic design makes a beautiful engagement ring or an everyday diamond piece. \n\nThe centre diamond displays exceptional sparkle and fire, with some natural carbon inclusions visible under close inspection, part of its unique character as a natural stone.\n\nStamped 18ct. 2.7g.",
+    "size": "UK M½ · US 6.5",
+    "price": 525,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "2026-07-26T17:00:00.000Z",
+    "createdAt": "2026-07-25T13:55:18.437Z",
+    "images": [
+      "/images/products/IMG_0027.jpeg",
+      "/images/products/IMG_0028.jpeg",
+      "/images/products/IMG_0029.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_0026.mp4"
+    ]
   }
 ]

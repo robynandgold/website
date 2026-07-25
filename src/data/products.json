@@ -985,5 +985,27 @@
     "videos": [
       "/images/products/IMG_0024.mp4"
     ]
+  },
+  {
+    "id": "18ct-yellow-gold-bar-set-five-stone-ea558",
+    "name": "18ct Yellow Gold Bar-set Five Stone",
+    "slug": "18ct-yellow-gold-bar-set-five-stone-ea558",
+    "description": "A classic 18ct yellow gold diamond ring featuring five round brilliant-cut natural diamonds in a contemporary shared-claw bar setting. The diamonds are set in white gold to enhance their sparkle, creating a subtle contrast against the warm yellow gold band. Elegant enough to wear alone yet perfect for stacking, this is an effortless everyday diamond ring that will never go out of style.\n\nStamped ‘750’ for 18ct gold. 2.3g.",
+    "size": "UK L · US 5.75",
+    "price": 585,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "2026-07-26T17:00:00.000Z",
+    "createdAt": "2026-07-25T13:34:26.166Z",
+    "images": [
+      "/images/products/IMG_0037.jpeg",
+      "/images/products/IMG_0039.jpeg",
+      "/images/products/IMG_0038.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_0020.mp4"
+    ]
   }
 ]

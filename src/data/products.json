@@ -1140,5 +1140,27 @@
     "videos": [
       "/images/products/IMG_0025.mp4"
     ]
+  },
+  {
+    "id": "14ct-yellow-gold-diamond-five-stone-ring-ywo06",
+    "name": "14ct Yellow Gold Diamond Five Stone Ring",
+    "slug": "14ct-yellow-gold-diamond-five-stone-ring-ywo06",
+    "description": "A beautifully crafted 14ct yellow gold five stone ring, rubover set with five natural round brilliant-cut diamonds. The smooth bezel setting offers a contemporary take on a timeless design, enhancing each diamond while providing exceptional security for everyday wear. Elegant, understated and endlessly versatile, this is a piece that looks just as beautiful worn alone as it does stacked with your favourite rings.\n\nStamped ‘585’ for 14ct gold. 3.4g.",
+    "size": "UK N½ · US 7",
+    "price": 750,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "2026-07-26T17:00:00.000Z",
+    "createdAt": "2026-07-25T14:21:00.374Z",
+    "images": [
+      "/images/products/IMG_0093.jpeg",
+      "/images/products/IMG_0096.jpeg",
+      "/images/products/IMG_0098.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_0088.mp4"
+    ]
   }
 ]

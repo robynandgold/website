@@ -963,5 +963,27 @@
     "videos": [
       "/images/products/IMG_7293.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-diamond-flower-trilogy-pscq8",
+    "name": "9ct Yellow Gold Diamond Flower Trilogy",
+    "slug": "9ct-yellow-gold-diamond-flower-trilogy-pscq8",
+    "description": "A charming 9ct yellow gold ring featuring three delicate diamond flowers, each formed from a cluster of sparkling natural diamonds (estimated total carat weight 0.5ct). The softly rounded, polished band beautifully complements the floral design, creating a timeless piece that’s perfect for everyday wear or stacking with your favourite rings.\n\nFully hallmarked for Sheffield and stamped DIA. 3.3g.",
+    "size": "UK O · US 7.25",
+    "price": 575,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "2026-07-26T17:00:00.000Z",
+    "createdAt": "2026-07-25T13:30:39.178Z",
+    "images": [
+      "/images/products/IMG_0030.jpeg",
+      "/images/products/IMG_0031.jpeg",
+      "/images/products/IMG_0032.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_0024.mp4"
+    ]
   }
 ]

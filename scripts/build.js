@@ -205,6 +205,11 @@ function infoMarkup(product) {
           ${isSold ? '' : `<p class="product-detail-oneoff">✦ One of a kind — only one available</p>`}
           ${buyBlock}
           <div class="product-detail-copy" style="margin-top: 1.8rem;">${escapeHtml(product.description || '')}</div>
+          <p class="product-detail-vintage-note" style="margin-top: 1.4rem; font-size: 0.8rem; line-height: 1.6; color: var(--muted);">
+            Please note: this is a vintage piece. Signs of age and wear are part of its character, and antique
+            jewellery cannot be guaranteed against future wear or accidental damage. Full details in our
+            <a href="/pages/terms.html" style="color: var(--ink);">Terms</a>.
+          </p>
           ${trust}
         </div>`;
 }

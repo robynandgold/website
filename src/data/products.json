@@ -1118,5 +1118,27 @@
     "videos": [
       "/images/products/IMG_0022.mp4"
     ]
+  },
+  {
+    "id": "18ct-yellow-gold-diamond-solitaire-edc7z",
+    "name": "18ct Yellow Gold Diamond Solitaire",
+    "slug": "18ct-yellow-gold-diamond-solitaire-edc7z",
+    "description": "A beautifully classic 18ct yellow gold solitaire ring, set with a sparkling natural round brilliant-cut diamond (approximately 0.5 ct) in a traditional white gold button-back setting. Designed to allow light to flood the diamond from every angle, this timeless setting enhances its brilliance while showcasing elegant, understated craftsmanship. A refined piece that will never go out of style, whether chosen as an engagement ring or an everyday heirloom.\n\nStamped 18ct. 2.2g.",
+    "size": "UK Q · US 8.25",
+    "price": 550,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "2026-07-26T17:00:00.000Z",
+    "createdAt": "2026-07-25T14:12:26.329Z",
+    "images": [
+      "/images/products/IMG_0036.jpeg",
+      "/images/products/IMG_0034.jpeg",
+      "/images/products/IMG_0033.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_0025.mp4"
+    ]
   }
 ]

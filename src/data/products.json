@@ -1029,5 +1029,27 @@
     "videos": [
       "/images/products/IMG_0023.mp4"
     ]
+  },
+  {
+    "id": "18ct-yellow-gold-diamond-dome-ring-wh5va",
+    "name": "18ct Yellow Gold Diamond Dome Ring",
+    "slug": "18ct-yellow-gold-diamond-dome-ring-wh5va",
+    "description": "A beautifully weighty 18ct yellow gold dome ring, grain set with a cluster of natural round brilliant-cut diamonds. With its sculptural silhouette and high-polish finish, this is the kind of piece that feels both timeless and unmistakably modern. Substantial at 8.4g, it has a luxurious feel on the hand and makes an effortless statement whether worn alone or stacked with finer bands. The ultimate cool girl ring!\n\nStamped 18K. 8.4g.",
+    "size": "UK R½ · US 9",
+    "price": 1350,
+    "currency": "EUR",
+    "featured": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "2026-07-26T17:00:00.000Z",
+    "createdAt": "2026-07-25T13:42:44.538Z",
+    "images": [
+      "/images/products/IMG_0053.jpeg",
+      "/images/products/IMG_0054.jpeg",
+      "/images/products/IMG_0055.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_0021.mp4"
+    ]
   }
 ]

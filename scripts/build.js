@@ -301,6 +301,7 @@ function renderPage(product) {
       </button>
       <nav class="nav nav-left" id="primary-nav" aria-label="Primary">
         <a href="../shop.html" class="nav-link">Shop</a>
+        <a href="../archive.html" class="nav-link">Archive</a>
         <a href="../about.html" class="nav-link">Our story</a>
         <a href="../../index.html#ethos" class="nav-link">Ethos</a>
       </nav>
@@ -350,6 +351,7 @@ ${stickyBarMarkup(product)}
       </div>
       <div class="footer-links">
         <a href="/pages/shop.html" class="footer-link">Shop</a>
+        <a href="/pages/archive.html" class="footer-link">Archive</a>
         <a href="/pages/about.html" class="footer-link">Our story</a>
         <a href="/pages/faq.html" class="footer-link">FAQ</a>
         <a href="/#ethos" class="footer-link">Ethos</a>
@@ -387,6 +389,7 @@ function renderSitemap(products) {
   const staticPages = [
     { loc: `${SITE}/`, changefreq: 'weekly', priority: '1.0' },
     { loc: `${SITE}/pages/shop.html`, changefreq: 'weekly', priority: '0.9' },
+    { loc: `${SITE}/pages/archive.html`, changefreq: 'weekly', priority: '0.5' },
     { loc: `${SITE}/pages/about.html`, changefreq: 'monthly', priority: '0.7' },
     { loc: `${SITE}/pages/faq.html`, changefreq: 'monthly', priority: '0.7' },
     { loc: `${SITE}/pages/care.html`, changefreq: 'yearly', priority: '0.5' },

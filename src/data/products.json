@@ -1173,7 +1173,7 @@
     "currency": "EUR",
     "featured": false,
     "category": "bracelets",
-    "available": true,
+    "available": false,
     "dropAt": "",
     "createdAt": "2026-08-01T07:44:52.989Z",
     "images": [],

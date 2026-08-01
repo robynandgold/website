@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Archive — Sold Pieces | Robyn &amp; Gold</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="An archive of past Robyn &amp; Gold vintage jewellery — pieces that have found their homes. Each was one of a kind and is no longer available." />
+  <link rel="canonical" href="https://robynandgold.com/pages/archive.html" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Robyn &amp; Gold" />
+  <meta property="og:title" content="Archive — Sold Pieces | Robyn &amp; Gold" />
+  <meta property="og:description" content="Pieces that have found their homes — an archive of past Robyn &amp; Gold vintage jewellery." />
+  <meta property="og:image" content="https://robynandgold.com/images/homepage.png" />
+  <meta property="og:url" content="https://robynandgold.com/pages/archive.html" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png" />
+  <link rel="manifest" href="/images/site.webmanifest" />
+
+  <style>
+    .archive-intro { max-width: 640px; margin-bottom: 2rem; }
+    .archive-intro p { font-size: 0.92rem; line-height: 1.8; color: var(--muted); margin: 0.6rem 0 0; }
+    .product-card.is-sold { position: relative; }
+    .product-card.is-sold .product-card-image { filter: grayscale(0.12); }
+    .sold-badge {
+      position: absolute; top: 0.7rem; left: 0.7rem; z-index: 2;
+      background: var(--ink); color: #fff;
+      font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase;
+      padding: 0.28rem 0.6rem; border-radius: 999px;
+    }
+    .product-card.is-sold .product-card-price { color: var(--muted); }
+  </style>
+  <!-- Umami Analytics (privacy-friendly, cookieless) -->
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="6730344d-0b4f-433f-85fd-a0ae7004f103"></script>
+
+</head>
+<body class="page">
+  <header class="site-header">
+    <div class="container header-inner">
+      <button class="nav-toggle" type="button" aria-label="Toggle menu" aria-controls="primary-nav" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav class="nav nav-left" id="primary-nav" aria-label="Primary">
+        <a href="shop.html" class="nav-link">Shop</a>
+        <a href="archive.html" class="nav-link">Archive</a>
+        <a href="about.html" class="nav-link">Our story</a>
+        <a href="../index.html#ethos" class="nav-link">Ethos</a>
+      </nav>
+      <div class="brand-banner">
+        <div class="brand-center">
+          <a href="../index.html">
+            <img src="../images/rg-logo.png" alt="Robyn & Gold" width="120" height="40" loading="eager" />
+          </a>
+          <a href="../index.html" class="brand-main">Robyn &amp; Gold</a>
+          <span class="brand-tagline">Vintage Jewellery</span>
+        </div>
+      </div>
+      <nav class="nav nav-right" aria-label="Utilities">
+        <a href="cart.html" class="nav-link nav-link--cart" aria-label="Cart">
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="icon-cart"><path d="M5 8h14l-1.1 11a1.3 1.3 0 0 1-1.3 1.2H7.4A1.3 1.3 0 0 1 6.1 19Z"/><path d="M9 8V6.6a3 3 0 0 1 6 0V8"/><path d="M9.7 12v5M14.3 12v5"/></svg>
+          <span id="cart-count" class="cart-count">0</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="section section--compact">
+      <div class="container">
+        <div class="archive-intro">
+          <p class="eyebrow">Archive</p>
+          <h1 class="page-title">Pieces that have found their homes</h1>
+          <p>
+            A record of past Robyn &amp; Gold pieces. Each was one of a kind and is no longer available — but
+            they show the character of what we source. New pieces arrive regularly in the
+            <a href="shop.html" style="color: var(--ink);">shop</a>.
+          </p>
+        </div>
+
+        <p class="shop-count" id="archive-count">Loading…</p>
+        <div id="archive-list" class="product-grid"></div>
+      </div>
+    </section>
+  </main>
+
+<footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="brand-main">Robyn &amp; Gold</span>
+        <span class="brand-tagline">Vintage Jewellery</span>
+      </div>
+<div class="footer-links">
+        <a href="/pages/shop.html" class="footer-link">Shop</a>
+        <a href="/pages/archive.html" class="footer-link">Archive</a>
+        <a href="/pages/about.html" class="footer-link">Our story</a>
+        <a href="/pages/faq.html" class="footer-link">FAQ</a>
+        <a href="/#ethos" class="footer-link">Ethos</a>
+        <a href="/pages/contact.html" class="footer-link">Contact</a>
+        <a href="/pages/terms.html" class="footer-link">T&amp;Cs</a>
+        <a href="/pages/returns.html" class="footer-link">Returns</a>
+        <a href="/pages/care.html" class="footer-link">Jewellery care</a>
+      </div>
+      <p class="footer-meta">© <span id="year"></span> Robyn &amp; Gold. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="../js/products.js"></script>
+  <script src="../js/cart.js"></script>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    (async function loadArchive() {
+      const grid = document.getElementById('archive-list');
+      const countEl = document.getElementById('archive-count');
+      let products = [];
+      try {
+        const res = await fetch('../data/products.json', { cache: 'no-store' });
+        if (res.ok) products = await res.json();
+      } catch (e) { /* handled below */ }
+
+      // Sold pieces only, newest first
+      const sold = products
+        .filter(p => p.available === false)
+        .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+      if (sold.length === 0) {
+        countEl.textContent = '';
+        grid.innerHTML = '<p class="cart-empty-message">No archived pieces yet — everything is currently available in the shop.</p>';
+        return;
+      }
+
+      countEl.textContent = `${sold.length} ${sold.length === 1 ? 'piece' : 'pieces'} archived`;
+
+      grid.innerHTML = sold.map(product => {
+        const price = window.ProductsAPI?.formatPrice
+          ? window.ProductsAPI.formatPrice(product.price, product.currency)
+          : `€${product.price}`;
+        const productLink = `product/${product.slug}.html`;
+        const video = product.videos?.[0];
+        const image = product.images?.[0];
+        const media = video
+          ? `<div class="product-media"><video src="${video}" class="product-card-image" muted loop playsinline preload="none"${image ? ` poster="${image}"` : ''}></video>${image ? `<img src="${image}" alt="" aria-hidden="true" class="media-poster" loading="lazy" />` : ''}</div>`
+          : image
+            ? `<img src="${image}" alt="${product.name}" class="product-card-image" width="600" height="600" loading="lazy" onerror="this.style.display='none'" />`
+            : '';
+        return `
+        <article class="product-card is-sold">
+          <span class="sold-badge">Sold</span>
+          <a class="product-card-link-wrap" href="${productLink}">
+            ${media}
+            <div class="product-card-body">
+              <h3 class="product-card-title">${product.name}</h3>
+              <p class="product-card-price">${price}</p>
+              <span class="product-card-link">View details</span>
+            </div>
+          </a>
+        </article>`;
+      }).join('');
+
+      if (window.lazyPlayVideos) window.lazyPlayVideos(grid);
+    })();
+  </script>
+</body>
+</html>

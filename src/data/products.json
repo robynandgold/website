@@ -178,7 +178,7 @@
     "currency": "EUR",
     "featured": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "createdAt": "2026-06-13T14:24:13+01:00",
     "images": [
       "/images/products/IMG_8576.jpeg",

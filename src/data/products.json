@@ -1191,7 +1191,7 @@
     "currency": "EUR",
     "featured": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "dropAt": "",
     "createdAt": "2026-08-01T18:39:54.936Z",
     "images": [

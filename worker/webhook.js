@@ -462,10 +462,13 @@ async function markProductsAsSoldViaGitHub(productIds, env) {
 
     // 2. Update products
     let updated = false;
+    const soldAt = new Date().toISOString();
     for (const product of products) {
       if (productIds.includes(product.id)) {
         product.available = false;
         product.featured = false;
+        // Record when it sold so the Archive can show most-recently-sold first.
+        if (!product.soldAt) product.soldAt = soldAt;
         updated = true;
       }
     }

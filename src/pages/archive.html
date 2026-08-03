@@ -131,10 +131,11 @@
         if (res.ok) products = await res.json();
       } catch (e) { /* handled below */ }
 
-      // Sold pieces only, newest first
+      // Sold pieces only, most recently sold first. Pieces sold before we
+      // started recording a sold date fall back to their listing date.
       const sold = products
         .filter(p => p.available === false)
-        .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        .sort((a, b) => new Date(b.soldAt || b.createdAt || 0) - new Date(a.soldAt || a.createdAt || 0));
 
       if (sold.length === 0) {
         countEl.textContent = '';

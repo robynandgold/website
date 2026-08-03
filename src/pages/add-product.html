@@ -1364,11 +1364,19 @@
           if (idx === -1) throw new Error(`Product "${product.id}" not found in products.json.`);
           // Preserve the original date added rather than stamping "now" on every edit.
           product.createdAt = allProducts[idx].createdAt || product.createdAt;
+          // Record when a piece is marked sold (for the Archive's most-recently-sold
+          // ordering); keep an existing sold date, and clear it if it goes back in stock.
+          if (product.available === false) {
+            product.soldAt = allProducts[idx].soldAt || new Date().toISOString();
+          } else {
+            delete product.soldAt;
+          }
           allProducts[idx] = product;
         } else {
           if (allProducts.find(p => p.id === product.id)) {
             throw new Error(`A product with slug "${product.id}" already exists.`);
           }
+          if (product.available === false) product.soldAt = new Date().toISOString();
           allProducts.push(product);
         }
 

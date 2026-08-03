@@ -124,7 +124,8 @@
       "/images/products/IMG_8547.mp4",
       "/images/products/IMG_8451.mp4"
     ],
-    "createdAt": "2026-06-13T14:24:13+01:00"
+    "createdAt": "2026-06-13T14:24:13+01:00",
+    "soldAt": "2026-07-13T18:17:22.000Z"
   },
   {
     "id": "18ct-white-gold-diamond-five-stone-ring-fzpdt",
@@ -188,7 +189,8 @@
     "videos": [
       "/images/products/IMG_8546.mp4",
       "/images/products/IMG_8440.mp4"
-    ]
+    ],
+    "soldAt": "2026-08-01T13:51:10.000Z"
   },
   {
     "id": "9ct-bezel-set-sapphire-and-diamond-band-raa62",
@@ -312,7 +314,8 @@
     ],
     "videos": [
       "/images/products/IMG_4650.mp4"
-    ]
+    ],
+    "soldAt": "2026-08-03T13:17:58.000Z"
   },
   {
     "id": "18ct-yellow-gold-bezel-set-diamond-trilogy-dc92g",
@@ -435,7 +438,8 @@
     ],
     "videos": [
       "/images/products/IMG_6703.mp4"
-    ]
+    ],
+    "soldAt": "2026-07-13T22:38:11.000Z"
   },
   {
     "id": "9ct-yellow-gold-hand-engraved-cigar-band-ojnb9",
@@ -455,7 +459,8 @@
     "videos": [
       "/images/products/IMG_8118.mp4"
     ],
-    "createdAt": "2026-06-20T20:57:53+01:00"
+    "createdAt": "2026-06-20T20:57:53+01:00",
+    "soldAt": "2026-07-27T00:46:31.000Z"
   },
   {
     "id": "9ct-yellow-gold-double-row-diamond-band-qj2ei",
@@ -497,7 +502,8 @@
     ],
     "videos": [
       "/images/products/IMG_8841.mp4"
-    ]
+    ],
+    "soldAt": "2026-07-13T18:17:22.000Z"
   },
   {
     "id": "18ct-yellow-gold-flush-set-diamond-band-f938z",
@@ -539,7 +545,8 @@
     ],
     "videos": [
       "/images/products/IMG_8836.mp4"
-    ]
+    ],
+    "soldAt": "2026-07-09T22:24:31.000Z"
   },
   {
     "id": "9ct-yellow-gold-bespoke-diamond-signet-68li3",
@@ -686,7 +693,8 @@
     ],
     "videos": [
       "/images/products/IMG_9573.mp4"
-    ]
+    ],
+    "soldAt": "2026-07-12T15:44:40.000Z"
   },
   {
     "id": "9ct-yellow-gold-diamond-heart-signet-jjz5x",
@@ -727,7 +735,8 @@
     ],
     "videos": [
       "/images/products/IMG_9734.mp4"
-    ]
+    ],
+    "soldAt": "2026-07-19T17:41:10.000Z"
   },
   {
     "id": "9ct-yellow-gold-diamond-band-twsw9",
@@ -748,7 +757,8 @@
     ],
     "videos": [
       "/images/products/IMG_9726.mp4"
-    ]
+    ],
+    "soldAt": "2026-07-19T14:46:11.000Z"
   },
   {
     "id": "9ct-yellow-gold-diamond-knot-ring-60aqu",
@@ -812,7 +822,8 @@
     ],
     "videos": [
       "/images/products/IMG_9732.mp4"
-    ]
+    ],
+    "soldAt": "2026-07-31T19:20:49.000Z"
   },
   {
     "id": "9ct-yellow-gold-amethyst-and-diamond-band-aihfj",
@@ -833,7 +844,8 @@
     ],
     "videos": [
       "/images/products/IMG_9735.mp4"
-    ]
+    ],
+    "soldAt": "2026-07-19T16:16:48.000Z"
   },
   {
     "id": "9ct-yellow-gold-diamond-knot-ring-j2nhj",
@@ -896,7 +908,8 @@
     ],
     "videos": [
       "/images/products/IMG_9736.mp4"
-    ]
+    ],
+    "soldAt": "2026-07-20T09:14:18.000Z"
   },
   {
     "id": "18ct-yellow-gold-natural-pink-spinel-and-diamond-ring-l0ppk",
@@ -917,7 +930,8 @@
     ],
     "videos": [
       "/images/products/IMG_9731.mp4"
-    ]
+    ],
+    "soldAt": "2026-07-19T13:12:07.000Z"
   },
   {
     "id": "9ct-yellow-gold-diamond-tennis-bracelet-bvk1h",
@@ -940,7 +954,8 @@
     ],
     "videos": [
       "/images/products/IMG_9830.mp4"
-    ]
+    ],
+    "soldAt": "2026-07-19T14:42:39.000Z"
   },
   {
     "id": "9ct-yellow-gold-tourmaline-and-diamond-ring-ate97",
@@ -1072,7 +1087,8 @@
     ],
     "videos": [
       "/images/products/IMG_0019.mp4"
-    ]
+    ],
+    "soldAt": "2026-07-27T00:46:31.000Z"
   },
   {
     "id": "18ct-yellow-gold-diamond-solitaire-103y9",
@@ -1179,7 +1195,8 @@
     "images": [],
     "videos": [
       "/images/products/IMG_0355.mp4"
-    ]
+    ],
+    "soldAt": "2026-08-01T07:56:05.000Z"
   },
   {
     "id": "9ct-yellow-gold-amethyst-and-topaz-band-hf27o",
@@ -1201,6 +1218,7 @@
     ],
     "videos": [
       "/images/products/IMG_9821.mp4"
-    ]
+    ],
+    "soldAt": "2026-08-02T00:46:55.000Z"
   }
 ]

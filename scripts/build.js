@@ -138,14 +138,20 @@ function carouselMarkup(product) {
   const images = (product.images || []).map(src => ({ type: 'image', src }));
   const videos = (product.videos || []).map(src => ({ type: 'video', src }));
   const slides = [...videos, ...images];
-  const poster = product.images && product.images[0];
 
   const slidesHTML = slides.map((item, index) => {
     const activeClass = index === 0 ? ' active' : '';
     if (item.type === 'video') {
+      // Only the first (visible) video autoplays and preloads; the rest load
+      // when the shopper navigates to them. No `poster` — a poster is the first
+      // photo, and the browser falls back to it whenever the video isn't
+      // painting a frame (e.g. after a mobile scroll pauses it), which looked
+      // like the video "flipping" to the first image. product-page.js keeps the
+      // visible video looping instead.
+      const isFirst = index === 0;
       return `
             <div class="carousel-slide${activeClass}" data-index="${index}">
-              <video src="${escapeHtml(item.src)}" autoplay muted loop playsinline preload="metadata" class="carousel-video"${poster ? ` poster="${escapeHtml(poster)}"` : ''}></video>
+              <video src="${escapeHtml(item.src)}"${isFirst ? ' autoplay' : ''} muted loop playsinline preload="${isFirst ? 'auto' : 'none'}" class="carousel-video"></video>
             </div>`;
     }
     return `

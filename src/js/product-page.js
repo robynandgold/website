@@ -93,6 +93,23 @@
     const track = document.getElementById('carousel-track');
     if (!track) return;
     const slides = Array.from(track.querySelectorAll('.carousel-slide'));
+    if (slides.length === 0) return;
+
+    // Keep the visible slide's video looping. Mobile browsers pause off-screen
+    // videos as you scroll; resume the active video whenever the carousel is
+    // back in view so it just loops (only the arrows/dots change the slide).
+    if ('IntersectionObserver' in window) {
+      const keepPlaying = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (!e.isIntersecting) return;
+          const slide = slides[currentSlideIndex];
+          const v = slide && slide.querySelector('video');
+          if (v) { const p = v.play(); if (p) p.catch(() => {}); }
+        });
+      }, { threshold: 0.15 });
+      keepPlaying.observe(track);
+    }
+
     if (slides.length <= 1) return;
 
     const prevBtn = document.getElementById('carousel-prev');

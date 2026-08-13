@@ -619,9 +619,10 @@
     "size": "UK O½ · US 7.5",
     "price": 725,
     "currency": "EUR",
-    "featured": false,
+    "featured": true,
     "category": "rings",
     "available": true,
+    "dropAt": "",
     "createdAt": "2026-07-05T12:34:15.391Z",
     "images": [
       "/images/products/IMG_9255.jpeg",

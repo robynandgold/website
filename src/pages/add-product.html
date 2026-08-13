@@ -178,7 +178,24 @@
       color: var(--muted); transition: background 0.15s, color 0.15s; text-align: center;
     }
     .mode-tab.active { background: #fdfbf8; color: var(--ink); font-weight: 500; }
-    .mode-tab:first-child { border-right: 1px solid var(--border); }
+    .mode-tab:not(:last-child) { border-right: 1px solid var(--border); }
+    /* Most-viewed insights */
+    .insights-controls { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; margin-bottom: 1.2rem; }
+    .insights-controls select {
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 0.45rem 0.7rem; font-family: inherit; font-size: 0.85rem;
+      color: var(--ink); background: #fdfbf8;
+    }
+    #insights-status { font-size: 0.85rem; color: var(--muted); margin: 0 0 1rem; }
+    .insights-row {
+      display: flex; align-items: center; gap: 0.9rem;
+      padding: 0.6rem 0.2rem; border-bottom: 1px solid var(--border);
+    }
+    .insights-row:last-child { border-bottom: none; }
+    .insights-rank { width: 1.6rem; text-align: right; color: var(--muted); font-size: 0.85rem; flex-shrink: 0; }
+    .insights-name { flex: 1; min-width: 0; color: var(--ink); font-size: 0.9rem; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .insights-name:hover { text-decoration: underline; }
+    .insights-views { color: var(--muted); font-size: 0.82rem; white-space: nowrap; flex-shrink: 0; }
 
     /* ── Product picker ─────────────────────── */
     #edit-picker { margin-bottom: 1.5rem; display: none; }
@@ -293,6 +310,7 @@
         <div class="mode-tabs">
           <button class="mode-tab active" id="tab-add" onclick="switchMode('add')">Add new piece</button>
           <button class="mode-tab" id="tab-edit" onclick="switchMode('edit')">Edit existing piece</button>
+          <button class="mode-tab" id="tab-insights" onclick="switchMode('insights')">Most viewed</button>
         </div>
 
         <!-- Setup -->
@@ -408,6 +426,23 @@
 
           <button class="btn btn-primary" id="publish-btn" style="width:100%;" data-add-label="Publish to site" data-edit-label="Save changes">Publish to site</button>
           <div class="publish-status" id="publish-status"></div>
+        </div>
+
+        <!-- Most viewed (analytics) -->
+        <div id="insights-panel" style="display:none;">
+          <div class="insights-controls">
+            <label style="font-size:0.85rem;color:var(--muted);">Period
+              <select id="insights-range">
+                <option value="7">Last 7 days</option>
+                <option value="30" selected>Last 30 days</option>
+                <option value="90">Last 90 days</option>
+                <option value="365">Last year</option>
+              </select>
+            </label>
+            <button class="btn btn-ghost" id="insights-refresh" style="padding:0.45rem 1rem;font-size:0.8rem;">Refresh</button>
+          </div>
+          <p id="insights-status"></p>
+          <div id="insights-list"></div>
         </div>
 
       </div>
@@ -579,9 +614,24 @@
       ensureFeaturedState(true);   // refresh the featured cap whenever modes change
       document.getElementById('tab-add').classList.toggle('active', mode === 'add');
       document.getElementById('tab-edit').classList.toggle('active', mode === 'edit');
+      document.getElementById('tab-insights').classList.toggle('active', mode === 'insights');
 
       const picker = document.getElementById('edit-picker');
       const publishBtn = document.getElementById('publish-btn');
+      const formCard = document.getElementById('form-card');
+      const insights = document.getElementById('insights-panel');
+
+      // The add/edit form and the analytics panel are mutually exclusive.
+      formCard.style.display = mode === 'insights' ? 'none' : '';
+      insights.style.display = mode === 'insights' ? '' : 'none';
+
+      if (mode === 'insights') {
+        document.getElementById('page-heading').textContent = 'Most viewed';
+        document.getElementById('page-intro').textContent = 'The pieces shoppers are viewing most, from your site analytics.';
+        picker.style.display = 'none';
+        loadInsights();
+        return;
+      }
 
       if (mode === 'add') {
         document.getElementById('page-heading').textContent = 'Add a new piece';
@@ -599,6 +649,62 @@
         loadProductPicker();
       }
     }
+
+    // ── Most viewed (analytics) ───────────────────────────────────
+    // Reads the top product pages from Umami via the password-gated
+    // /api/insights endpoint (the API key stays on the Worker), then maps each
+    // slug to its piece name using the public catalogue.
+    function prettifySlug(s) {
+      return s ? s.replace(/-[a-z0-9]{5}$/, '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : '';
+    }
+
+    async function loadInsights() {
+      const status = document.getElementById('insights-status');
+      const list = document.getElementById('insights-list');
+      list.innerHTML = '';
+      const pw = sessionStorage.getItem(PW_KEY);
+      if (!pw) { status.textContent = 'Please log in again to view analytics.'; return; }
+      const days = Number(document.getElementById('insights-range').value) || 30;
+      status.textContent = 'Loading…';
+
+      try {
+        const [res, prodRes] = await Promise.all([
+          fetch('/api/insights', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: pw, days }),
+          }),
+          fetch('/data/products.json', { cache: 'no-store' }),
+        ]);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { status.textContent = data.error || 'Could not load analytics.'; return; }
+
+        const products = prodRes.ok ? await prodRes.json().catch(() => []) : [];
+        const nameBySlug = {};
+        products.forEach(p => { if (p && p.slug) nameBySlug[p.slug] = p.name; });
+
+        const rows = data.rows || [];
+        if (!rows.length) {
+          status.textContent = 'No product-page views recorded for this period yet.';
+          return;
+        }
+        status.textContent = `Top viewed pieces · last ${days} days`;
+        list.innerHTML = rows.map((r, i) => {
+          const slug = (String(r.url).match(/\/pages\/product\/(.+?)\.html/) || [])[1] || '';
+          const name = nameBySlug[slug] || prettifySlug(slug) || r.url;
+          return `<div class="insights-row">
+            <span class="insights-rank">${i + 1}</span>
+            <a class="insights-name" href="${r.url}" target="_blank" rel="noopener">${name}</a>
+            <span class="insights-views">${(r.views || 0).toLocaleString()} views</span>
+          </div>`;
+        }).join('');
+      } catch (e) {
+        status.textContent = 'Could not reach the server to load analytics.';
+      }
+    }
+
+    document.getElementById('insights-refresh').addEventListener('click', loadInsights);
+    document.getElementById('insights-range').addEventListener('change', loadInsights);
 
     // ── Product picker (edit mode) ────────────────────────────────
     async function loadProductPicker() {

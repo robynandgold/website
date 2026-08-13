@@ -267,6 +267,27 @@
     section.hidden = false;
   }
 
+  // Fire-and-forget first-party view ping (no cookies, no personal data) that
+  // powers the admin "Most viewed" tab. No-ops server-side until the views
+  // database is set up.
+  function recordView() {
+    try {
+      const slug = currentProduct && currentProduct.slug;
+      if (!slug) return;
+      const body = JSON.stringify({ slug });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon('/api/view', new Blob([body], { type: 'application/json' }));
+      } else {
+        fetch('/api/view', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body,
+          keepalive: true,
+        }).catch(() => {});
+      }
+    } catch (e) { /* analytics must never break the page */ }
+  }
+
   function init() {
     const yearEl = document.getElementById('year');
     if (yearEl) yearEl.textContent = new Date().getFullYear();
@@ -275,6 +296,7 @@
     setupAddToCart();
     setupStickyBar();
     renderRelated();
+    recordView();
   }
 
   if (document.readyState === 'loading') {

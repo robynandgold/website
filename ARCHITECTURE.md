@@ -173,7 +173,22 @@ Variables and Secrets):
 | `ADMIN_PASSWORD` | admin login | Publish-page password |
 | `RESEND_API_KEY` | webhook | Confirmation + recovery emails |
 | `VIP_SECRET` | checkout, vip-link | Signs per-piece early-access (drop) links; unset → early purchase is never allowed |
-| `UMAMI_API_KEY` | insights | Umami Cloud API key (paid plan) for the admin "Most viewed" tab; unset → the tab shows a "not configured" message |
+
+**Worker bindings** (Cloudflare → Workers & Pages → website → Settings →
+Bindings):
+
+| Binding | Type | Purpose |
+|---|---|---|
+| `DB` | D1 database | First-party product-page view counts for the admin "Most viewed" tab. |
+
+**Setting up the views database** (one-time, free tier): create a D1
+database — Cloudflare dashboard → **Storage & Databases → D1 → Create**
+(any name, e.g. `robynandgold-views`), then add a **Binding** named `DB` on the
+Worker pointing at it (or add a `[[d1_databases]]` block with `binding = "DB"`
+and the database's `database_id` to `wrangler.toml`). The table is created
+automatically on the first view. Until `DB` is bound, view counting no-ops and
+the "Most viewed" tab shows a "not set up yet" note — nothing else is affected.
+No cookies or personal data are stored, only per-piece daily view totals.
 
 **GitHub repository secrets** (for the failsafe deploy):
 `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.

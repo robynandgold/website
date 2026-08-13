@@ -684,11 +684,18 @@
         products.forEach(p => { if (p && p.slug) nameBySlug[p.slug] = p.name; });
 
         const rows = data.rows || [];
+        const asOf = data.baselineAsOf
+          ? new Date(data.baselineAsOf).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+          : '';
+        const liveNote = data.liveTracking ? '' : ' · live counting not set up yet';
         if (!rows.length) {
-          status.textContent = 'No product-page views recorded for this period yet.';
+          status.textContent = data.baselineIncluded
+            ? 'No views recorded for this period yet.' + liveNote
+            : `No live views for the last ${days} days yet — choose 30 days or longer to see the imported Umami history.`;
           return;
         }
-        status.textContent = `Top viewed pieces · last ${days} days`;
+        const histNote = data.baselineIncluded && asOf ? ` · includes Umami history to ${asOf}` : '';
+        status.textContent = `Top viewed pieces · last ${days} days${histNote}${liveNote}`;
         list.innerHTML = rows.map((r, i) => {
           const slug = (String(r.url).match(/\/pages\/product\/(.+?)\.html/) || [])[1] || '';
           const name = nameBySlug[slug] || prettifySlug(slug) || r.url;

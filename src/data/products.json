@@ -515,7 +515,7 @@
     "currency": "EUR",
     "featured": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "createdAt": "2026-06-21T16:01:25.232Z",
     "images": [
       "/images/products/IMG_5899.jpeg",
@@ -524,7 +524,8 @@
     ],
     "videos": [
       "/images/products/IMG_8835.mp4"
-    ]
+    ],
+    "soldAt": "2026-08-13T23:15:16.374Z"
   },
   {
     "id": "18ct-yellow-gold-flush-set-diamond-band-autqs",

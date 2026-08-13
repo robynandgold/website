@@ -173,6 +173,7 @@ Variables and Secrets):
 | `ADMIN_PASSWORD` | admin login | Publish-page password |
 | `RESEND_API_KEY` | webhook | Confirmation + recovery emails |
 | `VIP_SECRET` | checkout, vip-link | Signs per-piece early-access (drop) links; unset → early purchase is never allowed |
+| `UMAMI_API_KEY` | insights | Umami Cloud API key (paid plan) for the admin "Most viewed" tab; unset → the tab shows a "not configured" message |
 
 **GitHub repository secrets** (for the failsafe deploy):
 `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.

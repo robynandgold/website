@@ -196,6 +196,11 @@
     .insights-name { flex: 1; min-width: 0; color: var(--ink); font-size: 0.9rem; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .insights-name:hover { text-decoration: underline; }
     .insights-views { color: var(--muted); font-size: 0.82rem; white-space: nowrap; flex-shrink: 0; }
+    .insights-sold {
+      font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em;
+      background: var(--ink); color: #fff; border-radius: 999px;
+      padding: 0.12rem 0.5rem; flex-shrink: 0;
+    }
 
     /* ── Product picker ─────────────────────── */
     #edit-picker { margin-bottom: 1.5rem; display: none; }
@@ -681,7 +686,8 @@
 
         const products = prodRes.ok ? await prodRes.json().catch(() => []) : [];
         const nameBySlug = {};
-        products.forEach(p => { if (p && p.slug) nameBySlug[p.slug] = p.name; });
+        const soldBySlug = {};
+        products.forEach(p => { if (p && p.slug) { nameBySlug[p.slug] = p.name; soldBySlug[p.slug] = p.available === false; } });
 
         const rows = data.rows || [];
         const asOf = data.baselineAsOf
@@ -699,9 +705,11 @@
         list.innerHTML = rows.map((r, i) => {
           const slug = (String(r.url).match(/\/pages\/product\/(.+?)\.html/) || [])[1] || '';
           const name = nameBySlug[slug] || prettifySlug(slug) || r.url;
+          const soldPill = soldBySlug[slug] ? '<span class="insights-sold">Sold</span>' : '';
           return `<div class="insights-row">
             <span class="insights-rank">${i + 1}</span>
             <a class="insights-name" href="${r.url}" target="_blank" rel="noopener">${name}</a>
+            ${soldPill}
             <span class="insights-views">${(r.views || 0).toLocaleString()} views</span>
           </div>`;
         }).join('');

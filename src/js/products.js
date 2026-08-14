@@ -67,6 +67,16 @@ function isPubliclyLive(product) {
 }
 
 /**
+ * Whether a piece belongs to the Keepsake collection — our finest pieces,
+ * ticked one by one on the add-product page. Keepsakes are gathered on
+ * pages/keepsake-collection.html and still sit in the shop with everything
+ * else; until any piece is ticked, that page stands as a "coming soon" note.
+ */
+function isKeepsake(product) {
+  return product.keepsake === true;
+}
+
+/**
  * Get all products
  */
 async function getAllProducts() {
@@ -200,6 +210,7 @@ if (typeof window !== 'undefined') {
     getProductById,
     formatPrice,
     isPubliclyLive,
+    isKeepsake,
     lazyPlayVideos
   };
 }

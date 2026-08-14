@@ -285,6 +285,7 @@
       </button>
       <nav class="nav nav-left" id="primary-nav" aria-label="Primary">
         <a href="shop.html" class="nav-link">Shop</a>
+        <a href="keepsake-collection.html" class="nav-link">Keepsake collection</a>
         <a href="about.html" class="nav-link">Our story</a>
         <a href="../index.html#ethos" class="nav-link">Ethos</a>
       </nav>
@@ -387,8 +388,13 @@
                 <input type="checkbox" id="f-featured" />
                 Featured on homepage
               </label>
+              <label class="toggle-field">
+                <input type="checkbox" id="f-keepsake" />
+                Keepsake collection
+              </label>
             </div>
             <p class="featured-note ok" id="featured-note"></p>
+            <p class="featured-note ok" id="keepsake-note"></p>
           </div>
 
           <div id="share-links" style="display:none;margin-bottom:1.6rem;">
@@ -462,6 +468,7 @@
       </div>
 <div class="footer-links">
         <a href="/pages/shop.html" class="footer-link">Shop</a>
+        <a href="/pages/keepsake-collection.html" class="footer-link">Keepsake collection</a>
         <a href="/pages/about.html" class="footer-link">Our story</a>
         <a href="/#ethos" class="footer-link">Ethos</a>
         <a href="/pages/contact.html" class="footer-link">Contact</a>
@@ -597,6 +604,33 @@
         note.textContent = `${count}/${FEATURED_MAX} pieces featured on the homepage.`;
       }
     }
+
+    // ── Keepsake collection ───────────────────────────────────────
+    // A keepsake piece is gathered on the Keepsake collection page as well as
+    // sitting in the shop with everything else. It's a deliberate tick rather
+    // than a price rule, but pieces over this figure get a nudge, since that's
+    // the line the collection was drawn at.
+    const KEEPSAKE_SUGGEST_PRICE = 1000;
+
+    function updateKeepsakeNote() {
+      const note = document.getElementById('keepsake-note');
+      const cb = document.getElementById('f-keepsake');
+      if (!note || !cb) return;
+      const price = parseFloat(document.getElementById('f-price').value) || 0;
+      if (cb.checked) {
+        note.className = 'featured-note ok';
+        note.textContent = '✦ Also shows in the Keepsake collection.';
+      } else if (price > KEEPSAKE_SUGGEST_PRICE) {
+        note.className = 'featured-note full';
+        note.textContent = `Over €${KEEPSAKE_SUGGEST_PRICE.toLocaleString('en-IE')} — this one could sit in the Keepsake collection.`;
+      } else {
+        note.className = 'featured-note ok';
+        note.textContent = '';
+      }
+    }
+
+    document.getElementById('f-keepsake').addEventListener('change', updateKeepsakeNote);
+    document.getElementById('f-price').addEventListener('input', updateKeepsakeNote);
 
     document.getElementById('f-featured').addEventListener('change', () => {
       const note = document.getElementById('featured-note');
@@ -748,7 +782,8 @@
             ? `<img class="product-pick-thumb" src="https://robynandgold.com${product.images[0]}" alt="" onerror="this.style.background='#e8e0d4';this.style.display='block'" />`
             : `<div class="product-pick-thumb"></div>`;
           const status = product.available === false ? 'Sold' : `€${product.price}`;
-          const badge = product.featured === true ? ' <span class="product-pick-featured-badge">★ Featured</span>' : '';
+          const badge = (product.featured === true ? ' <span class="product-pick-featured-badge">★ Featured</span>' : '')
+            + (product.keepsake === true ? ' <span class="product-pick-featured-badge">✦ Keepsake</span>' : '');
           const dropsFuture = product.dropAt && !isNaN(Date.parse(product.dropAt)) && Date.parse(product.dropAt) > Date.now();
           const dropNote = dropsFuture
             ? ' · Drops ' + new Date(product.dropAt).toLocaleString('en-GB', { timeZone: 'UTC', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' GMT'
@@ -866,6 +901,8 @@
       updateShareLinks();
       document.getElementById('f-available').checked = product.available !== false;
       document.getElementById('f-featured').checked = product.featured === true;
+      document.getElementById('f-keepsake').checked = product.keepsake === true;
+      updateKeepsakeNote();
       applyFeaturedCap(product.id);
 
       document.getElementById('image-list').innerHTML = '';
@@ -1273,6 +1310,8 @@
       updateShareLinks();
       document.getElementById('f-available').checked = true;
       document.getElementById('f-featured').checked = false;
+      document.getElementById('f-keepsake').checked = false;
+      updateKeepsakeNote();
       document.getElementById('image-list').innerHTML = '';
       document.getElementById('video-list').innerHTML = '';
       pendingFiles.clear();
@@ -1609,6 +1648,8 @@
           price:       parseFloat(document.getElementById('f-price').value) || 0,
           currency:    'EUR',
           featured:    document.getElementById('f-featured').checked,
+          // Keepsake pieces list on the Keepsake collection page, not the shop.
+          keepsake:    document.getElementById('f-keepsake').checked,
           category:    document.getElementById('f-category').value,
           available:   document.getElementById('f-available').checked,
           // Scheduled drop as an ISO UTC instant; '' means live immediately.

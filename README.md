@@ -119,6 +119,15 @@ commit and push. The product will:
 
 Set `"featured": true`. The homepage displays the first 3 featured products.
 
+### Putting a piece in the Keepsake collection
+
+Tick **Keepsake collection** on the admin page (or set `"keepsake": true` in
+the JSON). The piece then also lists on `/pages/keepsake-collection.html` —
+it stays in the shop as well. Until the first piece is ticked, that page shows
+the "coming soon" dictionary card; it turns into the collection on its own once
+a piece is in it, and back again if the last one sells. There's no price rule —
+the admin page just nudges you when a piece is over €1,000.
+
 ---
 
 ## Stripe

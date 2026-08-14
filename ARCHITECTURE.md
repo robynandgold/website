@@ -89,6 +89,13 @@ from `src/` via the assets binding:
   BreadcrumbList JSON-LD, visible content baked in) so search engines and
   AI crawlers need no JavaScript. `product-page.js` only rehydrates the
   carousel and cart buttons.
+- **Keepsake collection** (`pages/keepsake-collection.html`): a curated window
+  onto the finest pieces. A piece joins it by being ticked *Keepsake
+  collection* on the admin page (`keepsake: true`) and still sits in the shop
+  alongside everything else — the page gathers them, it doesn't take them away.
+  It ships as a "coming soon" dictionary card and swaps itself for the grid as
+  soon as one live keepsake exists, so the collection launches without a code
+  change (and reverts to the card if the last keepsake sells).
 - **Cart** is `localStorage` (`cart.js`) — one of each piece only, since
   everything is one of a kind. Nothing is reserved until payment.
 - **Drops** (optional per piece): a product can carry a `dropAt` (ISO UTC

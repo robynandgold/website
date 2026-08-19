@@ -188,14 +188,20 @@ Bindings):
 |---|---|---|
 | `DB` | D1 database | First-party product-page view counts for the admin "Most viewed" tab. |
 
-**Setting up the views database** (one-time, free tier): create a D1
-database — Cloudflare dashboard → **Storage & Databases → D1 → Create**
-(any name, e.g. `robynandgold-views`), then add a **Binding** named `DB` on the
-Worker pointing at it (or add a `[[d1_databases]]` block with `binding = "DB"`
-and the database's `database_id` to `wrangler.toml`). The table is created
-automatically on the first view. Until `DB` is bound, view counting no-ops and
-the "Most viewed" tab shows a "not set up yet" note — nothing else is affected.
-No cookies or personal data are stored, only per-piece daily view totals.
+**The views database** (free tier): the D1 database `robynandgold-views` is
+bound as `DB` in `wrangler.toml`, so it ships with every deploy. Keep it there
+rather than in the dashboard — `npx wrangler deploy` pushes the whole config, so
+a dashboard-only binding is dropped on the next publish and counting stops
+without any visible sign beyond the tab going stale. The `product_views` table
+is created automatically on the first view. If `DB` ever goes missing, view
+counting no-ops and the "Most viewed" tab shows a "live counting not set up
+yet" note — nothing else is affected. No cookies or personal data are stored,
+only per-piece daily view totals.
+
+Counting starts when the binding goes live; it doesn't backfill. The tab folds
+in the one-time Umami baseline (`worker/views-baseline.js`, snapshotted
+13 Aug 2026) for windows of 30 days or longer, so shorter windows show live
+counts only.
 
 **GitHub repository secrets** (for the failsafe deploy):
 `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.

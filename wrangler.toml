@@ -14,3 +14,13 @@ compatibility_flags = ["nodejs_compat"]
 [assets]
 directory = "./src"
 binding = "ASSETS"
+
+# First-party product-page view counts behind the admin "Most viewed" tab
+# (worker/views.js). Declared here rather than in the dashboard: every deploy
+# pushes this file's config, so a binding added only in the dashboard would be
+# dropped on the next publish and counting would silently stop. The
+# product_views table is created on the first recorded view.
+[[d1_databases]]
+binding = "DB"
+database_name = "robynandgold-views"
+database_id = "720f88a3-ce0e-4e74-a330-cfb447ed59f2"

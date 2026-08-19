@@ -1036,7 +1036,7 @@
     "currency": "EUR",
     "featured": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "dropAt": "",
     "createdAt": "2026-07-25T13:38:14.943Z",
     "images": [
@@ -1046,7 +1046,8 @@
     ],
     "videos": [
       "/images/products/IMG_0023.mp4"
-    ]
+    ],
+    "soldAt": "2026-08-19T07:48:30.368Z"
   },
   {
     "id": "18ct-yellow-gold-diamond-dome-ring-wh5va",
@@ -1149,7 +1150,7 @@
     "currency": "EUR",
     "featured": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "dropAt": "",
     "createdAt": "2026-07-25T14:12:26.329Z",
     "images": [
@@ -1159,7 +1160,8 @@
     ],
     "videos": [
       "/images/products/IMG_0025.mp4"
-    ]
+    ],
+    "soldAt": "2026-08-19T07:48:30.368Z"
   },
   {
     "id": "14ct-yellow-gold-diamond-five-stone-ring-ywo06",

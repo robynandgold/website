@@ -690,9 +690,10 @@
     }
 
     // ── Most viewed (analytics) ───────────────────────────────────
-    // Reads the top product pages from Umami via the password-gated
-    // /api/insights endpoint (the API key stays on the Worker), then maps each
-    // slug to its piece name using the public catalogue.
+    // Reads the top product pages from the password-gated /api/insights
+    // endpoint — first-party view counts from the D1 `DB` binding, plus a
+    // one-time historical baseline for windows of 30 days or longer — then
+    // maps each slug to its piece name using the public catalogue.
     function prettifySlug(s) {
       return s ? s.replace(/-[a-z0-9]{5}$/, '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : '';
     }
@@ -724,18 +725,14 @@
         products.forEach(p => { if (p && p.slug) { nameBySlug[p.slug] = p.name; soldBySlug[p.slug] = p.available === false; } });
 
         const rows = data.rows || [];
-        const asOf = data.baselineAsOf
-          ? new Date(data.baselineAsOf).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-          : '';
         const liveNote = data.liveTracking ? '' : ' · live counting not set up yet';
         if (!rows.length) {
           status.textContent = data.baselineIncluded
             ? 'No views recorded for this period yet.' + liveNote
-            : `No live views for the last ${days} days yet — choose 30 days or longer to see the imported Umami history.`;
+            : `No live views for the last ${days} days yet — try 30 days or longer.`;
           return;
         }
-        const histNote = data.baselineIncluded && asOf ? ` · includes Umami history to ${asOf}` : '';
-        status.textContent = `Top viewed pieces · last ${days} days${histNote}${liveNote}`;
+        status.textContent = `Top viewed pieces · last ${days} days${liveNote}`;
         list.innerHTML = rows.map((r, i) => {
           const slug = (String(r.url).match(/\/pages\/product\/(.+?)\.html/) || [])[1] || '';
           const name = nameBySlug[slug] || prettifySlug(slug) || r.url;

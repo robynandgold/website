@@ -87,8 +87,9 @@
     .field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--ink); }
     .field textarea { resize: vertical; min-height: 90px; }
     .section-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.18em; color: var(--muted); margin: 0 0 0.7rem; }
-    .toggle-row { display: flex; gap: 1.5rem; }
+    .toggle-row { display: flex; flex-wrap: wrap; gap: 0.9rem 1.5rem; }
     .toggle-field { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; cursor: pointer; }
+    .toggle-field input[type="checkbox"] { flex-shrink: 0; }
     .toggle-field input[type="checkbox"] { width: 1rem; height: 1rem; accent-color: var(--ink); cursor: pointer; }
 
     /* ── Media entries ──────────────────────────── */
@@ -307,6 +308,11 @@
     @media (max-width: 640px) {
       .form-grid { grid-template-columns: 1fr; }
       .form-grid .full { grid-column: 1; }
+
+      /* Three toggles won't sit side by side on a phone — laid out in a row
+         the third ran off the edge of the card, and the labels broke over
+         three lines each. One per line instead. */
+      .toggle-row { flex-direction: column; align-items: flex-start; gap: 0.85rem; }
     }
   </style>
 </head>

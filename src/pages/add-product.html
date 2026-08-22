@@ -849,14 +849,22 @@
       }
 
       const sold = products.filter(p => p.available === false);
-      // Pieces entered as already sold when the site launched carry no soldAt.
-      // They pre-date the shop, so they're kept out of the figures and noted.
-      const dated = sold.filter(p => p.soldAt && !isNaN(Date.parse(p.soldAt)))
-        .sort((a, b) => Date.parse(b.soldAt) - Date.parse(a.soldAt));
-      const undated = sold.length - dated.length;
+
+      // A handful of pieces were entered as already sold in the very first
+      // catalogue commit and carry no soldAt — they sold before the shop
+      // existed. They're counted against the launch date so the totals are
+      // complete. The date is applied here rather than written into
+      // products.json: they didn't actually sell that day, and the catalogue
+      // shouldn't claim they did.
+      const LAUNCH = '2026-07-25';
+      const effectiveSoldAt = p => (p.soldAt && !isNaN(Date.parse(p.soldAt))) ? p.soldAt : LAUNCH;
+      const preLaunch = sold.filter(p => !p.soldAt || isNaN(Date.parse(p.soldAt)));
+      const dated = sold
+        .slice()
+        .sort((a, b) => Date.parse(effectiveSoldAt(b)) - Date.parse(effectiveSoldAt(a)));
 
       if (!dated.length) {
-        status.textContent = 'No dated sales yet.';
+        status.textContent = 'Nothing sold yet.';
         return;
       }
       status.textContent = '';
@@ -867,7 +875,7 @@
 
       const byMonth = {};
       dated.forEach(p => {
-        const k = monthKey(new Date(p.soldAt));
+        const k = monthKey(new Date(effectiveSoldAt(p)));
         byMonth[k] = byMonth[k] || { n: 0, value: 0 };
         byMonth[k].n++;
         byMonth[k].value += Number(p.price) || 0;
@@ -879,8 +887,10 @@
       const avg = total / dated.length;
 
       // Median days from listing to sale — the honest middle, not skewed by
-      // the one piece that sat for months.
+      // the one piece that sat for months. Pre-launch sales are left out: the
+      // gap between listing them and the launch date isn't a selling time.
       const spans = dated
+        .filter(p => p.soldAt && !isNaN(Date.parse(p.soldAt)))
         .filter(p => p.createdAt && !isNaN(Date.parse(p.createdAt)))
         .map(p => (Date.parse(p.soldAt) - Date.parse(p.createdAt)) / 86400000)
         .filter(d => d >= 0)
@@ -950,11 +960,16 @@
           <span class="sales-bar-value">${m.n ? `${money(m.value)} · ${m.n}` : '—'}</span>
         </div>`).join('');
 
-      const recent = dated.slice(0, 8).map(p => `
+      const recent = dated.slice(0, 8).map(p => {
+        const when = p.soldAt && !isNaN(Date.parse(p.soldAt))
+          ? new Date(p.soldAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+          : 'At launch';
+        return `
         <div class="insights-row">
           <span class="insights-name">${p.name}</span>
-          <span class="insights-views">${new Date(p.soldAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} · ${money(p.price)}</span>
-        </div>`).join('');
+          <span class="insights-views">${when} · ${money(p.price)}</span>
+        </div>`;
+      }).join('');
 
       // Pieces that have been listed longest without selling — the ones worth
       // a fresh photo, a repost or a rethink on price.
@@ -973,8 +988,8 @@
           <span class="insights-views">${money(p.price)}</span>
         </div>`).join('')}` : '';
 
-      const undatedNote = undated
-        ? ` ${undated} ${undated === 1 ? 'piece was' : 'pieces were'} listed as already sold when the site launched; without a sale date they're left out of the figures above.`
+      const undatedNote = preLaunch.length
+        ? ` ${preLaunch.length} ${preLaunch.length === 1 ? 'piece' : 'pieces'} sold before the site launched and ${preLaunch.length === 1 ? 'is' : 'are'} counted against launch day, ${new Date(LAUNCH).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} — so July includes ${money(preLaunch.reduce((s, p) => s + (Number(p.price) || 0), 0))} that was taken before the shop opened. They're left out of the time-to-sell median.`
         : '';
 
       body.innerHTML = `

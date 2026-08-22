@@ -202,6 +202,52 @@
       padding: 0.12rem 0.5rem; flex-shrink: 0;
     }
 
+    /* ── Sales ──────────────────────────────── */
+    .sales-tiles {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+      gap: 0.7rem; margin-bottom: 0.6rem;
+    }
+    .sales-tile {
+      background: var(--bg-alt); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 0.85rem 0.95rem;
+    }
+    .sales-tile-label {
+      font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--muted); margin: 0;
+    }
+    .sales-tile-value {
+      font-family: "Playfair Display", serif; font-size: 1.45rem;
+      margin: 0.3rem 0 0; line-height: 1.1;
+    }
+    .sales-tile-sub { font-size: 0.75rem; color: var(--muted); margin: 0.25rem 0 0; }
+    .sales-tile-sub.up { color: #3f7d58; }
+    .sales-tile-sub.down { color: #a07830; }
+    .sales-section-title {
+      font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.16em;
+      color: var(--muted); margin: 1.9rem 0 0.7rem;
+    }
+    .sales-bar-row {
+      display: grid; grid-template-columns: 3.6rem 1fr auto;
+      gap: 0.7rem; align-items: center; padding: 0.32rem 0; font-size: 0.85rem;
+    }
+    .sales-bar-month { color: var(--muted); font-size: 0.8rem; }
+    .sales-bar-track {
+      background: rgba(221, 209, 194, 0.5); border-radius: 999px;
+      height: 8px; overflow: hidden;
+    }
+    .sales-bar-fill { display: block; background: var(--accent-soft); height: 100%; border-radius: 999px; }
+    .sales-bar-value { color: var(--ink); font-size: 0.8rem; white-space: nowrap; }
+    .sales-note {
+      font-size: 0.75rem; color: var(--muted); line-height: 1.7;
+      margin: 1.8rem 0 0; padding-top: 1rem; border-top: 1px solid var(--border);
+    }
+    .sales-age { color: #a07830; font-size: 0.8rem; white-space: nowrap; flex-shrink: 0; }
+
+    /* Four tabs need to fit a phone without the labels stacking three deep */
+    @media (max-width: 640px) {
+      .mode-tab { padding: 0.6rem 0.35rem; font-size: 0.78rem; }
+    }
+
     /* ── Product picker ─────────────────────── */
     #edit-picker { margin-bottom: 1.5rem; display: none; }
     #edit-picker-loading { font-size: 0.85rem; color: var(--muted); padding: 0.5rem 0; }
@@ -317,6 +363,7 @@
           <button class="mode-tab active" id="tab-add" onclick="switchMode('add')">Add new piece</button>
           <button class="mode-tab" id="tab-edit" onclick="switchMode('edit')">Edit existing piece</button>
           <button class="mode-tab" id="tab-insights" onclick="switchMode('insights')">Most viewed</button>
+          <button class="mode-tab" id="tab-sales" onclick="switchMode('sales')">Sales</button>
         </div>
 
         <!-- Setup -->
@@ -454,6 +501,12 @@
           </div>
           <p id="insights-status"></p>
           <div id="insights-list"></div>
+        </div>
+
+        <!-- Sales -->
+        <div id="sales-panel" style="display:none;">
+          <p id="sales-status"></p>
+          <div id="sales-body"></div>
         </div>
 
       </div>
@@ -654,21 +707,33 @@
       document.getElementById('tab-add').classList.toggle('active', mode === 'add');
       document.getElementById('tab-edit').classList.toggle('active', mode === 'edit');
       document.getElementById('tab-insights').classList.toggle('active', mode === 'insights');
+      document.getElementById('tab-sales').classList.toggle('active', mode === 'sales');
 
       const picker = document.getElementById('edit-picker');
       const publishBtn = document.getElementById('publish-btn');
       const formCard = document.getElementById('form-card');
       const insights = document.getElementById('insights-panel');
+      const sales = document.getElementById('sales-panel');
 
-      // The add/edit form and the analytics panel are mutually exclusive.
-      formCard.style.display = mode === 'insights' ? 'none' : '';
+      // The add/edit form and the two reporting panels are mutually exclusive.
+      const reporting = mode === 'insights' || mode === 'sales';
+      formCard.style.display = reporting ? 'none' : '';
       insights.style.display = mode === 'insights' ? '' : 'none';
+      sales.style.display = mode === 'sales' ? '' : 'none';
 
       if (mode === 'insights') {
         document.getElementById('page-heading').textContent = 'Most viewed';
         document.getElementById('page-intro').textContent = 'The pieces shoppers are viewing most, from your site analytics.';
         picker.style.display = 'none';
         loadInsights();
+        return;
+      }
+
+      if (mode === 'sales') {
+        document.getElementById('page-heading').textContent = 'Sales';
+        document.getElementById('page-intro').textContent = 'What has sold, when, and what is still waiting for a buyer.';
+        picker.style.display = 'none';
+        loadSales();
         return;
       }
 
@@ -751,6 +816,196 @@
 
     document.getElementById('insights-refresh').addEventListener('click', loadInsights);
     document.getElementById('insights-range').addEventListener('change', loadInsights);
+
+    // ── Sales ─────────────────────────────────────────────────────
+    // Built entirely from the public catalogue: every sale is already recorded
+    // there as `available: false` plus the `soldAt` stamp the Stripe webhook
+    // writes, so this needs no endpoint, no API key and no second source of
+    // truth. Prices are the listed prices — Stripe remains the record for what
+    // actually settled (shipping, currency conversion, fees, refunds).
+    const money = n => '€' + Math.round(n).toLocaleString('en-IE');
+    const pieceCount = n => `${n} ${n === 1 ? 'piece' : 'pieces'}`;
+    const monthKey = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const monthLabel = key => {
+      const [y, m] = key.split('-');
+      return new Date(Number(y), Number(m) - 1, 1)
+        .toLocaleDateString('en-GB', { month: 'short', year: '2-digit' });
+    };
+
+    async function loadSales() {
+      const status = document.getElementById('sales-status');
+      const body = document.getElementById('sales-body');
+      status.textContent = 'Loading…';
+      body.innerHTML = '';
+
+      let products = [];
+      try {
+        const res = await fetch('/data/products.json', { cache: 'no-store' });
+        if (!res.ok) throw new Error('catalogue unavailable');
+        products = await res.json();
+      } catch (e) {
+        status.textContent = 'Could not load the catalogue.';
+        return;
+      }
+
+      const sold = products.filter(p => p.available === false);
+
+      // A handful of pieces were entered as already sold in the very first
+      // catalogue commit and carry no soldAt — they sold before the shop
+      // existed. They're counted against the launch date so the totals are
+      // complete. The date is applied here rather than written into
+      // products.json: they didn't actually sell that day, and the catalogue
+      // shouldn't claim they did.
+      const LAUNCH = '2026-07-25';
+      const effectiveSoldAt = p => (p.soldAt && !isNaN(Date.parse(p.soldAt))) ? p.soldAt : LAUNCH;
+      const preLaunch = sold.filter(p => !p.soldAt || isNaN(Date.parse(p.soldAt)));
+      const dated = sold
+        .slice()
+        .sort((a, b) => Date.parse(effectiveSoldAt(b)) - Date.parse(effectiveSoldAt(a)));
+
+      if (!dated.length) {
+        status.textContent = 'Nothing sold yet.';
+        return;
+      }
+      status.textContent = '';
+
+      const now = new Date();
+      const thisKey = monthKey(now);
+      const lastKey = monthKey(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+
+      const byMonth = {};
+      dated.forEach(p => {
+        const k = monthKey(new Date(effectiveSoldAt(p)));
+        byMonth[k] = byMonth[k] || { n: 0, value: 0 };
+        byMonth[k].n++;
+        byMonth[k].value += Number(p.price) || 0;
+      });
+      const thisMonth = byMonth[thisKey] || { n: 0, value: 0 };
+      const lastMonth = byMonth[lastKey] || { n: 0, value: 0 };
+
+      const total = dated.reduce((s, p) => s + (Number(p.price) || 0), 0);
+      const avg = total / dated.length;
+
+      // Median days from listing to sale — the honest middle, not skewed by
+      // the one piece that sat for months. Pre-launch sales are left out: the
+      // gap between listing them and the launch date isn't a selling time.
+      const spans = dated
+        .filter(p => p.soldAt && !isNaN(Date.parse(p.soldAt)))
+        .filter(p => p.createdAt && !isNaN(Date.parse(p.createdAt)))
+        .map(p => (Date.parse(p.soldAt) - Date.parse(p.createdAt)) / 86400000)
+        .filter(d => d >= 0)
+        .sort((a, b) => a - b);
+      const median = spans.length
+        ? Math.round(spans.length % 2
+          ? spans[(spans.length - 1) / 2]
+          : (spans[spans.length / 2 - 1] + spans[spans.length / 2]) / 2)
+        : null;
+
+      const live = products.filter(p =>
+        p.available !== false &&
+        !(p.dropAt && !isNaN(Date.parse(p.dropAt)) && Date.parse(p.dropAt) > Date.now()));
+      const stockValue = live.reduce((s, p) => s + (Number(p.price) || 0), 0);
+
+      let delta = '';
+      if (lastMonth.value > 0) {
+        const pct = Math.round(((thisMonth.value - lastMonth.value) / lastMonth.value) * 100);
+        const dir = pct >= 0 ? 'up' : 'down';
+        // Mid-month this compares a part month against a whole one, so the
+        // label says which is which rather than implying a real drop.
+        delta = `<p class="sales-tile-sub ${dir}">${pct >= 0 ? '▲' : '▼'} ${Math.abs(pct)}% vs all of ${monthLabel(lastKey)} (${money(lastMonth.value)})</p>`;
+      } else if (lastMonth.n === 0) {
+        delta = `<p class="sales-tile-sub">Nothing sold in ${monthLabel(lastKey)}</p>`;
+      }
+
+      const tiles = `
+        <div class="sales-tiles">
+          <div class="sales-tile">
+            <p class="sales-tile-label">${monthLabel(thisKey)} so far</p>
+            <p class="sales-tile-value">${money(thisMonth.value)}</p>
+            <p class="sales-tile-sub">${pieceCount(thisMonth.n)}</p>
+            ${delta}
+          </div>
+          <div class="sales-tile">
+            <p class="sales-tile-label">All time</p>
+            <p class="sales-tile-value">${money(total)}</p>
+            <p class="sales-tile-sub">${pieceCount(dated.length)} · ${money(avg)} average</p>
+          </div>
+          <div class="sales-tile">
+            <p class="sales-tile-label">Typical time to sell</p>
+            <p class="sales-tile-value">${median === null ? '—' : median + ' days'}</p>
+            <p class="sales-tile-sub">Median from listing to sale</p>
+          </div>
+          <div class="sales-tile">
+            <p class="sales-tile-label">Unsold stock</p>
+            <p class="sales-tile-value">${money(stockValue)}</p>
+            <p class="sales-tile-sub">${pieceCount(live.length)} listed now</p>
+          </div>
+        </div>`;
+
+      // Last 12 months, oldest first, with empty months left in so a quiet
+      // month is visible rather than skipped.
+      const months = [];
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const k = monthKey(d);
+        months.push({ key: k, ...(byMonth[k] || { n: 0, value: 0 }) });
+      }
+      const firstWithSale = months.findIndex(m => m.n > 0);
+      const shown = firstWithSale === -1 ? months : months.slice(firstWithSale);
+      const peak = Math.max(...shown.map(m => m.value), 1);
+      const bars = shown.map(m => `
+        <div class="sales-bar-row">
+          <span class="sales-bar-month">${monthLabel(m.key)}</span>
+          <span class="sales-bar-track"><span class="sales-bar-fill" style="width:${Math.round((m.value / peak) * 100)}%"></span></span>
+          <span class="sales-bar-value">${m.n ? `${money(m.value)} · ${m.n}` : '—'}</span>
+        </div>`).join('');
+
+      const recent = dated.slice(0, 8).map(p => {
+        const when = p.soldAt && !isNaN(Date.parse(p.soldAt))
+          ? new Date(p.soldAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+          : 'At launch';
+        return `
+        <div class="insights-row">
+          <span class="insights-name">${p.name}</span>
+          <span class="insights-views">${when} · ${money(p.price)}</span>
+        </div>`;
+      }).join('');
+
+      // Pieces that have been listed longest without selling — the ones worth
+      // a fresh photo, a repost or a rethink on price.
+      const ageing = live
+        .filter(p => p.createdAt && !isNaN(Date.parse(p.createdAt)))
+        .map(p => ({ ...p, days: Math.floor((Date.now() - Date.parse(p.createdAt)) / 86400000) }))
+        .filter(p => median !== null && p.days > median)
+        .sort((a, b) => b.days - a.days)
+        .slice(0, 5);
+      const ageingBlock = ageing.length ? `
+        <p class="sales-section-title">Longest waiting</p>
+        ${ageing.map(p => `
+        <div class="insights-row">
+          <a class="insights-name" href="/pages/product/${p.slug}.html" target="_blank" rel="noopener">${p.name}</a>
+          <span class="sales-age">${p.days} days</span>
+          <span class="insights-views">${money(p.price)}</span>
+        </div>`).join('')}` : '';
+
+      const undatedNote = preLaunch.length
+        ? ` ${preLaunch.length} ${preLaunch.length === 1 ? 'piece' : 'pieces'} sold before the site launched and ${preLaunch.length === 1 ? 'is' : 'are'} counted against launch day, ${new Date(LAUNCH).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} — so July includes ${money(preLaunch.reduce((s, p) => s + (Number(p.price) || 0), 0))} that was taken before the shop opened. They're left out of the time-to-sell median.`
+        : '';
+
+      body.innerHTML = `
+        ${tiles}
+        <p class="sales-section-title">By month</p>
+        ${bars}
+        <p class="sales-section-title">Recent sales</p>
+        ${recent}
+        ${ageingBlock}
+        <p class="sales-note">
+          Figures are listed prices, so they exclude shipping and any currency conversion —
+          Stripe is the record for what actually settled.${undatedNote}
+          A piece sold through a DM payment link only appears here once you untick its
+          availability.
+        </p>`;
+    }
 
     // ── Product picker (edit mode) ────────────────────────────────
     async function loadProductPicker() {

@@ -983,7 +983,7 @@
         <p class="sales-section-title">Longest waiting</p>
         ${ageing.map(p => `
         <div class="insights-row">
-          <span class="insights-name">${p.name}</span>
+          <a class="insights-name" href="/pages/product/${p.slug}.html" target="_blank" rel="noopener">${p.name}</a>
           <span class="sales-age">${p.days} days</span>
           <span class="insights-views">${money(p.price)}</span>
         </div>`).join('')}` : '';

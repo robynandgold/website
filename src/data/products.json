@@ -561,8 +561,10 @@
     "price": 1295,
     "currency": "EUR",
     "featured": true,
+    "keepsake": false,
     "category": "rings",
     "available": true,
+    "dropAt": "",
     "createdAt": "2026-07-02T17:59:31.691Z",
     "images": [
       "/images/products/IMG_9145.jpeg",

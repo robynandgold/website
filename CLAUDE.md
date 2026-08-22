@@ -70,6 +70,16 @@ broken for six days. `[[d1_databases]]` is now in `wrangler.toml` (`DB` →
 only, survive deploys, and must never be committed. Database IDs are not
 secrets and are fine in config.
 
+## The repo is public
+
+`raw.githubusercontent.com` serves `products.json` unauthenticated — the
+Worker's checkout even falls back to it — so **anything committed here is
+public**, and anything under `src/` is served from the site as well. Private
+commercial data therefore never goes in the catalogue or the repo: buying
+prices live in the `product_costs` table in D1, behind `/api/costs` and the
+admin password. Apply the same rule to anything else that would expose
+margins, suppliers or customers.
+
 ## Site-wide edits
 
 The pages are hand-written and repetitive. A change to the header or footer

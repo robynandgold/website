@@ -55,8 +55,10 @@ flowchart LR
 
 ## The Worker (`worker/`)
 
-`worker/index.js` routes three POST endpoints and serves everything else
-from `src/` via the assets binding:
+`worker/index.js` routes the POST endpoints below and serves everything else
+from `src/` via the assets binding. `/api/vip-link`, `/api/insights` and
+`/api/costs` are all gated on `ADMIN_PASSWORD` with the same constant-time
+compare; `/api/view` is public and writes nothing but a daily tally.
 
 - **`/api/create-checkout-session`** (`checkout.js`) — builds a Stripe
   Checkout session. Security model: the request body is only trusted for
@@ -79,6 +81,13 @@ from `src/` via the assets binding:
   GitHub token against GitHub before handing it out** — including a Git
   Data API probe, because fine-grained tokens pass basic checks but fail
   large-file uploads. Returns precise, human-readable failure reasons.
+- **`/api/costs`** (`costs.js`) — what each piece cost to buy, read and
+  written by the admin Sales tab. Stored in the `product_costs` table in D1
+  and **never in products.json**: the repository is public and the catalogue
+  is served straight off the site, so a `cost` field there would publish the
+  shop's margins to anyone who looked. Saving is deliberately decoupled from
+  the git commit that publishes a piece — a costs failure reports and moves
+  on rather than failing a publish.
 
 ## The frontend (`src/`)
 
@@ -186,7 +195,7 @@ Bindings):
 
 | Binding | Type | Purpose |
 |---|---|---|
-| `DB` | D1 database | First-party product-page view counts for the admin "Most viewed" tab. |
+| `DB` | D1 database | First-party product-page view counts (`product_views`) for the admin "Most viewed" tab, and buying prices (`product_costs`) for the Sales tab. Both tables are created on first write. |
 
 **The views database** (free tier): the D1 database `robynandgold-views` is
 bound as `DB` in `wrangler.toml`, so it ships with every deploy. Keep it there

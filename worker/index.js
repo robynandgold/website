@@ -1,11 +1,12 @@
 // Cloudflare Worker entry — serves the static site (src/, via the ASSETS
-// binding) and handles the three /api/* endpoints.
+// binding) and handles the /api/* endpoints.
 import { handleCheckout } from './checkout.js';
 import { handleWebhook } from './webhook.js';
 import { handleAdminToken } from './admin-token.js';
 import { handleVipLink } from './vip.js';
 import { handleInsights } from './insights.js';
 import { handleView } from './views.js';
+import { handleCosts } from './costs.js';
 
 const methodNotAllowed = () =>
   new Response(JSON.stringify({ error: 'Method not allowed' }), {
@@ -20,6 +21,7 @@ const routes = {
   '/api/vip-link': handleVipLink,
   '/api/insights': handleInsights,
   '/api/view': handleView,
+  '/api/costs': handleCosts,
 };
 
 export default {

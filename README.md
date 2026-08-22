@@ -119,6 +119,14 @@ commit and push. The product will:
 
 Set `"featured": true`. The homepage displays the first 3 featured products.
 
+### Recording what a piece cost you
+
+Fill in **What you paid** on the admin page. It's saved to the Worker's
+database, never to `products.json` — the repository and the catalogue are both
+public, so a cost field there would publish your margins. The Sales tab uses it
+for profit and margin; pieces without one are left out of those figures rather
+than counted as free, so you can fill them in gradually.
+
 ### Putting a piece in the Keepsake collection
 
 Tick **Keepsake collection** on the admin page (or set `"keepsake": true` in

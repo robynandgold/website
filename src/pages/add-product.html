@@ -204,7 +204,7 @@
 
     /* ── Sales ──────────────────────────────── */
     .sales-tiles {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(136px, 1fr));
       gap: 0.7rem; margin-bottom: 0.6rem;
     }
     .sales-tile {
@@ -242,6 +242,7 @@
       margin: 1.8rem 0 0; padding-top: 1rem; border-top: 1px solid var(--border);
     }
     .sales-age { color: #a07830; font-size: 0.8rem; white-space: nowrap; flex-shrink: 0; }
+    .sales-profit { color: #3f7d58; font-size: 0.8rem; white-space: nowrap; flex-shrink: 0; }
 
     /* Four tabs need to fit a phone without the labels stacking three deep */
     @media (max-width: 640px) {
@@ -411,6 +412,11 @@
             <div class="field">
               <label for="f-price">Price (EUR) *</label>
               <input type="number" id="f-price" placeholder="e.g. 1200" min="0" step="1" />
+            </div>
+            <div class="field">
+              <label for="f-cost">What you paid (EUR)</label>
+              <input type="number" id="f-cost" placeholder="e.g. 450" min="0" step="1" />
+              <p class="featured-note ok" id="cost-note" style="margin-top:0.45rem;">Private — never published. Used for the profit figures on the Sales tab.</p>
             </div>
             <div class="field">
               <label for="f-category">Category *</label>
@@ -685,6 +691,76 @@
     document.getElementById('f-keepsake').addEventListener('change', updateKeepsakeNote);
     document.getElementById('f-price').addEventListener('input', updateKeepsakeNote);
 
+    // ── What you paid (private) ───────────────────────────────────
+    // Buying prices are kept in the Worker's D1 database, never in
+    // products.json: the repository is public and the catalogue is served
+    // straight off the site, so anything written there would publish the
+    // shop's margins. Read once per session and cached by slug.
+    let costsBySlug = {};
+    let costsLoaded = false;
+    let costsStorage = true;
+
+    async function loadCosts(force = false) {
+      if (costsLoaded && !force) return costsBySlug;
+      const pw = sessionStorage.getItem(PW_KEY);
+      if (!pw) return costsBySlug;
+      try {
+        const res = await fetch('/api/costs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pw }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          costsBySlug = data.costs || {};
+          costsStorage = data.storage !== false;
+          costsLoaded = true;
+        }
+      } catch (e) { /* leave the field blank rather than blocking the form */ }
+      return costsBySlug;
+    }
+
+    // Saves one piece's cost. Deliberately separate from the git commit — a
+    // failure here must never fail a publish, so it reports and moves on.
+    async function saveCost(slug) {
+      const pw = sessionStorage.getItem(PW_KEY);
+      if (!pw || !slug) return;
+      const raw = document.getElementById('f-cost').value.trim();
+      const cost = raw === '' ? null : parseFloat(raw);
+      if (cost !== null && (!isFinite(cost) || cost < 0)) return;
+      if (cost === null && costsBySlug[slug] === undefined) return;  // nothing to clear
+      try {
+        const res = await fetch('/api/costs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pw, slug, cost }),
+        });
+        if (!res.ok) return;
+        if (cost === null) delete costsBySlug[slug]; else costsBySlug[slug] = cost;
+      } catch (e) { /* see above */ }
+    }
+
+    function updateCostNote() {
+      const note = document.getElementById('cost-note');
+      if (!note) return;
+      const price = parseFloat(document.getElementById('f-price').value) || 0;
+      const cost = parseFloat(document.getElementById('f-cost').value);
+      if (!isFinite(cost) || cost <= 0 || price <= 0) {
+        note.className = 'featured-note ok';
+        note.textContent = 'Private — never published. Used for the profit figures on the Sales tab.';
+        return;
+      }
+      const profit = price - cost;
+      const margin = Math.round((profit / price) * 100);
+      note.className = profit >= 0 ? 'featured-note ok' : 'featured-note full';
+      note.textContent = profit >= 0
+        ? `Profit €${Math.round(profit).toLocaleString('en-IE')} · ${margin}% margin. Private — never published.`
+        : `Priced €${Math.round(-profit).toLocaleString('en-IE')} below what you paid.`;
+    }
+
+    document.getElementById('f-cost').addEventListener('input', updateCostNote);
+    document.getElementById('f-price').addEventListener('input', updateCostNote);
+
     document.getElementById('f-featured').addEventListener('change', () => {
       const note = document.getElementById('featured-note');
       const cb = document.getElementById('f-featured');
@@ -848,6 +924,11 @@
         return;
       }
 
+      // Buying prices, where they've been recorded. Anything without one is
+      // simply left out of the profit figures rather than counted as free.
+      const costs = await loadCosts(true);
+      const costOf = p => (costs[p.slug] !== undefined ? Number(costs[p.slug]) : null);
+
       const sold = products.filter(p => p.available === false);
 
       // A handful of pieces were entered as already sold in the very first
@@ -905,6 +986,15 @@
         p.available !== false &&
         !(p.dropAt && !isNaN(Date.parse(p.dropAt)) && Date.parse(p.dropAt) > Date.now()));
       const stockValue = live.reduce((s, p) => s + (Number(p.price) || 0), 0);
+      const stockCost = live.reduce((s, p) => s + (costOf(p) || 0), 0);
+      const stockCosted = live.filter(p => costOf(p) !== null).length;
+
+      // Profit, over the sold pieces that have a recorded buying price.
+      const costed = dated.filter(p => costOf(p) !== null);
+      const costedRevenue = costed.reduce((s, p) => s + (Number(p.price) || 0), 0);
+      const costedSpend = costed.reduce((s, p) => s + costOf(p), 0);
+      const profit = costedRevenue - costedSpend;
+      const marginPct = costedRevenue > 0 ? Math.round((profit / costedRevenue) * 100) : 0;
 
       let delta = '';
       if (lastMonth.value > 0) {
@@ -931,6 +1021,13 @@
             <p class="sales-tile-sub">${pieceCount(dated.length)} · ${money(avg)} average</p>
           </div>
           <div class="sales-tile">
+            <p class="sales-tile-label">Profit</p>
+            <p class="sales-tile-value">${costed.length ? money(profit) : '—'}</p>
+            <p class="sales-tile-sub">${costed.length
+              ? `${marginPct}% margin · ${costed.length} of ${dated.length} pieces costed`
+              : 'Add what you paid to a piece to see this'}</p>
+          </div>
+          <div class="sales-tile">
             <p class="sales-tile-label">Typical time to sell</p>
             <p class="sales-tile-value">${median === null ? '—' : median + ' days'}</p>
             <p class="sales-tile-sub">Median from listing to sale</p>
@@ -938,7 +1035,7 @@
           <div class="sales-tile">
             <p class="sales-tile-label">Unsold stock</p>
             <p class="sales-tile-value">${money(stockValue)}</p>
-            <p class="sales-tile-sub">${pieceCount(live.length)} listed now</p>
+            <p class="sales-tile-sub">${pieceCount(live.length)} listed now${stockCosted ? ` · ${money(stockCost)} paid for ${stockCosted}` : ''}</p>
           </div>
         </div>`;
 
@@ -964,12 +1061,28 @@
         const when = p.soldAt && !isNaN(Date.parse(p.soldAt))
           ? new Date(p.soldAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
           : 'At launch';
+        const c = costOf(p);
+        const made = c === null ? '' : ` <span class="sales-profit">+${money((Number(p.price) || 0) - c)}</span>`;
         return `
         <div class="insights-row">
           <span class="insights-name">${p.name}</span>
-          <span class="insights-views">${when} · ${money(p.price)}</span>
+          <span class="insights-views">${when} · ${money(p.price)}${made}</span>
         </div>`;
       }).join('');
+
+      // What actually made money, which is rarely the same as what sold fastest.
+      const byProfit = costed
+        .map(p => ({ p, made: (Number(p.price) || 0) - costOf(p) }))
+        .sort((a, b) => b.made - a.made)
+        .slice(0, 5);
+      const profitBlock = byProfit.length >= 2 ? `
+        <p class="sales-section-title">Made the most</p>
+        ${byProfit.map(({ p, made }) => `
+        <div class="insights-row">
+          <a class="insights-name" href="/pages/product/${p.slug}.html" target="_blank" rel="noopener">${p.name}</a>
+          <span class="insights-views">${money(p.price)} − ${money(costOf(p))}</span>
+          <span class="sales-profit">+${money(made)}</span>
+        </div>`).join('')}` : '';
 
       // Pieces that have been listed longest without selling — the ones worth
       // a fresh photo, a repost or a rethink on price.
@@ -992,16 +1105,23 @@
         ? ` ${preLaunch.length} ${preLaunch.length === 1 ? 'piece' : 'pieces'} sold before the site launched and ${preLaunch.length === 1 ? 'is' : 'are'} counted against launch day, ${new Date(LAUNCH).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} — so July includes ${money(preLaunch.reduce((s, p) => s + (Number(p.price) || 0), 0))} that was taken before the shop opened. They're left out of the time-to-sell median.`
         : '';
 
+      const costNote = !costsStorage
+        ? ' Buying prices need the views database bound to save.'
+        : costed.length < dated.length
+          ? ` Profit covers the ${costed.length} of ${dated.length} sold ${dated.length === 1 ? 'piece' : 'pieces'} with a recorded buying price — add the rest from the Edit tab and the figure fills in.`
+          : '';
+
       body.innerHTML = `
         ${tiles}
         <p class="sales-section-title">By month</p>
         ${bars}
         <p class="sales-section-title">Recent sales</p>
         ${recent}
+        ${profitBlock}
         ${ageingBlock}
         <p class="sales-note">
           Figures are listed prices, so they exclude shipping and any currency conversion —
-          Stripe is the record for what actually settled.${undatedNote}
+          Stripe is the record for what actually settled.${costNote}${undatedNote}
           A piece sold through a DM payment link only appears here once you untick its
           availability.
         </p>`;
@@ -1155,6 +1275,15 @@
       document.getElementById('f-featured').checked = product.featured === true;
       document.getElementById('f-keepsake').checked = product.keepsake === true;
       updateKeepsakeNote();
+      // Costs live in the Worker, so they may still be in flight on first open.
+      const costField = document.getElementById('f-cost');
+      costField.value = costsBySlug[product.slug] !== undefined ? costsBySlug[product.slug] : '';
+      updateCostNote();
+      loadCosts().then(costs => {
+        if (currentEditProduct !== product) return;   // a different piece was picked meanwhile
+        costField.value = costs[product.slug] !== undefined ? costs[product.slug] : '';
+        updateCostNote();
+      });
       applyFeaturedCap(product.id);
 
       document.getElementById('image-list').innerHTML = '';
@@ -1553,9 +1682,10 @@
     }
 
     function clearForm() {
-      ['f-name', 'f-slug', 'f-description', 'f-size', 'f-price'].forEach(id => {
+      ['f-name', 'f-slug', 'f-description', 'f-size', 'f-price', 'f-cost'].forEach(id => {
         document.getElementById(id).value = '';
       });
+      updateCostNote();
       document.getElementById('f-category').value = 'rings';
       updateSizeVisibility();
       setDropValue('');
@@ -1918,6 +2048,10 @@
 
         // Keep the featured cap in sync with what we just saved
         if (product.featured) featuredIds.add(product.id); else featuredIds.delete(product.id);
+
+        // The buying price is stored separately from the catalogue (see
+        // loadCosts) and must not hold up or fail the publish.
+        await saveCost(product.slug);
 
         pendingFiles.clear();
         blobUploads.clear();

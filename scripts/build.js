@@ -382,7 +382,7 @@ ${stickyBarMarkup(product)}
 // --- sitemap ----------------------------------------------------------------
 
 // A product belongs in the sitemap once it's sellable: not sold, and any
-// scheduled GMT drop (dropAt, an ISO UTC instant) has already passed at build
+// scheduled drop (dropAt, an ISO UTC instant) has already passed at build
 // time. Scheduled pieces are kept out until a build runs after their drop.
 function isSitemapEligible(product) {
   if (product.available === false) return false;

@@ -36,8 +36,9 @@
     return `${symbol}${Number(price).toFixed(2)}`;
   }
 
-  // A piece scheduled as a drop is not yet purchasable — its GMT drop time
-  // is still in the future.
+  // A piece scheduled as a drop is not yet purchasable — its drop time is
+  // still in the future. dropAt is a UTC instant, so this comparison is
+  // timezone-proof; only the displayed wall-clock is Irish.
   function isScheduled(product) {
     if (!product || !product.dropAt) return false;
     const t = Date.parse(product.dropAt);
@@ -47,9 +48,9 @@
   function formatDropTime(iso) {
     const d = new Date(iso);
     return d.toLocaleString('en-GB', {
-      timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'long',
+      timeZone: 'Europe/Dublin', weekday: 'short', day: 'numeric', month: 'long',
       hour: '2-digit', minute: '2-digit'
-    }) + ' GMT';
+    }) + ' Irish time';
   }
 
   // Insert an "early access" note above the buy button for a VIP visitor

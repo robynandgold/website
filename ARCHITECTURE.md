@@ -108,12 +108,16 @@ compare; `/api/view` is public and writes nothing but a daily tally.
 - **Cart** is `localStorage` (`cart.js`) — one of each piece only, since
   everything is one of a kind. Nothing is reserved until payment.
 - **Drops** (optional per piece): a product can carry a `dropAt` (ISO UTC
-  instant) set from the add-product page. Until that GMT time it's hidden
-  from the shop, homepage and "you might also like", left out of the
-  sitemap, and its own page shows "Available &lt;date&gt; GMT" instead of an
-  Add-to-cart button — all enforced client-side against the current time, so
-  it goes live automatically at the drop. No `dropAt` means the piece
-  publishes live immediately; a "Drop now" override clears the schedule.
+  instant) set from the add-product page, where the date/time is entered and
+  shown in **Irish time** — 5pm typed is 5pm in Ireland, summer or winter. The
+  offset is looked up from `Europe/Dublin` via `Intl` rather than hardcoded, so
+  the October and March clock changes need no attention; only the stored
+  instant is UTC. Until that moment the piece is hidden from the shop,
+  homepage and "you might also like", left out of the sitemap, and its own page
+  shows "Available &lt;date&gt; Irish time" instead of an Add-to-cart button —
+  all enforced client-side against the current time, so it goes live
+  automatically at the drop. No `dropAt` means the piece publishes live
+  immediately; a "Drop now" override clears the schedule.
 - **VIP early access**: the admin can copy a `?vip=<token>` link for a
   scheduled piece (token = HMAC of the product id, signed on the Worker with
   `VIP_SECRET` and minted via `/api/vip-link`, password-gated). That link

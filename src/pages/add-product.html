@@ -473,11 +473,11 @@
             </label>
             <div id="drop-schedule-row" style="display:none;">
               <div class="field" style="margin-bottom:0.8rem;">
-                <label for="f-drop-datetime">Drop date &amp; time (GMT)</label>
+                <label for="f-drop-datetime">Drop date &amp; time (Irish time)</label>
                 <input type="datetime-local" id="f-drop-datetime" />
               </div>
               <button type="button" class="btn btn-ghost" id="drop-now-btn" style="padding:0.45rem 1rem;font-size:0.8rem;">Drop now — release immediately</button>
-              <p id="drop-hint" style="font-size:0.75rem;color:var(--muted);margin:0.6rem 0 0;">Leave the drop off to publish the piece live straight away. All times are GMT.</p>
+              <p id="drop-hint" style="font-size:0.75rem;color:var(--muted);margin:0.6rem 0 0;">Leave the drop off to publish the piece live straight away. All times are Irish time.</p>
             </div>
           </div>
 
@@ -1164,7 +1164,7 @@
             + (product.keepsake === true ? ' <span class="product-pick-featured-badge">✦ Keepsake</span>' : '');
           const dropsFuture = product.dropAt && !isNaN(Date.parse(product.dropAt)) && Date.parse(product.dropAt) > Date.now();
           const dropNote = dropsFuture
-            ? ' · Drops ' + new Date(product.dropAt).toLocaleString('en-GB', { timeZone: 'UTC', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' GMT'
+            ? ' · Drops ' + new Date(product.dropAt).toLocaleString('en-GB', { timeZone: 'Europe/Dublin', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
             : '';
           const meta = (product.size ? `${product.size} · ${status}` : status) + dropNote;
           const item = document.createElement('div');
@@ -1483,11 +1483,13 @@
     document.getElementById('f-category').addEventListener('change', updateSizeVisibility);
     updateSizeVisibility();
 
-    // ── Drops (scheduled release, all times GMT) ──────────────────
-    // A piece can be held back until a set GMT date/time. The datetime-local
-    // input is read as literal GMT wall-clock (not the admin's local zone), so
-    // the stored `dropAt` is an accurate UTC instant regardless of where the
-    // shopkeeper is. No schedule → the piece goes live as soon as it's published.
+    // ── Drops (scheduled release, all times Irish) ────────────────
+    // A piece can be held back until a set date/time. The datetime-local input
+    // is read as Irish wall-clock (not the admin's device zone), so 5pm typed
+    // here is 5pm in Ireland whether or not the shopkeeper is travelling. The
+    // stored `dropAt` is still an accurate UTC instant, which is what the shop,
+    // the product page and the sitemap all compare against. No schedule → the
+    // piece goes live as soon as it's published.
     function updateDropVisibility() {
       const on = document.getElementById('f-drop-enabled').checked;
       document.getElementById('drop-schedule-row').style.display = on ? '' : 'none';
@@ -1500,8 +1502,24 @@
       document.getElementById('drop-now-btn').style.display = editingScheduled ? '' : 'none';
     }
 
-    // datetime-local value ("YYYY-MM-DDTHH:mm") → ISO UTC instant, treating the
-    // entered wall-clock as GMT.
+    // Ireland's offset from UTC at a given instant, in minutes: +60 on IST
+    // (late March to late October), 0 on GMT. Looked up from the zone rather
+    // than hardcoded, so the October changeover takes care of itself.
+    function dublinOffsetMinutes(utcMs) {
+      const parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Europe/Dublin', hour12: false,
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      }).formatToParts(new Date(utcMs)).reduce((acc, p) => (acc[p.type] = p.value, acc), {});
+      const asIfUTC = Date.UTC(+parts.year, +parts.month - 1, +parts.day,
+        +parts.hour % 24, +parts.minute, +parts.second);
+      return Math.round((asIfUTC - utcMs) / 60000);
+    }
+
+    // datetime-local value ("YYYY-MM-DDTHH:mm") → ISO UTC instant, reading the
+    // entered wall-clock as Irish time. Two passes: the first offset is looked
+    // up from the naive instant, the second from the corrected one, which is
+    // what makes a time near a clock change resolve to the right side of it.
     function dropInputToISO() {
       if (!document.getElementById('f-drop-enabled').checked) return '';
       const v = document.getElementById('f-drop-datetime').value;
@@ -1509,16 +1527,19 @@
       const m = v.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
       if (!m) return '';
       const [, y, mo, d, h, mi] = m.map(Number);
-      return new Date(Date.UTC(y, mo - 1, d, h, mi)).toISOString();
+      const naive = Date.UTC(y, mo - 1, d, h, mi);
+      let ts = naive - dublinOffsetMinutes(naive) * 60000;
+      ts = naive - dublinOffsetMinutes(ts) * 60000;
+      return new Date(ts).toISOString();
     }
 
-    // Stored ISO UTC → datetime-local value showing the GMT wall-clock.
+    // Stored ISO UTC → datetime-local value showing the Irish wall-clock.
     function isoToDropInput(iso) {
       const t = Date.parse(iso);
       if (isNaN(t)) return '';
-      const dt = new Date(t);
+      const local = new Date(t + dublinOffsetMinutes(t) * 60000);
       const p = n => String(n).padStart(2, '0');
-      return `${dt.getUTCFullYear()}-${p(dt.getUTCMonth() + 1)}-${p(dt.getUTCDate())}T${p(dt.getUTCHours())}:${p(dt.getUTCMinutes())}`;
+      return `${local.getUTCFullYear()}-${p(local.getUTCMonth() + 1)}-${p(local.getUTCDate())}T${p(local.getUTCHours())}:${p(local.getUTCMinutes())}`;
     }
 
     // Load a product's saved drop into the form. Only a *future* drop is still a
@@ -1993,7 +2014,7 @@
       if (!name || !slug) { setStatus('error', 'Please enter at least a name.'); return; }
       if (categoryHasSize() && !document.getElementById('f-size').value) { setStatus('error', 'Please select a ring size.'); return; }
       if (document.getElementById('f-drop-enabled').checked && !document.getElementById('f-drop-datetime').value) {
-        setStatus('error', 'Please set a drop date and time (GMT), or turn the drop off / use “Drop now”.');
+        setStatus('error', 'Please set a drop date and time, or turn the drop off / use “Drop now”.');
         return;
       }
 

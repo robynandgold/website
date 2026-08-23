@@ -1254,5 +1254,28 @@
     "videos": [
       "/images/products/IMG_1184.mp4"
     ]
+  },
+  {
+    "id": "18ct-yellow-gold-diamond-baguette-and-brilliant-cut-ring-kp9hc",
+    "name": "18ct Yellow Gold Diamond Baguette and Brilliant-cut Ring",
+    "slug": "18ct-yellow-gold-diamond-baguette-and-brilliant-cut-ring-kp9hc",
+    "description": "A beautifully structured 18ct gold diamond ring with a distinctly Art Deco-inspired feel. The front is set with alternating baguette-cut and round brilliant-cut diamonds in a crisp white setting, contrasting beautifully with the yellow gold band. Sleek, geometric and wonderfully sparkly, gorgeous worn alone or as part of a stack.\n\nFully hallmarked, 2.8g.",
+    "size": "UK O · US 7.25",
+    "price": 775,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "2026-08-23T16:00:00.000Z",
+    "createdAt": "2026-08-23T12:06:43.314Z",
+    "images": [
+      "/images/products/IMG_1111.jpeg",
+      "/images/products/IMG_1113.jpeg",
+      "/images/products/IMG_1112.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_1182.mp4"
+    ]
   }
 ]

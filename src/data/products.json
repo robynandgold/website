@@ -1415,5 +1415,28 @@
     "videos": [
       "/images/products/IMG_1185.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-diamond-wishbone-ring-x4znl",
+    "name": "9ct Yellow Gold Diamond Wishbone Ring",
+    "slug": "9ct-yellow-gold-diamond-wishbone-ring-x4znl",
+    "description": "A classic 9ct yellow gold diamond wishbone ring, set along the gently curved front with a graduating row of round brilliant-cut diamonds. Simple, elegant and endlessly wearable, with a lovely polished gold surround framing the diamonds. Perfect worn alone, stacked with other bands or paired with an engagement ring.\n\nFully hallmarked and stamped ‘DIA’ for diamonds, 2.1g.",
+    "size": "UK Q · US 8.25",
+    "price": 440,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "2026-08-23T16:00:00.000Z",
+    "createdAt": "2026-08-23T12:34:38.002Z",
+    "images": [
+      "/images/products/IMG_1143.jpeg",
+      "/images/products/IMG_1147.jpeg",
+      "/images/products/IMG_1149.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_1186.mp4"
+    ]
   }
 ]

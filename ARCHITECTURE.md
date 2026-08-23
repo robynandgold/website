@@ -81,6 +81,12 @@ compare; `/api/view` is public and writes nothing but a daily tally.
   GitHub token against GitHub before handing it out** — including a Git
   Data API probe, because fine-grained tokens pass basic checks but fail
   large-file uploads. Returns precise, human-readable failure reasons.
+- **`/api/abandoned`** (`abandoned.js`) — checkouts started and never paid
+  for, listed straight from Stripe (`status: 'expired'`) rather than stored
+  here. A session already carries `metadata.product_ids` from `checkout.js`,
+  so Stripe is both source of truth and history, and the view works
+  retroactively over sessions that pre-date the endpoint. The Sales tab groups
+  them by piece — the same ring left three times is the signal worth seeing.
 - **`/api/costs`** (`costs.js`) — what each piece cost to buy, read and
   written by the admin Sales tab. Stored in the `product_costs` table in D1
   and **never in products.json**: the repository is public and the catalogue

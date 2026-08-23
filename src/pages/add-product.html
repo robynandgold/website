@@ -1130,6 +1130,7 @@
 
       body.innerHTML = `
         ${tiles}
+        <div id="abandoned-block"></div>
         <p class="sales-section-title">By month</p>
         ${bars}
         <p class="sales-section-title">Recent sales</p>
@@ -1141,6 +1142,75 @@
           Stripe is the record for what actually settled.${costNote}${undatedNote}
           A piece sold through a DM payment link only appears here once you untick its
           availability.
+        </p>`;
+
+      // Loaded after the rest so a slow Stripe call never holds up the page.
+      renderAbandoned(products);
+    }
+
+    // ── Abandoned checkouts ───────────────────────────────────────
+    // Pieces someone took as far as the payment page and didn't buy. Read from
+    // Stripe via /api/abandoned; grouped by piece, because the same ring being
+    // left three times says more than three separate lines would.
+    async function renderAbandoned(products) {
+      const block = document.getElementById('abandoned-block');
+      if (!block) return;
+      const pw = sessionStorage.getItem(PW_KEY);
+      if (!pw) return;
+
+      let rows = [];
+      try {
+        const res = await fetch('/api/abandoned', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pw, days: 90 }),
+        });
+        if (!res.ok) return;
+        rows = (await res.json()).rows || [];
+      } catch (e) { return; }
+      if (!rows.length) return;
+
+      const byId = {};
+      products.forEach(p => { if (p && p.id) byId[p.id] = p; });
+
+      // One entry per piece: how many times it was left, and when last.
+      const tally = {};
+      rows.forEach(r => {
+        r.ids.forEach(id => {
+          tally[id] = tally[id] || { id, times: 0, last: 0, emailed: 0 };
+          tally[id].times++;
+          tally[id].last = Math.max(tally[id].last, r.at || 0);
+          if (r.emailCaptured) tally[id].emailed++;
+        });
+      });
+
+      const list = Object.values(tally)
+        .sort((a, b) => b.times - a.times || b.last - a.last)
+        .slice(0, 8);
+
+      const total = rows.length;
+      block.innerHTML = `
+        <p class="sales-section-title">Left at checkout · last 90 days</p>
+        ${list.map(t => {
+          const p = byId[t.id];
+          const name = p ? p.name : prettifySlug(t.id);
+          const when = t.last ? new Date(t.last).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
+          const sold = p && p.available === false ? ' <span class="insights-sold">Sold since</span>' : '';
+          const times = t.times > 1 ? `${t.times}× · ` : '';
+          const nameCell = p
+            ? `<a class="insights-name" href="/pages/product/${p.slug}.html" target="_blank" rel="noopener">${name}</a>`
+            : `<span class="insights-name">${name}</span>`;
+          return `
+        <div class="insights-row">
+          ${nameCell}${sold}
+          <span class="insights-views">${times}last ${when}${p ? ` · ${money(p.price)}` : ''}</span>
+        </div>`;
+        }).join('')}
+        <p class="sales-note" style="margin-top:0.9rem;padding-top:0.7rem;">
+          ${total} checkout${total === 1 ? '' : 's'} started and not paid for in the last 90 days.
+          Each one expired after 35 minutes, and a recovery email went out to anyone who had typed
+          their address in — wallet payers don't reach us, so some get nothing. A piece left
+          repeatedly is usually saying something about its price or the postage.
         </p>`;
     }
 

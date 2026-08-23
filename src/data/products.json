@@ -1300,5 +1300,28 @@
     "videos": [
       "/images/products/IMG_1103.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-pink-tourmaline-and-diamond-heart-ring-cuqxk",
+    "name": "9ct Yellow Gold Pink Tourmaline and Diamond Heart Ring",
+    "slug": "9ct-yellow-gold-pink-tourmaline-and-diamond-heart-ring-cuqxk",
+    "description": "A beautiful 9ct yellow gold three-stone ring centred with a vivid oval-cut pinkish-red tourmaline, flanked on either side by heart-shaped diamond settings. The combination is wonderfully romantic, with the warm yellow gold setting off that incredible jewel-toned centre stone. Feminine, unusual and very pretty on the hand.\n\nFully hallmarked, 3.2g.",
+    "size": "UK N½ · US 7",
+    "price": 595,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "2026-08-23T16:00:00.000Z",
+    "createdAt": "2026-08-23T12:15:30.102Z",
+    "images": [
+      "/images/products/IMG_1119.jpeg",
+      "/images/products/IMG_1122.jpeg",
+      "/images/products/IMG_1121.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_1150.mp4"
+    ]
   }
 ]

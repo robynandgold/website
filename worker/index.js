@@ -7,6 +7,7 @@ import { handleVipLink } from './vip.js';
 import { handleInsights } from './insights.js';
 import { handleView } from './views.js';
 import { handleCosts } from './costs.js';
+import { handleAbandoned } from './abandoned.js';
 
 const methodNotAllowed = () =>
   new Response(JSON.stringify({ error: 'Method not allowed' }), {
@@ -22,6 +23,7 @@ const routes = {
   '/api/insights': handleInsights,
   '/api/view': handleView,
   '/api/costs': handleCosts,
+  '/api/abandoned': handleAbandoned,
 };
 
 export default {

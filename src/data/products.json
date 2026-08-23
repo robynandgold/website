@@ -1323,5 +1323,28 @@
     "videos": [
       "/images/products/IMG_1150.mp4"
     ]
+  },
+  {
+    "id": "9ct-gold-pav-diamond-serpent-ring-qlxtk",
+    "name": "9ct Gold Pavé Diamond Serpent Ring",
+    "slug": "9ct-gold-pav-diamond-serpent-ring-qlxtk",
+    "description": "A beautifully unusual vintage snake ring crafted in 9ct gold, with a sinuous wraparound design and delicate diamond detailing. The body curves elegantly around the finger, finishing in a diamond-set head and tail. A gorgeous statement piece with plenty of character, striking without feeling overly ornate.\n\nFully hallmarked, 2.6g.",
+    "size": "UK T · US 9.75",
+    "price": 375,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "2026-08-23T16:00:00.000Z",
+    "createdAt": "2026-08-23T12:19:03.837Z",
+    "images": [
+      "/images/products/IMG_1124.jpeg",
+      "/images/products/IMG_1126.jpeg",
+      "/images/products/IMG_1127.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_1101.mp4"
+    ]
   }
 ]

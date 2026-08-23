@@ -1346,5 +1346,24 @@
     "videos": [
       "/images/products/IMG_1101.mp4"
     ]
+  },
+  {
+    "id": "9ct-gold-two-tone-diamond-teardrop-ring-htdqy",
+    "name": "9ct Gold Two-tone Diamond Teardrop Ring",
+    "slug": "9ct-gold-two-tone-diamond-teardrop-ring-htdqy",
+    "description": "An elegant 9ct two-tone gold diamond ring with a fluid crossover design. Sweeping bands of yellow and white gold curve around one another, meeting at a single bezel-set round brilliant-cut diamond. Understated but beautifully designed, with that lovely late-20th-century sculptural feel. A very easy everyday diamond ring.\n\nFully hallmarked, 2.3g.",
+    "size": "UK O · US 7.25",
+    "price": 395,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "2026-08-23T16:00:00.000Z",
+    "createdAt": "2026-08-23T12:22:30.302Z",
+    "images": [],
+    "videos": [
+      "/images/products/IMG_1099.mp4"
+    ]
   }
 ]

@@ -1392,5 +1392,28 @@
     "videos": [
       "/images/products/IMG_1183.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-diamond-double-wave-ring-jyej6",
+    "name": "9ct Yellow Gold Diamond Double Wave Ring",
+    "slug": "9ct-yellow-gold-diamond-double-wave-ring-jyej6",
+    "description": "A beautifully fluid 9ct yellow gold diamond ring featuring two interwoven wave-shaped rows of channel-set round brilliant-cut diamonds. The polished gold sweeps between the two sparkling rows, creating a lovely sense of movement across the finger. Substantial enough to wear alone while still feeling elegant and refined.\n\nFully hallmarked, 2.6g.",
+    "size": "UK N · US 6.75",
+    "price": 525,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "",
+    "createdAt": "2026-08-23T12:31:11.683Z",
+    "images": [
+      "/images/products/IMG_1140.jpeg",
+      "/images/products/IMG_1139.jpeg",
+      "/images/products/IMG_1141.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_1185.mp4"
+    ]
   }
 ]

@@ -1369,5 +1369,28 @@
     "videos": [
       "/images/products/IMG_1099.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-champagne-diamond-five-stone-band-6qice",
+    "name": "9ct Yellow Gold Champagne Diamond Five-stone Band",
+    "slug": "9ct-yellow-gold-champagne-diamond-five-stone-band-6qice",
+    "description": "A seriously gorgeous 9ct yellow gold five-stone ring, set with 1ct total of beautiful champagne diamonds. Five round brilliant-cut diamonds are set into a swirl pattern, their warm champagne tones pairing perfectly with the rich yellow gold setting. Chunky, luxurious and wonderfully unusual, the kind of diamond ring that has real presence while still being incredibly wearable.\n\nFully hallmarked and stamped for 1ct diamonds, 3.4g.",
+    "size": "UK P · US 7.75",
+    "price": 785,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "2026-08-23T16:00:00.000Z",
+    "createdAt": "2026-08-23T12:27:55.513Z",
+    "images": [
+      "/images/products/IMG_1134.jpeg",
+      "/images/products/IMG_1137.jpeg",
+      "/images/products/IMG_1135.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_1183.mp4"
+    ]
   }
 ]

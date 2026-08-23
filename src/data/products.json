@@ -1361,7 +1361,11 @@
     "available": true,
     "dropAt": "2026-08-23T16:00:00.000Z",
     "createdAt": "2026-08-23T12:22:30.302Z",
-    "images": [],
+    "images": [
+      "/images/products/IMG_1130.jpeg",
+      "/images/products/IMG_1132.jpeg",
+      "/images/products/IMG_1129.jpeg"
+    ],
     "videos": [
       "/images/products/IMG_1099.mp4"
     ]

@@ -1335,7 +1335,7 @@
     "featured": false,
     "keepsake": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "dropAt": "2026-08-23T16:00:00.000Z",
     "createdAt": "2026-08-23T12:19:03.837Z",
     "images": [
@@ -1345,7 +1345,8 @@
     ],
     "videos": [
       "/images/products/IMG_1101.mp4"
-    ]
+    ],
+    "soldAt": "2026-08-23T14:08:50.756Z"
   },
   {
     "id": "9ct-gold-two-tone-diamond-teardrop-ring-htdqy",

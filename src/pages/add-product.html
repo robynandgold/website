@@ -764,10 +764,13 @@
         return;
       }
       const profit = price - cost;
-      const margin = Math.round((profit / price) * 100);
+      // Markup, not margin: profit against what you paid, so doubling your
+      // money reads as 100% rather than 50%.
+      const markup = Math.round((profit / cost) * 100);
+      const multiple = (price / cost).toFixed(1).replace(/\.0$/, '');
       note.className = profit >= 0 ? 'featured-note ok' : 'featured-note full';
       note.textContent = profit >= 0
-        ? `Profit €${Math.round(profit).toLocaleString('en-IE')} · ${margin}% margin. Private — never published.`
+        ? `Profit €${Math.round(profit).toLocaleString('en-IE')} · ${markup}% markup (${multiple}× your money). Private — never published.`
         : `Priced €${Math.round(-profit).toLocaleString('en-IE')} below what you paid.`;
     }
 
@@ -1007,7 +1010,8 @@
       const costedRevenue = costed.reduce((s, p) => s + (Number(p.price) || 0), 0);
       const costedSpend = costed.reduce((s, p) => s + costOf(p), 0);
       const profit = costedRevenue - costedSpend;
-      const marginPct = costedRevenue > 0 ? Math.round((profit / costedRevenue) * 100) : 0;
+      // Markup against what was paid — doubling your money reads as 100%.
+      const markupPct = costedSpend > 0 ? Math.round((profit / costedSpend) * 100) : 0;
 
       let delta = '';
       if (lastMonth.value > 0) {
@@ -1037,7 +1041,7 @@
             <p class="sales-tile-label">Profit</p>
             <p class="sales-tile-value">${costed.length ? money(profit) : '—'}</p>
             <p class="sales-tile-sub">${costed.length
-              ? `${marginPct}% margin · ${costed.length} of ${dated.length} pieces costed`
+              ? `${markupPct}% markup · ${costed.length} of ${dated.length} pieces costed`
               : 'Add what you paid to a piece to see this'}</p>
           </div>
           <div class="sales-tile">

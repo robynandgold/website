@@ -286,6 +286,13 @@
     .btn-copy-vip:hover { background: rgba(198,168,120,0.16); }
     .btn.copied { border-color: #a8d5b5; color: #3a7a52; background: #edf7f0; }
     .product-pick-item.is-featured { background: rgba(198,168,120,0.06); }
+    /* A piece still waiting for its drop, listed above everything else */
+    .product-pick-item.is-scheduled { background: rgba(22,53,47,0.05); }
+    .product-pick-drop-badge {
+      font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--accent); background: rgba(22,53,47,0.09);
+      border-radius: 4px; padding: 0.1rem 0.4rem; margin-left: 0.5rem; white-space: nowrap;
+    }
     .product-pick-featured-badge {
       font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em;
       color: #a07830; background: rgba(198,168,120,0.16);
@@ -1155,20 +1162,28 @@
         const countLabel = document.getElementById('featured-count-label');
         if (countLabel) countLabel.textContent = `· ${featuredIds.size}/${FEATURED_MAX} featured`;
 
+        // Still ahead of its drop — evaluated now, so the grouping below is
+        // accurate every time the picker is opened.
+        const isScheduled = p =>
+          !!p.dropAt && !isNaN(Date.parse(p.dropAt)) && Date.parse(p.dropAt) > Date.now();
+
         function makeItem(product) {
           const thumb = product.images?.[0]
             ? `<img class="product-pick-thumb" src="https://robynandgold.com${product.images[0]}" alt="" onerror="this.style.background='#e8e0d4';this.style.display='block'" />`
             : `<div class="product-pick-thumb"></div>`;
           const status = product.available === false ? 'Sold' : `€${product.price}`;
-          const badge = (product.featured === true ? ' <span class="product-pick-featured-badge">★ Featured</span>' : '')
+          const dropsFuture = isScheduled(product);
+          const badge = (dropsFuture ? ' <span class="product-pick-drop-badge">◷ Drop</span>' : '')
+            + (product.featured === true ? ' <span class="product-pick-featured-badge">★ Featured</span>' : '')
             + (product.keepsake === true ? ' <span class="product-pick-featured-badge">✦ Keepsake</span>' : '');
-          const dropsFuture = product.dropAt && !isNaN(Date.parse(product.dropAt)) && Date.parse(product.dropAt) > Date.now();
           const dropNote = dropsFuture
             ? ' · Drops ' + new Date(product.dropAt).toLocaleString('en-GB', { timeZone: 'Europe/Dublin', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
             : '';
           const meta = (product.size ? `${product.size} · ${status}` : status) + dropNote;
           const item = document.createElement('div');
-          item.className = 'product-pick-item' + (product.featured === true ? ' is-featured' : '');
+          item.className = 'product-pick-item'
+            + (dropsFuture ? ' is-scheduled' : '')
+            + (product.featured === true ? ' is-featured' : '');
           item.innerHTML = `${thumb}<div class="product-pick-info"><div class="product-pick-name">${product.name}</div><div class="product-pick-meta">${meta}${badge}</div></div><button class="btn-delete-product" title="Delete product">Delete</button>`;
           item.querySelector('.product-pick-info').addEventListener('click', () => {
             list.querySelectorAll('.product-pick-item').forEach(el => el.classList.remove('selected'));
@@ -1182,10 +1197,22 @@
           return item;
         }
 
-        // Featured pieces first (under a heading), then everything else
-        const featured = products.filter(p => p.featured === true);
-        const rest = products.filter(p => p.featured !== true);
+        // Pieces waiting on a drop sit at the top, then the homepage picks,
+        // then everything else. The drop group is temporary by construction:
+        // membership is tested against the current time, so a piece leaves it
+        // the moment its drop passes and falls back into its usual place.
+        const scheduled = products.filter(isScheduled)
+          .sort((a, b) => Date.parse(a.dropAt) - Date.parse(b.dropAt));
+        const featured = products.filter(p => !isScheduled(p) && p.featured === true);
+        const rest = products.filter(p => !isScheduled(p) && p.featured !== true);
 
+        if (scheduled.length) {
+          const lbl = document.createElement('p');
+          lbl.className = 'pick-group-label';
+          lbl.textContent = `Waiting to drop (${scheduled.length})`;
+          list.appendChild(lbl);
+          scheduled.forEach(p => list.appendChild(makeItem(p)));
+        }
         if (featured.length) {
           const lbl = document.createElement('p');
           lbl.className = 'pick-group-label';
@@ -1196,7 +1223,7 @@
         if (rest.length) {
           const lbl = document.createElement('p');
           lbl.className = 'pick-group-label';
-          lbl.textContent = featured.length ? 'All other pieces' : 'All pieces';
+          lbl.textContent = (featured.length || scheduled.length) ? 'All other pieces' : 'All pieces';
           list.appendChild(lbl);
           rest.forEach(p => list.appendChild(makeItem(p)));
         }

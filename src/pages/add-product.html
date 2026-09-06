@@ -186,6 +186,13 @@
       display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 0.8rem; align-items: end; margin-bottom: 1rem;
     }
+    /* A grid item is sized by its content unless told otherwise, and a
+       datetime-local input is intrinsically wide — without this the date
+       fields push their column past the edge of the screen. */
+    .promo-form .field { min-width: 0; }
+    /* A date input renders a few pixels taller than a text or number one, so
+       give them all the same height and the row reads as one. */
+    .promo-form .field input { min-width: 0; width: 100%; min-height: 40px; }
     .promo-code-cell { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.06em; }
     .promo-row-off .promo-code-cell { text-decoration: line-through; opacity: 0.55; }
     .promo-pill {
@@ -346,6 +353,20 @@
       .mode-tabs { flex-wrap: wrap; }
       .mode-tab { flex: 1 1 33%; }
       .mode-tab:not(:last-child) { border-right: none; }
+
+      /* One field per line on a phone, like the main form. Two columns left
+         the date pickers cut off at the right edge, and labels of different
+         lengths wrapped to different heights so the boxes didn't line up. */
+      .promo-form { grid-template-columns: 1fr; gap: 1rem; }
+
+      /* Code, status, details and the button won't fit one line on a phone —
+         the code was truncating to "WELCOM…", which is the one part you need
+         to read. Code and status on top, the rest underneath. */
+      #promo-list .insights-row { flex-wrap: wrap; row-gap: 0.4rem; }
+      #promo-list .promo-code-cell {
+        flex: 1 1 auto; white-space: normal; overflow: visible; text-overflow: clip;
+      }
+      #promo-list .insights-views { flex: 1 1 100%; }
     }
   </style>
 </head>

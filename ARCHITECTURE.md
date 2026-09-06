@@ -87,7 +87,10 @@ compare; `/api/view` is public and writes nothing but a daily tally.
   `checkout.js`) and Stripe validates it, applies the percentage, enforces the
   expiry and counts redemptions. No discount is ever computed from anything the
   browser sends, so a bug here cannot mis-charge an order — the worst case is a
-  code that doesn't exist.
+  code that doesn't exist. `allow_promotion_codes` is set to `!saleActive(sale)`,
+  so while a sale is running Stripe doesn't offer the code field at all — a code
+  can never be stacked on an already-reduced price, however checkout is
+  reached.
 - **`/api/abandoned`** (`abandoned.js`) — checkouts started and never paid
   for, listed straight from Stripe (`status: 'expired'`) rather than stored
   here. A session already carries `metadata.product_ids` from `checkout.js`,

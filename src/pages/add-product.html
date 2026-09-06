@@ -590,6 +590,7 @@
           </p>
 
           <p class="section-label" style="margin-top:2.4rem;">Create a promo code</p>
+          <p class="featured-note full" id="promo-sale-note" style="display:none;margin:-0.3rem 0 1rem;"></p>
           <div class="promo-form">
             <div class="field">
               <label for="f-promo-code">Code</label>
@@ -617,7 +618,8 @@
             Shoppers enter the code on the payment page — Stripe checks it, applies the discount and
             counts the uses, so a code can't be shared past its limit or used after it expires.
             Switching a code off stops it working straight away; codes that have already been used
-            stay listed so the record survives.
+            stay listed so the record survives. Codes and a sale never combine: while a sale is
+            running the payment page doesn't offer the code field at all.
           </p>
         </div>
 
@@ -1378,6 +1380,16 @@
       document.getElementById('f-sale-label').value = (running || scheduled) ? (sale.label || '') : '';
       document.getElementById('f-sale-starts').value = (running || scheduled) && sale.startsAt ? isoToIrishInput(sale.startsAt) : '';
       document.getElementById('f-sale-ends').value = (running || scheduled) && sale.endsAt ? isoToIrishInput(sale.endsAt) : '';
+
+      // Codes and sales don't combine — checkout withdraws the promo field
+      // while a sale is running — so say so where the codes are made.
+      const promoNote = document.getElementById('promo-sale-note');
+      if (promoNote) {
+        promoNote.style.display = running ? '' : 'none';
+        promoNote.textContent = running
+          ? 'Codes are paused while the sale is running — the payment page doesn\u2019t offer the field, so a code can\u2019t be added on top of a sale price.'
+          : '';
+      }
 
       const when = iso => new Date(iso).toLocaleString('en-GB', {
         timeZone: 'Europe/Dublin', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'

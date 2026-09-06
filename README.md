@@ -137,6 +137,9 @@ maximum uses. The code lives in Stripe, and shoppers enter it on the payment
 page; Stripe checks it, applies the discount and counts the uses. Switching a
 code off stops it working immediately. Nothing on the site needs republishing.
 
+Codes and a sale never combine: while a sale is running the payment page
+doesn't offer the code field, so nobody can take a code off a sale price.
+
 ### Recording what a piece cost you
 
 Fill in **What you paid** on the admin page. It's saved to the Worker's

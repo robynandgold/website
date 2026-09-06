@@ -81,6 +81,13 @@ compare; `/api/view` is public and writes nothing but a daily tally.
   GitHub token against GitHub before handing it out** — including a Git
   Data API probe, because fine-grained tokens pass basic checks but fail
   large-file uploads. Returns precise, human-readable failure reasons.
+- **`/api/promos`** (`promos.js`) — creates, lists and switches off **Stripe
+  promotion codes** from the admin page. Deliberately Stripe-native: the
+  shopper types the code into Stripe's checkout (`allow_promotion_codes` in
+  `checkout.js`) and Stripe validates it, applies the percentage, enforces the
+  expiry and counts redemptions. No discount is ever computed from anything the
+  browser sends, so a bug here cannot mis-charge an order — the worst case is a
+  code that doesn't exist.
 - **`/api/abandoned`** (`abandoned.js`) — checkouts started and never paid
   for, listed straight from Stripe (`status: 'expired'`) rather than stored
   here. A session already carries `metadata.product_ids` from `checkout.js`,

@@ -180,6 +180,26 @@
     }
     .mode-tab.active { background: #fdfbf8; color: var(--ink); font-weight: 500; }
     .mode-tab:not(:last-child) { border-right: 1px solid var(--border); }
+
+    /* ── Discounts ──────────────────────────── */
+    .promo-form {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 0.8rem; align-items: end; margin-bottom: 1rem;
+    }
+    .promo-code-cell { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.06em; }
+    .promo-row-off .promo-code-cell { text-decoration: line-through; opacity: 0.55; }
+    .promo-pill {
+      font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em;
+      border-radius: 999px; padding: 0.12rem 0.5rem; flex-shrink: 0;
+      background: rgba(63,125,88,0.12); color: #3f7d58;
+    }
+    .promo-pill.off { background: rgba(0,0,0,0.06); color: var(--muted); }
+    .btn-promo-toggle {
+      border: 1px solid var(--border); background: none; border-radius: 999px;
+      font-family: inherit; font-size: 0.7rem; color: var(--muted);
+      padding: 0.15rem 0.6rem; cursor: pointer; flex-shrink: 0;
+    }
+    .btn-promo-toggle:hover { border-color: var(--ink); color: var(--ink); }
     /* Most-viewed insights */
     .insights-controls { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; margin-bottom: 1.2rem; }
     .insights-controls select {
@@ -320,6 +340,12 @@
          the third ran off the edge of the card, and the labels broke over
          three lines each. One per line instead. */
       .toggle-row { flex-direction: column; align-items: flex-start; gap: 0.85rem; }
+
+      /* Five tabs squeezed onto one row leaves each label three lines deep —
+         wrap to two rows instead. */
+      .mode-tabs { flex-wrap: wrap; }
+      .mode-tab { flex: 1 1 33%; }
+      .mode-tab:not(:last-child) { border-right: none; }
     }
   </style>
 </head>
@@ -378,6 +404,7 @@
           <button class="mode-tab" id="tab-edit" onclick="switchMode('edit')">Edit existing piece</button>
           <button class="mode-tab" id="tab-insights" onclick="switchMode('insights')">Most viewed</button>
           <button class="mode-tab" id="tab-sales" onclick="switchMode('sales')">Sales</button>
+          <button class="mode-tab" id="tab-discounts" onclick="switchMode('discounts')">Discounts</button>
         </div>
 
         <!-- Setup -->
@@ -526,6 +553,40 @@
         <div id="sales-panel" style="display:none;">
           <p id="sales-status"></p>
           <div id="sales-body"></div>
+        </div>
+
+        <!-- Discounts -->
+        <div id="discounts-panel" style="display:none;">
+          <p class="section-label">Create a promo code</p>
+          <div class="promo-form">
+            <div class="field">
+              <label for="f-promo-code">Code</label>
+              <input type="text" id="f-promo-code" placeholder="e.g. AUTUMN15" maxlength="32" autocapitalize="characters" spellcheck="false" />
+            </div>
+            <div class="field">
+              <label for="f-promo-percent">Discount (%)</label>
+              <input type="number" id="f-promo-percent" placeholder="e.g. 15" min="1" max="100" step="1" />
+            </div>
+            <div class="field">
+              <label for="f-promo-expires">Expires (Irish time, optional)</label>
+              <input type="datetime-local" id="f-promo-expires" />
+            </div>
+            <div class="field">
+              <label for="f-promo-max">Maximum uses (optional)</label>
+              <input type="number" id="f-promo-max" placeholder="Leave blank for unlimited" min="1" step="1" />
+            </div>
+          </div>
+          <button class="btn btn-primary" id="promo-create-btn" style="width:auto;padding:0.7rem 1.6rem;">Create code</button>
+          <p class="featured-note ok" id="promo-status" style="margin-top:0.8rem;"></p>
+
+          <p class="sales-section-title" style="margin-top:2rem;">Existing codes</p>
+          <div id="promo-list"></div>
+          <p class="sales-note">
+            Shoppers enter the code on the payment page — Stripe checks it, applies the discount and
+            counts the uses, so a code can't be shared past its limit or used after it expires.
+            Switching a code off stops it working straight away; codes that have already been used
+            stay listed so the record survives.
+          </p>
         </div>
 
       </div>
@@ -800,18 +861,21 @@
       document.getElementById('tab-edit').classList.toggle('active', mode === 'edit');
       document.getElementById('tab-insights').classList.toggle('active', mode === 'insights');
       document.getElementById('tab-sales').classList.toggle('active', mode === 'sales');
+      document.getElementById('tab-discounts').classList.toggle('active', mode === 'discounts');
 
       const picker = document.getElementById('edit-picker');
       const publishBtn = document.getElementById('publish-btn');
       const formCard = document.getElementById('form-card');
       const insights = document.getElementById('insights-panel');
       const sales = document.getElementById('sales-panel');
+      const discounts = document.getElementById('discounts-panel');
 
-      // The add/edit form and the two reporting panels are mutually exclusive.
-      const reporting = mode === 'insights' || mode === 'sales';
+      // The add/edit form and the reporting panels are mutually exclusive.
+      const reporting = mode === 'insights' || mode === 'sales' || mode === 'discounts';
       formCard.style.display = reporting ? 'none' : '';
       insights.style.display = mode === 'insights' ? '' : 'none';
       sales.style.display = mode === 'sales' ? '' : 'none';
+      discounts.style.display = mode === 'discounts' ? '' : 'none';
 
       if (mode === 'insights') {
         document.getElementById('page-heading').textContent = 'Most viewed';
@@ -826,6 +890,14 @@
         document.getElementById('page-intro').textContent = 'What has sold, when, and what is still waiting for a buyer.';
         picker.style.display = 'none';
         loadSales();
+        return;
+      }
+
+      if (mode === 'discounts') {
+        document.getElementById('page-heading').textContent = 'Discounts';
+        document.getElementById('page-intro').textContent = 'Promo codes shoppers can enter at checkout.';
+        picker.style.display = 'none';
+        loadPromos();
         return;
       }
 
@@ -1213,6 +1285,134 @@
           repeatedly is usually saying something about its price or the postage.
         </p>`;
     }
+
+    // ── Discounts (promo codes) ───────────────────────────────────
+    // Codes live in Stripe, not here. This screen creates and lists them; the
+    // shopper types one into Stripe's checkout page and Stripe does the
+    // validating, discounting and counting — so nothing on our side has to be
+    // trusted with a price.
+    async function promoApi(payload) {
+      const pw = sessionStorage.getItem(PW_KEY);
+      if (!pw) throw new Error('Please log in again.');
+      const res = await fetch('/api/promos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.assign({ password: pw }, payload)),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Stripe rejected that.');
+      return data;
+    }
+
+    function setPromoStatus(kind, msg) {
+      const el = document.getElementById('promo-status');
+      el.className = kind === 'error' ? 'featured-note full' : 'featured-note ok';
+      el.textContent = msg || '';
+    }
+
+    function renderPromos(promos) {
+      const list = document.getElementById('promo-list');
+      if (!promos.length) {
+        list.innerHTML = '<p class="sales-note" style="border:0;padding:0;margin:0;">No codes yet.</p>';
+        return;
+      }
+      list.innerHTML = promos.map(p => {
+        const expired = p.expiresAt && p.expiresAt < Date.now();
+        const usedUp = p.maxRedemptions && p.redeemed >= p.maxRedemptions;
+        const live = p.active && !expired && !usedUp;
+        const bits = [];
+        if (p.percent !== null) bits.push(`${p.percent}% off`);
+        bits.push(p.maxRedemptions ? `${p.redeemed}/${p.maxRedemptions} used` : `${p.redeemed} used`);
+        if (p.expiresAt) {
+          bits.push(`${expired ? 'expired' : 'expires'} ` + new Date(p.expiresAt).toLocaleDateString('en-GB', {
+            timeZone: 'Europe/Dublin', day: 'numeric', month: 'short'
+          }));
+        }
+        const why = !p.active ? 'Off' : expired ? 'Expired' : usedUp ? 'Used up' : 'Live';
+        return `
+        <div class="insights-row${live ? '' : ' promo-row-off'}">
+          <span class="insights-name promo-code-cell">${p.code}</span>
+          <span class="promo-pill${live ? '' : ' off'}">${why}</span>
+          <span class="insights-views">${bits.join(' · ')}</span>
+          ${expired || usedUp ? '' : `<button class="btn-promo-toggle" data-id="${p.id}" data-active="${p.active}">${p.active ? 'Switch off' : 'Switch on'}</button>`}
+        </div>`;
+      }).join('');
+
+      list.querySelectorAll('.btn-promo-toggle').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const turningOff = btn.dataset.active === 'true';
+          btn.disabled = true;
+          btn.textContent = '…';
+          try {
+            await promoApi({ action: turningOff ? 'deactivate' : 'activate', id: btn.dataset.id });
+            await loadPromos();
+          } catch (e) {
+            setPromoStatus('error', e.message);
+            btn.disabled = false;
+            btn.textContent = turningOff ? 'Switch off' : 'Switch on';
+          }
+        });
+      });
+    }
+
+    async function loadPromos() {
+      const list = document.getElementById('promo-list');
+      list.innerHTML = '<p class="sales-note" style="border:0;padding:0;margin:0;">Loading…</p>';
+      try {
+        const { promos } = await promoApi({ action: 'list' });
+        renderPromos(promos || []);
+      } catch (e) {
+        list.innerHTML = '';
+        setPromoStatus('error', e.message);
+      }
+    }
+
+    document.getElementById('promo-create-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('promo-create-btn');
+      const code = document.getElementById('f-promo-code').value.trim().toUpperCase();
+      const percent = parseFloat(document.getElementById('f-promo-percent').value);
+      const expiresRaw = document.getElementById('f-promo-expires').value;
+      const maxRaw = document.getElementById('f-promo-max').value.trim();
+
+      if (!code) return setPromoStatus('error', 'Give the code a name, e.g. AUTUMN15.');
+      if (!isFinite(percent) || percent <= 0 || percent > 100) {
+        return setPromoStatus('error', 'Enter a discount between 1% and 100%.');
+      }
+
+      // The expiry picker is Irish time, same as the drop scheduler.
+      let expiresAt = null;
+      if (expiresRaw) {
+        const m = expiresRaw.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+        if (m) {
+          const [, y, mo, d, h, mi] = m.map(Number);
+          const naive = Date.UTC(y, mo - 1, d, h, mi);
+          let ts = naive - dublinOffsetMinutes(naive) * 60000;
+          expiresAt = naive - dublinOffsetMinutes(ts) * 60000;
+        }
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Creating…';
+      setPromoStatus('ok', '');
+      try {
+        const { promo } = await promoApi({
+          action: 'create',
+          code,
+          percent,
+          expiresAt,
+          maxRedemptions: maxRaw ? Number(maxRaw) : null,
+        });
+        setPromoStatus('ok', `✓ ${promo.code} created — ${promo.percent}% off. Shoppers can enter it at checkout now.`);
+        ['f-promo-code', 'f-promo-percent', 'f-promo-expires', 'f-promo-max'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        await loadPromos();
+      } catch (e) {
+        setPromoStatus('error', e.message);
+      }
+      btn.disabled = false;
+      btn.textContent = 'Create code';
+    });
 
     // ── Product picker (edit mode) ────────────────────────────────
     async function loadProductPicker() {

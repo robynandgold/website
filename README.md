@@ -119,6 +119,13 @@ commit and push. The product will:
 
 Set `"featured": true`. The homepage displays the first 3 featured products.
 
+### Creating a promo code
+
+**Discounts** tab → code, percentage, optional expiry (Irish time) and optional
+maximum uses. The code lives in Stripe, and shoppers enter it on the payment
+page; Stripe checks it, applies the discount and counts the uses. Switching a
+code off stops it working immediately. Nothing on the site needs republishing.
+
 ### Recording what a piece cost you
 
 Fill in **What you paid** on the admin page. It's saved to the Worker's

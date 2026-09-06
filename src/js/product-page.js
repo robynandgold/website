@@ -289,13 +289,73 @@
     } catch (e) { /* analytics must never break the page */ }
   }
 
+  // ---- Sale ---------------------------------------------------------------
+  // The page is generated with the full price baked in, because a sale starts
+  // and ends on a clock rather than at build time. When one is running we
+  // rewrite the visible prices here — and the JSON-LD offer with them, so a
+  // crawler that runs JavaScript doesn't see a price that disagrees with the
+  // page. checkout.js applies the same reduction to what Stripe charges.
+  async function applySale() {
+    let sale;
+    try {
+      const res = await fetch('/data/sale.json', { cache: 'no-store' });
+      sale = res.ok ? await res.json() : null;
+    } catch (e) { return; }
+    if (!sale) return;
+
+    const percent = Number(sale.percent);
+    if (!isFinite(percent) || percent <= 0 || percent >= 100) return;
+    const now = Date.now();
+    if (sale.startsAt && !isNaN(Date.parse(sale.startsAt)) && Date.parse(sale.startsAt) > now) return;
+    if (sale.endsAt && !isNaN(Date.parse(sale.endsAt)) && Date.parse(sale.endsAt) <= now) return;
+
+    const full = Number(currentProduct.price) || 0;
+    const reduced = Math.round(full * (1 - percent / 100));
+    if (!(reduced < full)) return;
+
+    const currency = currentProduct.currency || 'EUR';
+    const was = `<span class="price-was">${formatPrice(full, currency)}</span>`;
+    const nowMarkup = `<span class="price-now">${formatPrice(reduced, currency)}</span>`;
+
+    const priceEl = document.querySelector('.product-detail-price');
+    if (priceEl) priceEl.innerHTML = `${was} ${nowMarkup}`;
+    const psbPrice = document.getElementById('psb-price');
+    if (psbPrice) psbPrice.innerHTML = nowMarkup;
+
+    // Keep the piece's own data in step, so anything added to the cart from
+    // this page carries the sale price rather than the printed one.
+    currentProduct.price = reduced;
+    currentProduct.fullPrice = full;
+
+    document.querySelectorAll('script[type="application/ld+json"]').forEach(el => {
+      try {
+        const ld = JSON.parse(el.textContent);
+        if (ld && ld['@type'] === 'Product' && ld.offers) {
+          ld.offers.price = reduced;
+          el.textContent = JSON.stringify(ld);
+        }
+      } catch (e) { /* leave malformed blocks alone */ }
+    });
+
+    if (!document.querySelector('.sale-banner')) {
+      const banner = document.createElement('div');
+      banner.className = 'sale-banner';
+      banner.innerHTML = `${String(sale.label || 'Sale').trim()} — <strong>${percent}% off</strong> everything`;
+      document.body.insertBefore(banner, document.body.firstChild);
+    }
+  }
+
   function init() {
     const yearEl = document.getElementById('year');
     if (yearEl) yearEl.textContent = new Date().getFullYear();
     setupCarousel();
     applyDropGate();
-    setupAddToCart();
-    setupStickyBar();
+    // Prices are adjusted before the cart buttons are wired, so a piece added
+    // to the basket carries the sale price from the first click.
+    applySale().finally(() => {
+      setupAddToCart();
+      setupStickyBar();
+    });
     renderRelated();
     recordView();
   }

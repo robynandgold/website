@@ -117,6 +117,22 @@
   <script src="../js/cart.js"></script>
   <script>
     let allProducts = [];
+    let currentSale = null;
+
+    // The sale (if any) is needed before the first render, so prices never
+    // flash at full price and then drop.
+    async function ensureSale() {
+      if (currentSale) return currentSale;
+      if (window.ProductsAPI && window.ProductsAPI.loadSale) {
+        currentSale = await window.ProductsAPI.loadSale();
+      } else {
+        try {
+          const r = await fetch('/data/sale.json', { cache: 'no-store' });
+          currentSale = r.ok ? await r.json() : {};
+        } catch (e) { currentSale = {}; }
+      }
+      return currentSale;
+    }
 
     // A piece is shown when it isn't sold and any scheduled GMT drop has passed.
     function isLive(product) {
@@ -136,6 +152,7 @@
       // First try to load products directly without waiting for ProductsAPI
       try {
         console.log('Trying direct fetch of products...');
+        await ensureSale();
         const response = await fetch('../data/products.json', { cache: 'no-store' });
         console.log('Direct fetch response:', response.status, response.ok);
         
@@ -172,7 +189,8 @@
       }
       
       console.log('ProductsAPI is available, calling getAllProducts()');
-      
+
+      await ensureSale();
       try {
         allProducts = await window.ProductsAPI.getAllProducts();
         console.log('Products loaded successfully:', allProducts.length, allProducts);
@@ -207,8 +225,9 @@
       countEl.textContent = `Showing ${products.length} ${products.length === 1 ? 'piece' : 'pieces'}`;
       
       grid.innerHTML = products.map(product => {
-        const price = window.ProductsAPI?.formatPrice
-          ? window.ProductsAPI.formatPrice(product.price, product.currency)
+        // Shows the sale price with the old one struck through when a sale is on.
+        const price = window.ProductsAPI?.priceMarkup
+          ? window.ProductsAPI.priceMarkup(product, currentSale)
           : `€${product.price}`;
 
         const productLink = `product/${product.slug}.html`;

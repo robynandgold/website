@@ -253,6 +253,8 @@
         ? window.ProductsAPI.isKeepsake(p)
         : p.keepsake === true;
 
+      const sale = window.ProductsAPI?.loadSale ? await window.ProductsAPI.loadSale() : null;
+
       const keepsakes = products
         .filter(p => isKeepsake(p) && isLive(p))
         .sort((a, b) => b.price - a.price);
@@ -264,8 +266,8 @@
       countEl.textContent = `Showing ${keepsakes.length} ${keepsakes.length === 1 ? 'piece' : 'pieces'}`;
 
       grid.innerHTML = keepsakes.map(product => {
-        const price = window.ProductsAPI?.formatPrice
-          ? window.ProductsAPI.formatPrice(product.price, product.currency)
+        const price = window.ProductsAPI?.priceMarkup
+          ? window.ProductsAPI.priceMarkup(product, sale)
           : `€${product.price}`;
         const productLink = `product/${product.slug}.html`;
         const video = product.videos?.[0];

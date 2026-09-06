@@ -203,6 +203,7 @@
       try {
         const res = await fetch('data/products.json');
         const products = await res.json();
+        const sale = window.ProductsAPI?.loadSale ? await window.ProductsAPI.loadSale() : null;
         const grid = document.getElementById('featured-grid');
         
         if (!grid || !Array.isArray(products) || products.length === 0) return;
@@ -216,8 +217,8 @@
         );
         
         grid.innerHTML = featuredProducts.slice(0, 3).map(product => {
-          const price = (window?.ProductsAPI?.formatPrice)
-            ? window.ProductsAPI.formatPrice(product.price, product.currency)
+          const price = (window?.ProductsAPI?.priceMarkup)
+            ? window.ProductsAPI.priceMarkup(product, sale)
             : `${product.currency || '€'}${product.price}`;
           const slug = product.slug || product.id;
           const video = product.videos?.[0];

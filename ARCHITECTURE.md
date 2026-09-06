@@ -81,6 +81,16 @@ compare; `/api/view` is public and writes nothing but a daily tally.
   GitHub token against GitHub before handing it out** — including a Git
   Data API probe, because fine-grained tokens pass basic checks but fail
   large-file uploads. Returns precise, human-readable failure reasons.
+- **`/api/promos`** (`promos.js`) — creates, lists and switches off **Stripe
+  promotion codes** from the admin page. Deliberately Stripe-native: the
+  shopper types the code into Stripe's checkout (`allow_promotion_codes` in
+  `checkout.js`) and Stripe validates it, applies the percentage, enforces the
+  expiry and counts redemptions. No discount is ever computed from anything the
+  browser sends, so a bug here cannot mis-charge an order — the worst case is a
+  code that doesn't exist. `allow_promotion_codes` is set to `!saleActive(sale)`,
+  so while a sale is running Stripe doesn't offer the code field at all — a code
+  can never be stacked on an already-reduced price, however checkout is
+  reached.
 - **`/api/abandoned`** (`abandoned.js`) — checkouts started and never paid
   for, listed straight from Stripe (`status: 'expired'`) rather than stored
   here. A session already carries `metadata.product_ids` from `checkout.js`,
@@ -111,6 +121,16 @@ compare; `/api/view` is public and writes nothing but a daily tally.
   It ships as a "coming soon" dictionary card and swaps itself for the grid as
   soon as one live keepsake exists, so the collection launches without a code
   change (and reverts to the card if the last keepsake sells).
+- **Site-wide sale** (optional): `src/data/sale.json` holds a percentage, a
+  label and a start/end instant. Prices are **never rewritten** — the shop, the
+  cart, the product pages and `checkout.js` all apply the percentage at the
+  moment of asking, so the sale begins and ends on the clock with nothing
+  scheduled to run and no way to leave the catalogue in a discounted state.
+  `worker/checkout.js` reads the same file from GitHub and charges the reduced
+  price; if it can't determine whether a sale is running it **fails closed**
+  rather than risk charging full price for something the shop is showing
+  reduced. A missing file is a definite "no sale", not an outage. Sold pieces
+  in the Archive keep their original prices.
 - **Cart** is `localStorage` (`cart.js`) — one of each piece only, since
   everything is one of a kind. Nothing is reserved until payment.
 - **Drops** (optional per piece): a product can carry a `dropAt` (ISO UTC

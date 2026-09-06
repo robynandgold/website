@@ -148,6 +148,34 @@
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
     
+    // The bag stores each piece's price as it was when it went in. That can
+    // go stale — a sale starting or ending, or a price edit — so prices are
+    // re-derived from the live catalogue at render time. Checkout prices from
+    // the catalogue too, so what's shown here is what will be charged.
+    let livePrices = null;
+
+    async function refreshLivePrices() {
+      try {
+        const [pRes, sale] = await Promise.all([
+          fetch('../data/products.json', { cache: 'no-store' }),
+          window.ProductsAPI.loadSale(),
+        ]);
+        if (!pRes.ok) return;
+        const products = await pRes.json();
+        livePrices = {};
+        products.forEach(p => {
+          livePrices[p.id] = window.ProductsAPI.priceNow(p, sale);
+        });
+      } catch (e) { /* fall back to the stored prices */ }
+    }
+
+    // What a bagged piece costs now, falling back to the stored price if the
+    // catalogue can't be read.
+    function currentPriceOf(item) {
+      const live = livePrices && livePrices[item.id];
+      return live ? live : { price: item.price, was: null };
+    }
+
     // Render cart items
     function renderCart() {
       const cart = window.CartAPI.getCart();
@@ -198,7 +226,12 @@
           </div>
           <div class="cart-item-details">
             <h3 class="cart-item-title">${item.name}</h3>
-            <p class="cart-item-price">${window.ProductsAPI.formatPrice(item.price, item.currency)}</p>
+            <p class="cart-item-price">${(() => {
+              const { price, was } = currentPriceOf(item);
+              const now = window.ProductsAPI.formatPrice(price, item.currency);
+              return was === null ? now
+                : `<span class="price-was">${window.ProductsAPI.formatPrice(was, item.currency)}</span> <span class="price-now">${now}</span>`;
+            })()}</p>
           </div>
           <button class="cart-item-remove" data-id="${item.id}" aria-label="Remove ${item.name} from cart">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -209,7 +242,7 @@
       `).join('');
       
       // Update subtotal (desktop summary + sticky mobile bar)
-      const total = window.CartAPI.getCartTotal();
+      const total = cart.reduce((sum, item) => sum + currentPriceOf(item).price, 0);
       const formatted = window.ProductsAPI.formatPrice(total, 'EUR');
       subtotalEl.textContent = formatted;
       mcbSubtotal.textContent = formatted;
@@ -236,7 +269,12 @@
     window.addEventListener('cartUpdated', renderCart);
     
     // Initial render
-    document.addEventListener('DOMContentLoaded', renderCart);
+    // Render immediately from the stored prices so the bag isn't blank, then
+    // again once the live catalogue and any sale have been read.
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCart();
+      refreshLivePrices().then(renderCart);
+    });
   </script>
 </body>
 </html>

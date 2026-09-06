@@ -205,6 +205,34 @@ a {
   white-space: nowrap;
 }
 
+/* Sale pricing — the old price struck through beside the new one */
+.price-was {
+  text-decoration: line-through;
+  color: var(--muted);
+  font-weight: 400;
+  margin-right: 0.35rem;
+}
+
+.price-now {
+  color: var(--accent);
+}
+
+/* A quiet band announcing a running sale, above the header */
+.sale-banner {
+  background: var(--accent);
+  color: #f7f3ec;
+  text-align: center;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.55rem 1rem;
+}
+
+.sale-banner strong {
+  font-weight: 600;
+  color: var(--accent-soft);
+}
+
 .nav-link::after {
   content: "";
   position: absolute;

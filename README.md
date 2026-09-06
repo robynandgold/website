@@ -119,6 +119,17 @@ commit and push. The product will:
 
 Set `"featured": true`. The homepage displays the first 3 featured products.
 
+### Running a sale
+
+**Discounts** tab → a percentage, a name shoppers see, an optional start and a
+required end (both Irish time). Every available piece then shows the reduced
+price with the old one struck through, a band appears above the header, and
+checkout charges the reduced price.
+
+The sale stops itself at the end time. No piece's own price is changed, so
+there is nothing to undo and no risk of prices staying low — "End it now" just
+clears the setting early.
+
 ### Creating a promo code
 
 **Discounts** tab → code, percentage, optional expiry (Irish time) and optional

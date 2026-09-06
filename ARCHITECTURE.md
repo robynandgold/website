@@ -118,6 +118,16 @@ compare; `/api/view` is public and writes nothing but a daily tally.
   It ships as a "coming soon" dictionary card and swaps itself for the grid as
   soon as one live keepsake exists, so the collection launches without a code
   change (and reverts to the card if the last keepsake sells).
+- **Site-wide sale** (optional): `src/data/sale.json` holds a percentage, a
+  label and a start/end instant. Prices are **never rewritten** — the shop, the
+  cart, the product pages and `checkout.js` all apply the percentage at the
+  moment of asking, so the sale begins and ends on the clock with nothing
+  scheduled to run and no way to leave the catalogue in a discounted state.
+  `worker/checkout.js` reads the same file from GitHub and charges the reduced
+  price; if it can't determine whether a sale is running it **fails closed**
+  rather than risk charging full price for something the shop is showing
+  reduced. A missing file is a definite "no sale", not an outage. Sold pieces
+  in the Archive keep their original prices.
 - **Cart** is `localStorage` (`cart.js`) — one of each piece only, since
   everything is one of a kind. Nothing is reserved until payment.
 - **Drops** (optional per piece): a product can carry a `dropAt` (ISO UTC

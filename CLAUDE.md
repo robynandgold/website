@@ -113,6 +113,13 @@ optional `soldAt`, `dropAt`, `keepsake`.
   while no live keepsake exists and swaps itself for the grid when one does,
   so launching it needs no code change.
 
+`src/data/sale.json` sits alongside it: a site-wide percentage with a start and
+end. Prices in the catalogue are never rewritten for a sale — the shop and
+`worker/checkout.js` both apply the percentage at render/charge time, so it
+ends by itself. If you change one side of that calculation, change the other:
+`priceNow()` in `src/js/products.js` and `priceFor()` in `worker/checkout.js`
+must agree, or the till and the shelf disagree.
+
 Writes come from three places — the admin page, the Stripe webhook (marking
 sold), and hand edits. Keep the shape identical across all three.
 

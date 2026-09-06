@@ -557,7 +557,39 @@
 
         <!-- Discounts -->
         <div id="discounts-panel" style="display:none;">
-          <p class="section-label">Create a promo code</p>
+          <p class="section-label">Site-wide sale</p>
+          <div id="sale-current" class="setup-banner" style="display:none;"></div>
+          <div class="promo-form">
+            <div class="field">
+              <label for="f-sale-percent">Everything reduced by (%)</label>
+              <input type="number" id="f-sale-percent" placeholder="e.g. 20" min="1" max="99" step="1" />
+            </div>
+            <div class="field">
+              <label for="f-sale-label">Name shown to shoppers</label>
+              <input type="text" id="f-sale-label" placeholder="e.g. Autumn sale" maxlength="40" />
+            </div>
+            <div class="field">
+              <label for="f-sale-starts">Starts (Irish time, optional)</label>
+              <input type="datetime-local" id="f-sale-starts" />
+            </div>
+            <div class="field">
+              <label for="f-sale-ends">Ends (Irish time)</label>
+              <input type="datetime-local" id="f-sale-ends" />
+            </div>
+          </div>
+          <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+            <button class="btn btn-primary" id="sale-save-btn" style="width:auto;padding:0.7rem 1.6rem;">Start the sale</button>
+            <button class="btn btn-ghost" id="sale-end-btn" style="width:auto;padding:0.7rem 1.4rem;display:none;">End it now</button>
+          </div>
+          <p class="featured-note ok" id="sale-status" style="margin-top:0.8rem;"></p>
+          <p class="sales-note">
+            Every available piece shows the reduced price with the old one struck through, and the
+            checkout charges the reduced price too. Leave the start blank to begin straight away.
+            The sale stops itself at the end time — nothing needs switching off, and no piece's own
+            price is changed, so prices return to normal by themselves.
+          </p>
+
+          <p class="section-label" style="margin-top:2.4rem;">Create a promo code</p>
           <div class="promo-form">
             <div class="field">
               <label for="f-promo-code">Code</label>
@@ -895,8 +927,9 @@
 
       if (mode === 'discounts') {
         document.getElementById('page-heading').textContent = 'Discounts';
-        document.getElementById('page-intro').textContent = 'Promo codes shoppers can enter at checkout.';
+        document.getElementById('page-intro').textContent = 'A sale across the whole shop, and promo codes shoppers can enter at checkout.';
         picker.style.display = 'none';
+        loadSaleConfig();
         loadPromos();
         return;
       }
@@ -1285,6 +1318,159 @@
           repeatedly is usually saying something about its price or the postage.
         </p>`;
     }
+
+    // ── Site-wide sale ────────────────────────────────────────────
+    // Held in src/data/sale.json, committed like any other catalogue change.
+    // Prices themselves are never rewritten: the shop and the Worker both
+    // apply the percentage at the moment of asking, so the sale ends on its
+    // own at the end time with nothing scheduled to run.
+    const SALE_PATH = 'src/data/sale.json';
+
+    function irishInputToISO(value) {
+      const m = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+      if (!m) return '';
+      const [, y, mo, d, h, mi] = m.map(Number);
+      const naive = Date.UTC(y, mo - 1, d, h, mi);
+      let ts = naive - dublinOffsetMinutes(naive) * 60000;
+      ts = naive - dublinOffsetMinutes(ts) * 60000;
+      return new Date(ts).toISOString();
+    }
+
+    function isoToIrishInput(iso) {
+      const t = Date.parse(iso);
+      if (isNaN(t)) return '';
+      const local = new Date(t + dublinOffsetMinutes(t) * 60000);
+      const p = n => String(n).padStart(2, '0');
+      return `${local.getUTCFullYear()}-${p(local.getUTCMonth() + 1)}-${p(local.getUTCDate())}T${p(local.getUTCHours())}:${p(local.getUTCMinutes())}`;
+    }
+
+    function saleIsRunning(sale, now = Date.now()) {
+      if (!sale) return false;
+      const percent = Number(sale.percent);
+      if (!isFinite(percent) || percent <= 0 || percent >= 100) return false;
+      if (sale.startsAt && Date.parse(sale.startsAt) > now) return false;
+      if (sale.endsAt && Date.parse(sale.endsAt) <= now) return false;
+      return true;
+    }
+
+    function setSaleStatus(kind, msg) {
+      const el = document.getElementById('sale-status');
+      el.className = kind === 'error' ? 'featured-note full' : 'featured-note ok';
+      el.textContent = msg || '';
+    }
+
+    async function loadSaleConfig() {
+      const banner = document.getElementById('sale-current');
+      const endBtn = document.getElementById('sale-end-btn');
+      const saveBtn = document.getElementById('sale-save-btn');
+      let sale = {};
+      try {
+        const res = await fetch('/data/sale.json', { cache: 'no-store' });
+        if (res.ok) sale = await res.json();
+      } catch (e) { /* treated as no sale */ }
+
+      const running = saleIsRunning(sale);
+      const scheduled = !running && sale.startsAt && Date.parse(sale.startsAt) > Date.now()
+        && Number(sale.percent) > 0
+        && (!sale.endsAt || Date.parse(sale.endsAt) > Date.now());
+
+      document.getElementById('f-sale-percent').value = (running || scheduled) ? sale.percent : '';
+      document.getElementById('f-sale-label').value = (running || scheduled) ? (sale.label || '') : '';
+      document.getElementById('f-sale-starts').value = (running || scheduled) && sale.startsAt ? isoToIrishInput(sale.startsAt) : '';
+      document.getElementById('f-sale-ends').value = (running || scheduled) && sale.endsAt ? isoToIrishInput(sale.endsAt) : '';
+
+      const when = iso => new Date(iso).toLocaleString('en-GB', {
+        timeZone: 'Europe/Dublin', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+      });
+      if (running) {
+        banner.style.display = '';
+        banner.innerHTML = `<p><strong>${sale.label || 'Sale'} is running</strong> — ${sale.percent}% off everything${sale.endsAt ? `, until ${when(sale.endsAt)} Irish time` : ', with no end set'}.</p>`;
+        endBtn.style.display = '';
+        saveBtn.textContent = 'Update the sale';
+      } else if (scheduled) {
+        banner.style.display = '';
+        banner.innerHTML = `<p><strong>${sale.label || 'Sale'} is scheduled</strong> — ${sale.percent}% off, starting ${when(sale.startsAt)} Irish time.</p>`;
+        endBtn.style.display = '';
+        saveBtn.textContent = 'Update the sale';
+      } else {
+        banner.style.display = 'none';
+        endBtn.style.display = 'none';
+        saveBtn.textContent = 'Start the sale';
+      }
+      return sale;
+    }
+
+    async function commitSale(sale, message) {
+      const token = await ensureToken();
+      const headers = ghHeaders(token);
+      const url = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${SALE_PATH}`;
+
+      // The file is committed, so it needs the current sha to replace it.
+      let sha;
+      const head = await fetch(url + `?ref=${GH_BRANCH}`, { headers, cache: 'no-store' });
+      if (head.ok) sha = (await head.json()).sha;
+
+      const content = btoa(unescape(encodeURIComponent(JSON.stringify(sale, null, 2) + '\n')));
+      const res = await fetch(url, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ message, content, branch: GH_BRANCH, ...(sha ? { sha } : {}) }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Failed to save the sale');
+      }
+    }
+
+    document.getElementById('sale-save-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('sale-save-btn');
+      const percent = parseFloat(document.getElementById('f-sale-percent').value);
+      const label = document.getElementById('f-sale-label').value.trim();
+      const startsRaw = document.getElementById('f-sale-starts').value;
+      const endsRaw = document.getElementById('f-sale-ends').value;
+
+      if (!isFinite(percent) || percent <= 0 || percent >= 100) {
+        return setSaleStatus('error', 'Enter a reduction between 1% and 99%.');
+      }
+      if (!endsRaw) return setSaleStatus('error', 'Set an end date and time, so the sale stops by itself.');
+
+      const startsAt = startsRaw ? irishInputToISO(startsRaw) : '';
+      const endsAt = irishInputToISO(endsRaw);
+      if (!endsAt) return setSaleStatus('error', 'That end date and time could not be read.');
+      if (Date.parse(endsAt) <= Date.now()) return setSaleStatus('error', 'That end time has already passed.');
+      if (startsAt && Date.parse(startsAt) >= Date.parse(endsAt)) {
+        return setSaleStatus('error', 'The sale would end before it started.');
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+      setSaleStatus('ok', '');
+      try {
+        await commitSale({ percent, label, startsAt, endsAt }, `Sale: ${percent}% off${label ? ` (${label})` : ''}`);
+        setSaleStatus('ok', '✓ Saved. Prices update across the site in a minute or two, once it redeploys.');
+        await loadSaleConfig();
+      } catch (e) {
+        setSaleStatus('error', e.message);
+      }
+      btn.disabled = false;
+      await loadSaleConfig();
+    });
+
+    document.getElementById('sale-end-btn').addEventListener('click', async () => {
+      if (!confirm('End the sale now? Prices go back to normal.')) return;
+      const btn = document.getElementById('sale-end-btn');
+      btn.disabled = true;
+      btn.textContent = 'Ending…';
+      try {
+        await commitSale({ percent: 0, label: '', startsAt: '', endsAt: '' }, 'Sale: ended');
+        setSaleStatus('ok', '✓ Sale ended. Full prices return in a minute or two.');
+      } catch (e) {
+        setSaleStatus('error', e.message);
+      }
+      btn.disabled = false;
+      btn.textContent = 'End it now';
+      await loadSaleConfig();
+    });
 
     // ── Discounts (promo codes) ───────────────────────────────────
     // Codes live in Stripe, not here. This screen creates and lists them; the

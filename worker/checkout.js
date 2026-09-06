@@ -11,6 +11,7 @@ import { purchaseAllowed } from './vip.js';
 const GH_OWNER = 'robynandgold';
 const GH_REPO = 'website';
 const PRODUCTS_PATH = 'src/data/products.json';
+const SALE_PATH = 'src/data/sale.json';
 // Branch the live catalogue is read from for the pre-payment availability check.
 const PRODUCTS_REF = 'main';
 
@@ -114,6 +115,77 @@ async function getCurrentProducts(env) {
   return null;
 }
 
+/**
+ * The site-wide sale, read from the same repo as the catalogue so the till and
+ * the shelf can't disagree. Returns:
+ *   an object — the sale config (possibly an inactive one)
+ *   null      — couldn't be determined, so the caller should fail closed
+ * A 404 is a definite "no sale" rather than an outage, so it returns {}.
+ */
+async function getCurrentSale(env) {
+  const token = env.GITHUB_TOKEN;
+
+  if (token) {
+    try {
+      const resp = await fetch(
+        `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${SALE_PATH}?ref=${PRODUCTS_REF}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github.v3+json',
+            'User-Agent': 'robynandgold-checkout',
+          },
+        }
+      );
+      if (resp.ok) {
+        const data = await resp.json();
+        return JSON.parse(Buffer.from(data.content, 'base64').toString('utf8'));
+      }
+      if (resp.status === 404) return {};
+      console.error('[checkout] GitHub sale fetch failed:', resp.status);
+    } catch (err) {
+      console.error('[checkout] GitHub sale fetch error:', err);
+    }
+  }
+
+  try {
+    const resp = await fetch(
+      `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${PRODUCTS_REF}/${SALE_PATH}`,
+      { headers: { 'Cache-Control': 'no-cache' } }
+    );
+    if (resp.ok) return await resp.json();
+    if (resp.status === 404) return {};
+    console.error('[checkout] raw sale fetch failed:', resp.status);
+  } catch (err) {
+    console.error('[checkout] raw sale fetch error:', err);
+  }
+
+  return null;
+}
+
+/** Mirrors priceNow() in src/js/products.js — keep the two in step. */
+function saleActive(sale, now = Date.now()) {
+  if (!sale) return false;
+  const percent = Number(sale.percent);
+  if (!isFinite(percent) || percent <= 0 || percent >= 100) return false;
+  if (sale.startsAt) {
+    const from = Date.parse(sale.startsAt);
+    if (!isNaN(from) && from > now) return false;
+  }
+  if (sale.endsAt) {
+    const until = Date.parse(sale.endsAt);
+    if (!isNaN(until) && until <= now) return false;
+  }
+  return true;
+}
+
+function priceFor(product, sale) {
+  const full = Number(product.price) || 0;
+  if (!saleActive(sale)) return full;
+  const reduced = Math.round(full * (1 - Number(sale.percent) / 100));
+  return reduced < full ? reduced : full;
+}
+
 export async function handleCheckout(request, env) {
   if (!env.STRIPE_SECRET_KEY) {
     console.error('STRIPE_SECRET_KEY is not set in environment variables');
@@ -140,9 +212,17 @@ export async function handleCheckout(request, env) {
     // because every piece is one of a kind. That means the catalogue is
     // required: if it can't be loaded we fail closed rather than fall back
     // to client-supplied prices.
-    const products = await getCurrentProducts(env);
+    const [products, sale] = await Promise.all([getCurrentProducts(env), getCurrentSale(env)]);
     if (!products) {
       console.error('[checkout] Could not load catalogue; refusing checkout (fail closed)');
+      return json({ error: 'Checkout is temporarily unavailable. Please try again in a few minutes.' }, 503);
+    }
+    // Same reasoning as the catalogue: if we can't tell whether a sale is
+    // running, we could charge full price for something the shop is showing
+    // reduced. Refuse rather than overcharge. (A missing file is a definite
+    // "no sale" and comes back as {}, so this only trips on a real outage.)
+    if (!sale) {
+      console.error('[checkout] Could not load sale config; refusing checkout (fail closed)');
       return json({ error: 'Checkout is temporarily unavailable. Please try again in a few minutes.' }, 503);
     }
 
@@ -171,7 +251,9 @@ export async function handleCheckout(request, env) {
             description: product.description || undefined,
             metadata: { product_id: product.id },
           },
-          unit_amount: Math.round(product.price * 100),
+          // Priced from the catalogue, reduced by any running sale — never
+          // from anything the browser sent.
+          unit_amount: Math.round(priceFor(product, sale) * 100),
         },
         quantity: 1,
       });
@@ -208,6 +290,7 @@ export async function handleCheckout(request, env) {
       cancel_url: cancelUrl || `${env.SITE_URL}/pages/cart.html`,
       metadata: {
         product_ids: items.map((item) => item.id).join(','),
+        ...(saleActive(sale) ? { sale_percent: String(sale.percent) } : {}),
       },
     });
 

@@ -558,7 +558,7 @@ function shopItemListJsonLd(live) {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     '@id': `${SITE}/pages/shop.html`,
-    name: 'Shop Vintage Gold Rings',
+    name: 'Vintage & Antique Diamond Rings',
     url: `${SITE}/pages/shop.html`,
     isPartOf: { '@type': 'WebSite', name: 'Robyn & Gold', url: SITE },
     mainEntity: {

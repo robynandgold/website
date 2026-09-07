@@ -231,9 +231,14 @@
       if (res.ok) products = await res.json();
     } catch (e) { return; }
 
-    const others = products
-      .filter(p => p.slug !== currentProduct.slug && p.available !== false && !isScheduled(p))
-      .slice(0, 3);
+    // Same category first, then anything else live. Mirrors relatedTo() in
+    // scripts/build.js so this matches the links already in the markup.
+    const pool = products
+      .filter(p => p.slug !== currentProduct.slug && p.available !== false && !isScheduled(p));
+    const others = [
+      ...pool.filter(p => p.category === currentProduct.category),
+      ...pool.filter(p => p.category !== currentProduct.category)
+    ].slice(0, 3);
 
     if (others.length === 0) { section.hidden = true; return; }
 

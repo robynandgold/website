@@ -31,6 +31,18 @@ const SITEMAP_FILE = path.join(SRC, 'sitemap.xml');
 
 const SITE = 'https://robynandgold.com';
 
+// Pages that carry a build-managed <!-- BUILD:name --> region. The grids in
+// these pages are rendered by their own inline JS at runtime; the injected
+// markup is the same list of pieces in plain HTML so that crawlers which don't
+// execute JavaScript (Bingbot, GPTBot, ClaudeBot, PerplexityBot, Applebot)
+// still see real links to every product page. The JS overwrites the region's
+// innerHTML on load, so shoppers get the interactive grid either way.
+const INJECT_PAGES = {
+  shop: path.join(SRC, 'pages', 'shop.html'),
+  archive: path.join(SRC, 'pages', 'archive.html'),
+  index: path.join(SRC, 'index.html')
+};
+
 // --- helpers ----------------------------------------------------------------
 
 function escapeHtml(str) {
@@ -76,6 +88,68 @@ function priceValidUntil() {
   return d.toISOString().slice(0, 10);
 }
 
+// A piece is publicly visible once any scheduled drop has passed. Mirrors
+// isPubliclyLive() in src/js/products.js — keep the two in step.
+function isPubliclyLive(product) {
+  if (!product.dropAt) return true;
+  const t = Date.parse(product.dropAt);
+  return isNaN(t) || t <= Date.now();
+}
+
+// Several pieces legitimately share a name ("18ct Yellow Gold Diamond Five
+// Stone Ring" covers three). Identical <title> tags make them compete with
+// each other, so a repeated name is qualified with its UK ring size, which is
+// what actually distinguishes them to a shopper.
+function ukSize(size) {
+  const m = String(size || '').match(/UK\s*[^/·|,]+/i);
+  return m ? m[0].replace(/\s+/g, ' ').trim() : '';
+}
+
+function buildTitleSuffixes(products) {
+  const counts = new Map();
+  for (const p of products) counts.set(p.name, (counts.get(p.name) || 0) + 1);
+
+  const suffixes = new Map();
+  for (const p of products) {
+    if (counts.get(p.name) > 1) {
+      const size = ukSize(p.size);
+      if (size) suffixes.set(p.slug, `, Size ${size}`);
+    }
+  }
+  return suffixes;
+}
+
+// --- shared product-card markup --------------------------------------------
+
+// Matches the card the page's own JS renders, so the pre-rendered and
+// hydrated versions look the same. `linkPrefix` differs per page because the
+// nav hrefs are relative: '' on a product page, 'product/' under src/pages/,
+// 'pages/product/' from the homepage.
+function cardMarkup(product, linkPrefix) {
+  const isSold = product.available === false;
+  const price = formatPrice(product.price, product.currency);
+  const image = (product.images || [])[0];
+  const media = image
+    ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(product.name)}" class="product-card-image" width="600" height="600" loading="lazy" />`
+    : '';
+
+  return `
+        <article class="product-card${isSold ? ' is-sold' : ''}">${isSold ? '\n          <span class="sold-badge">Sold</span>' : ''}
+          <a class="product-card-link-wrap" href="${linkPrefix}${escapeHtml(product.slug)}.html">
+            ${media}
+            <div class="product-card-body">
+              <h3 class="product-card-title">${escapeHtml(product.name)}</h3>
+              <p class="product-card-price">${price}</p>
+              <span class="product-card-link">View details</span>
+            </div>
+          </a>
+        </article>`;
+}
+
+function gridMarkup(products, linkPrefix) {
+  return products.map(p => cardMarkup(p, linkPrefix)).join('');
+}
+
 // --- per-product structured data -------------------------------------------
 
 function productJsonLd(product, url) {
@@ -98,6 +172,20 @@ function productJsonLd(product, url) {
       merchantReturnDays: 14,
       returnMethod: 'https://schema.org/ReturnByMail',
       returnFees: 'https://schema.org/ReturnShippingFees'
+    },
+    // Google's product rich results pair the return policy with a shipping
+    // block; without one the offer is flagged as incomplete in Search Console.
+    shippingDetails: {
+      '@type': 'OfferShippingDetails',
+      shippingDestination: {
+        '@type': 'DefinedRegion',
+        name: 'Worldwide'
+      },
+      deliveryTime: {
+        '@type': 'ShippingDeliveryTime',
+        handlingTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 3, unitCode: 'DAY' },
+        transitTime: { '@type': 'QuantitativeValue', minValue: 2, maxValue: 10, unitCode: 'DAY' }
+      }
     }
   };
 
@@ -238,9 +326,22 @@ function stickyBarMarkup(product) {
 
 // --- full page template -----------------------------------------------------
 
-function renderPage(product) {
+// Three other pieces to link to from the bottom of a product page: same
+// category first, then anything else live. Mirrors relatedTo() in
+// src/js/product-page.js so the pre-rendered links and the hydrated ones
+// agree.
+function relatedTo(product, products) {
+  const pool = products.filter(p =>
+    p.slug && p.slug !== product.slug && p.available !== false && isPubliclyLive(p)
+  );
+  const sameCategory = pool.filter(p => p.category === product.category);
+  const rest = pool.filter(p => p.category !== product.category);
+  return [...sameCategory, ...rest].slice(0, 3);
+}
+
+function renderPage(product, { titleSuffix = '', related = [] } = {}) {
   const url = `${SITE}/pages/product/${product.slug}.html`;
-  const title = `${product.name} | Robyn & Gold`;
+  const title = `${product.name}${titleSuffix} | Robyn & Gold`;
   const description = metaDescription(product);
   const image = (product.images && product.images[0]) ? SITE + product.images[0] : `${SITE}/images/homepage.png`;
   const availability = product.available === false ? 'oldsold' : 'instock';
@@ -261,6 +362,7 @@ function renderPage(product) {
   <!-- Open Graph -->
   <meta property="og:type" content="product" />
   <meta property="og:site_name" content="Robyn &amp; Gold" />
+  <meta property="og:locale" content="en_IE" />
   <meta property="og:title" content="${escapeHtml(title)}" />
   <meta property="og:description" content="${escapeHtml(description)}" />
   <meta property="og:image" content="${escapeHtml(image)}" />
@@ -341,9 +443,10 @@ ${carouselMarkup(product)}
 ${infoMarkup(product)}
         </div>
 
-        <div class="related-section" id="related-section" hidden>
+        <div class="related-section" id="related-section"${related.length ? '' : ' hidden'}>
           <h2 class="related-title">You might also like</h2>
-          <div class="product-grid" id="related-grid"></div>
+          <div class="product-grid" id="related-grid">${gridMarkup(related, '')}
+          </div>
         </div>
       </div>
     </section>
@@ -426,6 +529,70 @@ function renderSitemap(products) {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n${urls}\n\n</urlset>\n`;
 }
 
+// --- build-managed regions in the hand-written pages -------------------------
+
+// Replaces everything between <!-- BUILD:name --> and <!-- /BUILD:name -->.
+// The markers stay in the file, so the region is obvious to anyone editing the
+// page by hand and the rest of the page is left untouched.
+function injectRegion(html, name, body) {
+  const open = `<!-- BUILD:${name} -->`;
+  const close = `<!-- /BUILD:${name} -->`;
+  const start = html.indexOf(open);
+  const end = html.indexOf(close);
+  if (start === -1 || end === -1 || end < start) {
+    throw new Error(`Missing or malformed BUILD:${name} region — expected ${open} … ${close}`);
+  }
+  return html.slice(0, start + open.length) + body + html.slice(end);
+}
+
+function writeRegion(file, name, body) {
+  const html = fs.readFileSync(file, 'utf8');
+  const next = injectRegion(html, name, body);
+  if (next !== html) fs.writeFileSync(file, next);
+}
+
+// The shop's ItemList tells search and answer engines what the collection page
+// actually lists, which a JS-rendered grid can't.
+function shopItemListJsonLd(live) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    '@id': `${SITE}/pages/shop.html`,
+    name: 'Vintage & Antique Diamond Rings',
+    url: `${SITE}/pages/shop.html`,
+    isPartOf: { '@type': 'WebSite', name: 'Robyn & Gold', url: SITE },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: live.length,
+      itemListElement: live.map((p, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: p.name,
+        url: `${SITE}/pages/product/${p.slug}.html`
+      }))
+    }
+  };
+}
+
+function injectPages(products) {
+  const live = products.filter(p => p.slug && p.available !== false && isPubliclyLive(p));
+  const sold = products
+    .filter(p => p.slug && p.available === false)
+    .sort((a, b) => new Date(b.soldAt || b.createdAt || 0) - new Date(a.soldAt || a.createdAt || 0));
+  const featured = live.filter(p => p.featured).slice(0, 3);
+
+  writeRegion(INJECT_PAGES.shop, 'shop-grid', gridMarkup(live, 'product/') + '\n          ');
+  writeRegion(
+    INJECT_PAGES.shop,
+    'shop-jsonld',
+    `\n  <script type="application/ld+json">${JSON.stringify(shopItemListJsonLd(live))}</script>\n  `
+  );
+  writeRegion(INJECT_PAGES.archive, 'archive-grid', gridMarkup(sold, 'product/') + '\n        ');
+  writeRegion(INJECT_PAGES.index, 'featured-grid', gridMarkup(featured, 'pages/product/') + '\n        ');
+
+  return { live: live.length, sold: sold.length, featured: featured.length };
+}
+
 // --- run --------------------------------------------------------------------
 
 function main() {
@@ -438,17 +605,28 @@ function main() {
     if (file.endsWith('.html')) fs.unlinkSync(path.join(PRODUCT_DIR, file));
   }
 
+  const titleSuffixes = buildTitleSuffixes(products);
+
   let written = 0;
   for (const product of products) {
     if (!product.slug) continue;
-    fs.writeFileSync(path.join(PRODUCT_DIR, `${product.slug}.html`), renderPage(product));
+    const page = renderPage(product, {
+      titleSuffix: titleSuffixes.get(product.slug) || '',
+      related: relatedTo(product, products)
+    });
+    fs.writeFileSync(path.join(PRODUCT_DIR, `${product.slug}.html`), page);
     written++;
   }
 
   fs.writeFileSync(SITEMAP_FILE, renderSitemap(products));
 
+  const injected = injectPages(products);
+
   console.log(`Generated ${written} product page(s) in src/pages/product/`);
   console.log(`Wrote sitemap with ${products.filter(isSitemapEligible).length} live product URL(s)`);
+  console.log(
+    `Pre-rendered grids: shop ${injected.live}, archive ${injected.sold}, homepage featured ${injected.featured}`
+  );
 }
 
 main();

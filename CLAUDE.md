@@ -35,6 +35,23 @@ Regenerates every `src/pages/product/<slug>.html` and `src/sitemap.xml` from
 `products.json`. Run it after changing `scripts/build.js` or `products.json`,
 and commit the output — the generated pages are tracked.
 
+It also rewrites the **build-managed regions** inside three hand-written pages,
+marked `<!-- BUILD:name --> … <!-- /BUILD:name -->`:
+
+| Page | Region | Contents |
+| --- | --- | --- |
+| `src/pages/shop.html` | `shop-grid` | a card per live piece |
+| `src/pages/shop.html` | `shop-jsonld` | `CollectionPage` + `ItemList` |
+| `src/pages/archive.html` | `archive-grid` | a card per sold piece |
+| `src/index.html` | `featured-grid` | the three featured pieces |
+
+Each page's own inline JS overwrites the grid's `innerHTML` on load, so
+shoppers get the interactive version; the pre-rendered markup exists so
+crawlers that don't execute JavaScript (Bingbot, GPTBot, ClaudeBot,
+PerplexityBot, Applebot) still see a link to every product page. Edit around
+the markers freely, but don't delete them — the build throws if a region is
+missing. Everything outside a marked region is still hand-edited.
+
 Expect noise in the diff: `priceValidUntil` is stamped as today + 1 year, so
 all 57 product pages change on any run. That's normal, and the
 `convert-videos` Action does the same after each publish.

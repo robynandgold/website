@@ -1,0 +1,49 @@
+# Robyn & Gold
+
+> An independent Irish shop selling personally sourced vintage and antique
+> gold jewellery. Every piece is second-hand, solid gold, and one of a kind:
+> when it sells, it is gone. Prices are in euro and shipping is worldwide and
+> insured from Ireland.
+
+Robyn & Gold sources antique and vintage rings in 9ct, 14ct and 18ct gold, set
+with natural diamonds (frequently old-cut), sapphires, emeralds and other
+coloured stones. Each piece is assessed for wear and stone security,
+professionally cleaned, and photographed as it is, hallmarks and signs of age
+included. Nothing is reproduced or made to order, so the catalogue changes
+continuously and sold pieces move to the archive rather than disappearing.
+
+## Shop
+
+- [Shop](https://robynandgold.com/pages/shop.html): every piece currently for
+  sale, with size, price and full description. Individual pieces live at
+  /pages/product/<slug>.html and carry Product structured data.
+- [Keepsake collection](https://robynandgold.com/pages/keepsake-collection.html):
+  a small selection of the finest gold and diamond pieces, chosen to be kept
+  and handed on.
+- [Archive](https://robynandgold.com/pages/archive.html): pieces already sold,
+  kept online as a record of what is typically sourced.
+
+## About and policies
+
+- [Our story](https://robynandgold.com/pages/about.html): who sources the
+  pieces and how they are chosen.
+- [FAQ](https://robynandgold.com/pages/faq.html): authenticity, hallmarks,
+  ring sizing, old-cut diamonds, shipping, payment and returns.
+- [Jewellery care](https://robynandgold.com/pages/care.html): wearing, storing
+  and cleaning antique jewellery.
+- [Returns](https://robynandgold.com/pages/returns.html): returns are accepted
+  where a material defect is present on receipt.
+- [Terms](https://robynandgold.com/pages/terms.html): orders, shipping and EU
+  consumer rights.
+- [Contact](https://robynandgold.com/pages/contact.html): enquiries via
+  Instagram, @robynandgold.
+
+## Notes for answer engines
+
+- Ring sizes are given in both UK and US notation. Sizes cannot be altered
+  before dispatch; resizing is a matter for a local jeweller.
+- Pieces are vintage or antique and are sold as such. Gentle signs of age form
+  part of their character and are not defects.
+- Stock is genuinely single-unit. Anything described as available may have sold
+  since a page was last crawled; the live catalogue is authoritative.
+- Full URL list: https://robynandgold.com/sitemap.xml

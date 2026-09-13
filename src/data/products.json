@@ -1530,5 +1530,28 @@
     "videos": [
       "/images/products/IMG_1681.mp4"
     ]
+  },
+  {
+    "id": "18ct-yellow-and-white-gold-antique-diamond-daisy-ring-bl171",
+    "name": "18ct Yellow and White Gold Antique Diamond Daisy Ring",
+    "slug": "18ct-yellow-and-white-gold-antique-diamond-daisy-ring-bl171",
+    "description": "A captivating antique 18ct gold diamond cluster ring, featuring a central diamond encircled by a generous halo of individually set old-cut diamonds. The beautifully domed, flower-like arrangement creates exceptional presence and a wonderfully lively, characterful sparkle. Finished with a slender yellow-gold shank and contrasting white-metal setting, this is a timeless antique piece with all the romance and individuality of hand-cut diamonds. Stamped “18ct”.\n\n3.4g.",
+    "size": "UK N · US 6.75",
+    "price": 715,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "",
+    "createdAt": "2026-09-13T13:11:16.302Z",
+    "images": [
+      "/images/products/IMG_1669.jpeg",
+      "/images/products/IMG_1667.jpeg",
+      "/images/products/IMG_1665.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_1663.mp4"
+    ]
   }
 ]

@@ -1463,5 +1463,29 @@
     "videos": [
       "/images/products/IMG_1642.mp4"
     ]
+  },
+  {
+    "id": "10ct-white-gold-lab-diamond-tennis-bracelet-t7woq",
+    "name": "10ct White Gold Lab Diamond Tennis Bracelet",
+    "slug": "10ct-white-gold-lab-diamond-tennis-bracelet-t7woq",
+    "description": "A timeless tennis bracelet crafted in polished 10ct white gold, set with an uninterrupted line of brilliant round lab-grown diamonds (fully IGI-certified). Delicate and beautifully fluid on the wrist, the fine claw settings allow each diamond to catch the light for exceptional, continuous sparkle. An effortlessly elegant piece, perfect worn alone or layered into a bracelet stack.\n\n7 inches in length, 3.6g, 2.48ct total weight lab grown diamonds (88 diamonds).",
+    "size": "",
+    "price": 1150,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "bracelets",
+    "available": true,
+    "dropAt": "",
+    "createdAt": "2026-09-13T12:57:15.270Z",
+    "images": [
+      "/images/products/IMG_1654.jpeg",
+      "/images/products/IMG_1653.jpeg",
+      "/images/products/IMG_1651.jpeg",
+      "/images/products/IMG_1652.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_1645.mp4"
+    ]
   }
 ]

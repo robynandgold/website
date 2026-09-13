@@ -1241,11 +1241,11 @@
     "size": "UK Q · US 8.25",
     "price": 995,
     "currency": "EUR",
-    "featured": false,
+    "featured": true,
     "keepsake": false,
     "category": "rings",
     "available": true,
-    "dropAt": "2026-08-23T16:00:00.000Z",
+    "dropAt": "",
     "createdAt": "2026-08-23T12:02:50.676Z",
     "images": [
       "/images/products/IMG_1107.jpeg",

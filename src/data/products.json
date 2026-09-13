@@ -1440,5 +1440,28 @@
     "videos": [
       "/images/products/IMG_1186.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-omega-bracelet-zp2o1",
+    "name": "9ct Yellow Gold Omega Bracelet",
+    "slug": "9ct-yellow-gold-omega-bracelet-zp2o1",
+    "description": "A sleek vintage 9ct yellow-gold Omega bracelet, formed from closely articulated rectangular links that create a smooth, fluid, almost ribbon-like finish. Its softly rounded profile sits beautifully against the wrist, catching the light with every movement. Elegant and understated, it has that wonderfully substantial mid-century look while remaining refined enough for everyday wear.\n\n15.1g, 6.2mm in width, 7.5 inches in length. Stamped “375” for 9ct gold.",
+    "size": "",
+    "price": 1500,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "bracelets",
+    "available": true,
+    "dropAt": "",
+    "createdAt": "2026-09-13T12:50:25.586Z",
+    "images": [
+      "/images/products/IMG_1657.jpeg",
+      "/images/products/IMG_1659.jpeg",
+      "/images/products/IMG_1648.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_1642.mp4"
+    ]
   }
 ]

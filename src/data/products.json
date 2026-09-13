@@ -1506,5 +1506,29 @@
     "videos": [
       "/images/products/IMG_1682.mp4"
     ]
+  },
+  {
+    "id": "18ct-yellow-gold-curved-diamond-band-jwl1n",
+    "name": "18ct Yellow Gold Curved Diamond Band",
+    "slug": "18ct-yellow-gold-curved-diamond-band-jwl1n",
+    "description": "A beautifully elegant curved natural diamond band crafted with a rich 18ct yellow-gold shank and contrasting white-gold setting. A graduated row of round brilliant-cut diamonds is individually claw-set along the gentle curve, allowing the stones to sparkle with minimal visible metal. Designed to nest gracefully alongside another ring, it is equally beautiful worn alone as a delicate statement of understated luxury.\n\n3.4g.",
+    "size": "UK M½ · US 6.5",
+    "price": 850,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "",
+    "createdAt": "2026-09-13T13:06:39.437Z",
+    "images": [
+      "/images/products/IMG_1675.jpeg",
+      "/images/products/IMG_1676.jpeg",
+      "/images/products/IMG_1680.jpeg",
+      "/images/products/IMG_1678.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_1681.mp4"
+    ]
   }
 ]

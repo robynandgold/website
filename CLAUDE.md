@@ -124,7 +124,11 @@ optional `soldAt`, `dropAt`, `keepsake`.
 
 - `available: false` → sold. Page stays live showing SOLD, appears in Archive.
 - `featured: true` → homepage, capped at 3 (enforced in the admin page).
-- `dropAt` → ISO UTC instant; hidden everywhere until it passes.
+- `dropAt` → ISO UTC instant. The piece is shown before it drops with a
+  "Drops <date>" badge and no way to buy it; `previewDrop: false` keeps it
+  hidden until the moment it drops instead. `isListed()` (shown) and
+  `isPubliclyLive()` (buyable) are different questions — don't collapse them,
+  and both are mirrored in `scripts/build.js`.
 - `keepsake: true` → also listed on the Keepsake collection page; the piece
   still appears in the shop. The page shows a "coming soon" dictionary card
   while no live keepsake exists and swaps itself for the grid when one does,

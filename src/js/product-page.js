@@ -231,10 +231,13 @@
       if (res.ok) products = await res.json();
     } catch (e) { return; }
 
-    // Same category first, then anything else live. Mirrors relatedTo() in
-    // scripts/build.js so this matches the links already in the markup.
+    // Same category first, then anything else listed. Mirrors relatedTo() in
+    // scripts/build.js so this matches the links already in the markup. A
+    // piece awaiting its drop belongs here — it's on the shop shelf too — but
+    // one held back with previewDrop: false does not.
     const pool = products
-      .filter(p => p.slug !== currentProduct.slug && p.available !== false && !isScheduled(p));
+      .filter(p => p.slug !== currentProduct.slug && p.available !== false &&
+        (!isScheduled(p) || p.previewDrop !== false));
     const others = [
       ...pool.filter(p => p.category === currentProduct.category),
       ...pool.filter(p => p.category !== currentProduct.category)

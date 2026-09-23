@@ -247,9 +247,11 @@
         if (res.ok) products = await res.json();
       } catch (e) { return; }
 
+      // Listed, not merely buyable: a keepsake with a drop ahead of it is shown
+      // here as a teaser, with its drop date and no way to buy it yet.
       const isLive = p => window.ProductsAPI
-        ? window.ProductsAPI.isPubliclyLive(p)
-        : p.available !== false && !(p.dropAt && Date.parse(p.dropAt) > Date.now());
+        ? window.ProductsAPI.isListed(p)
+        : p.available !== false && !(p.dropAt && Date.parse(p.dropAt) > Date.now() && p.previewDrop === false);
       const isKeepsake = p => window.ProductsAPI
         ? window.ProductsAPI.isKeepsake(p)
         : p.keepsake === true;
@@ -278,8 +280,11 @@
           : image
             ? `<img src="${image}" alt="${product.name}" class="product-card-image" width="600" height="600" loading="lazy" onerror="this.style.display='none'" />`
             : '';
+        const scheduled = window.ProductsAPI?.isScheduled ? window.ProductsAPI.isScheduled(product) : false;
+        const badge = window.ProductsAPI?.dropBadge ? window.ProductsAPI.dropBadge(product) : '';
         return `
-        <article class="product-card">
+        <article class="product-card${scheduled ? ' is-scheduled' : ''}">
+          ${badge}
           <a class="product-card-link-wrap" href="${productLink}">
             ${media}
             <div class="product-card-body">

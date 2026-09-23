@@ -138,12 +138,23 @@ compare; `/api/view` is public and writes nothing but a daily tally.
   shown in **Irish time** — 5pm typed is 5pm in Ireland, summer or winter. The
   offset is looked up from `Europe/Dublin` via `Intl` rather than hardcoded, so
   the October and March clock changes need no attention; only the stored
-  instant is UTC. Until that moment the piece is hidden from the shop,
-  homepage and "you might also like", left out of the sitemap, and its own page
-  shows "Available &lt;date&gt; Irish time" instead of an Add-to-cart button —
-  all enforced client-side against the current time, so it goes live
-  automatically at the drop. No `dropAt` means the piece publishes live
-  immediately; a "Drop now" override clears the schedule.
+  instant is UTC.
+
+  By default a scheduled piece is **shown before it drops**: it appears in the
+  shop, its collection and the homepage with a "Drops &lt;date&gt;" badge, its
+  own page carries "Available &lt;date&gt; Irish time" in place of the
+  Add-to-cart button, and its structured data says `PreOrder` rather than
+  `InStock`. Set `previewDrop: false` (untick *Show it on the site before it
+  drops*) to keep it hidden until the moment it drops instead — then it's out
+  of every listing and the sitemap, as drops used to be.
+
+  Two distinct questions, kept apart in code: `isListed()` decides whether a
+  piece is *shown*, `isPubliclyLive()` whether it can be *bought*. Both are
+  mirrored in `scripts/build.js` for the pre-rendered grids. Visibility is
+  client-side against the current time, so a drop goes live on its own; buying
+  is enforced server-side in `worker/vip.js`, so a previewed piece is genuinely
+  unbuyable early, not merely missing a button.
+
 - **VIP early access**: the admin can copy a `?vip=<token>` link for a
   scheduled piece (token = HMAC of the product id, signed on the Worker with
   `VIP_SECRET` and minted via `/api/vip-link`, password-gated). That link

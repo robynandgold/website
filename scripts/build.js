@@ -88,12 +88,36 @@ function priceValidUntil() {
   return d.toISOString().slice(0, 10);
 }
 
-// A piece is publicly visible once any scheduled drop has passed. Mirrors
+// A piece is buyable once any scheduled drop has passed. Mirrors
 // isPubliclyLive() in src/js/products.js — keep the two in step.
 function isPubliclyLive(product) {
   if (!product.dropAt) return true;
   const t = Date.parse(product.dropAt);
   return isNaN(t) || t <= Date.now();
+}
+
+// Whether a piece appears in listings. Wider than isPubliclyLive: a scheduled
+// piece is shown ahead of its drop as a teaser unless it carries
+// previewDrop: false. Mirrors isListed() in src/js/products.js.
+function isScheduled(product) {
+  if (!product || !product.dropAt) return false;
+  const t = Date.parse(product.dropAt);
+  return !isNaN(t) && t > Date.now();
+}
+
+function isListed(product) {
+  if (product.available === false) return false;
+  if (isScheduled(product)) return product.previewDrop !== false;
+  return true;
+}
+
+// "25 Sept" in Irish time, matching dropLabel() in src/js/products.js.
+function dropLabel(product) {
+  const t = Date.parse(product && product.dropAt);
+  if (isNaN(t)) return '';
+  return new Date(t).toLocaleDateString('en-GB', {
+    timeZone: 'Europe/Dublin', day: 'numeric', month: 'short'
+  });
 }
 
 // Several pieces legitimately share a name ("18ct Yellow Gold Diamond Five
@@ -127,6 +151,7 @@ function buildTitleSuffixes(products) {
 // 'pages/product/' from the homepage.
 function cardMarkup(product, linkPrefix) {
   const isSold = product.available === false;
+  const scheduled = isScheduled(product);
   const price = formatPrice(product.price, product.currency);
   const image = (product.images || [])[0];
   const media = image
@@ -134,7 +159,7 @@ function cardMarkup(product, linkPrefix) {
     : '';
 
   return `
-        <article class="product-card${isSold ? ' is-sold' : ''}">${isSold ? '\n          <span class="sold-badge">Sold</span>' : ''}
+        <article class="product-card${isSold ? ' is-sold' : ''}${scheduled ? ' is-scheduled' : ''}">${isSold ? '\n          <span class="sold-badge">Sold</span>' : ''}${scheduled ? `\n          <span class="drop-badge">Drops ${escapeHtml(dropLabel(product))}</span>` : ''}
           <a class="product-card-link-wrap" href="${linkPrefix}${escapeHtml(product.slug)}.html">
             ${media}
             <div class="product-card-body">
@@ -163,7 +188,13 @@ function productJsonLd(product, url) {
     priceCurrency: product.currency || 'EUR',
     priceValidUntil: priceValidUntil(),
     itemCondition: 'https://schema.org/UsedCondition',
-    availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut',
+    availability: !inStock
+      ? 'https://schema.org/SoldOut'
+      : isScheduled(product)
+        // Visible but not yet buyable — PreOrder is the honest signal, and
+        // stops Search Console flagging a page whose buy button is absent.
+        ? 'https://schema.org/PreOrder'
+        : 'https://schema.org/InStock',
     seller: { '@type': 'Organization', name: 'Robyn & Gold' },
     hasMerchantReturnPolicy: {
       '@type': 'MerchantReturnPolicy',
@@ -332,7 +363,7 @@ function stickyBarMarkup(product) {
 // agree.
 function relatedTo(product, products) {
   const pool = products.filter(p =>
-    p.slug && p.slug !== product.slug && p.available !== false && isPubliclyLive(p)
+    p.slug && p.slug !== product.slug && isListed(p)
   );
   const sameCategory = pool.filter(p => p.category === product.category);
   const rest = pool.filter(p => p.category !== product.category);
@@ -484,16 +515,11 @@ ${stickyBarMarkup(product)}
 
 // --- sitemap ----------------------------------------------------------------
 
-// A product belongs in the sitemap once it's sellable: not sold, and any
-// scheduled drop (dropAt, an ISO UTC instant) has already passed at build
-// time. Scheduled pieces are kept out until a build runs after their drop.
+// A product belongs in the sitemap once its page is a real destination: not
+// sold, and either live or being shown ahead of its drop. A piece held back
+// with previewDrop: false stays out until a build runs after it drops.
 function isSitemapEligible(product) {
-  if (product.available === false) return false;
-  if (product.dropAt) {
-    const t = Date.parse(product.dropAt);
-    if (!isNaN(t) && t > Date.now()) return false;
-  }
-  return true;
+  return isListed(product);
 }
 
 function renderSitemap(products) {
@@ -575,7 +601,7 @@ function shopItemListJsonLd(live) {
 }
 
 function injectPages(products) {
-  const live = products.filter(p => p.slug && p.available !== false && isPubliclyLive(p));
+  const live = products.filter(p => p.slug && isListed(p));
   const sold = products
     .filter(p => p.slug && p.available === false)
     .sort((a, b) => new Date(b.soldAt || b.createdAt || 0) - new Date(a.soldAt || a.createdAt || 0));

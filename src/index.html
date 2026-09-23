@@ -251,7 +251,8 @@
         const featuredProducts = products.filter(product =>
           product.featured === true &&
           product.available === true &&
-          (!product.dropAt || !(Date.parse(product.dropAt) > now))
+          // A scheduled piece is teased here too, badged and unbuyable.
+          (!product.dropAt || !(Date.parse(product.dropAt) > now) || product.previewDrop !== false)
         );
         
         grid.innerHTML = featuredProducts.slice(0, 3).map(product => {
@@ -267,8 +268,12 @@
               ? `<img src="${image}" alt="${product.name}" class="product-card-image" width="600" height="600" loading="lazy" onerror="this.style.display='none'" />`
               : '';
 
+          const scheduled = window.ProductsAPI?.isScheduled ? window.ProductsAPI.isScheduled(product) : false;
+          const badge = window.ProductsAPI?.dropBadge ? window.ProductsAPI.dropBadge(product) : '';
+
           return `
-            <article class="product-card">
+            <article class="product-card${scheduled ? ' is-scheduled' : ''}">
+              ${badge}
               <a class="product-card-link-wrap" href="pages/product/${slug}.html">
                 ${media}
                 <div class="product-card-body">

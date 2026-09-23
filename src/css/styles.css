@@ -205,6 +205,24 @@ a {
   white-space: nowrap;
 }
 
+/* A piece shown ahead of its drop: visible, tagged, and not yet buyable */
+.product-card.is-scheduled { position: relative; }
+
+.drop-badge {
+  position: absolute;
+  top: 0.7rem;
+  left: 0.7rem;
+  z-index: 2;
+  background: var(--accent);
+  color: #f7f3ec;
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.28rem 0.6rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
 /* Sale pricing — the old price struck through beside the new one */
 .price-was {
   text-decoration: line-through;

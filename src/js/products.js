@@ -52,8 +52,8 @@ async function loadProducts() {
 }
 
 /**
- * Whether a product should be shown to shoppers right now.
- * A piece is public when it isn't sold and any scheduled drop (an ISO UTC
+ * Whether a product can be bought right now.
+ * A piece is buyable when it isn't sold and any scheduled drop (an ISO UTC
  * instant in `dropAt`) has already passed. A missing/empty dropAt means it's
  * live immediately.
  */
@@ -64,6 +64,44 @@ function isPubliclyLive(product) {
     if (!isNaN(dropTime) && dropTime > Date.now()) return false;
   }
   return true;
+}
+
+/** A piece whose drop is still ahead of it. */
+function isScheduled(product) {
+  if (!product || !product.dropAt) return false;
+  const t = Date.parse(product.dropAt);
+  return !isNaN(t) && t > Date.now();
+}
+
+/**
+ * Whether a piece appears in the shop, homepage and collection listings.
+ *
+ * Wider than isPubliclyLive: a scheduled piece is shown *before* its drop as a
+ * teaser, carrying a "Drops <date>" badge and no way to buy it. Set
+ * `previewDrop: false` on a piece to keep it hidden until the moment it drops
+ * instead — the absence of the field means preview, since that's the norm.
+ *
+ * Buying is gated separately and server-side (worker/vip.js), so a piece being
+ * visible here never makes it purchasable early.
+ */
+function isListed(product) {
+  if (product.available === false) return false;
+  if (isScheduled(product)) return product.previewDrop !== false;
+  return true;
+}
+
+/** "25 Sept" in Irish time, for the badge on a scheduled piece's card. */
+function dropLabel(product) {
+  const t = Date.parse(product && product.dropAt);
+  if (isNaN(t)) return '';
+  return new Date(t).toLocaleDateString('en-GB', {
+    timeZone: 'Europe/Dublin', day: 'numeric', month: 'short'
+  });
+}
+
+/** Badge markup for a card, or '' for a piece that's simply on sale now. */
+function dropBadge(product) {
+  return isScheduled(product) ? `<span class="drop-badge">Drops ${dropLabel(product)}</span>` : '';
 }
 
 /**
@@ -295,6 +333,10 @@ if (typeof window !== 'undefined') {
     getProductById,
     formatPrice,
     isPubliclyLive,
+    isScheduled,
+    isListed,
+    dropLabel,
+    dropBadge,
     isKeepsake,
     loadSale,
     saleActive,

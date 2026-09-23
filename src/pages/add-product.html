@@ -531,8 +531,12 @@
                 <label for="f-drop-datetime">Drop date &amp; time (Irish time)</label>
                 <input type="datetime-local" id="f-drop-datetime" />
               </div>
+              <label class="toggle-field" style="margin:0.2rem 0 0.9rem;">
+                <input type="checkbox" id="f-drop-preview" checked />
+                Show it on the site before it drops
+              </label>
               <button type="button" class="btn btn-ghost" id="drop-now-btn" style="padding:0.45rem 1rem;font-size:0.8rem;">Drop now — release immediately</button>
-              <p id="drop-hint" style="font-size:0.75rem;color:var(--muted);margin:0.6rem 0 0;">Leave the drop off to publish the piece live straight away. All times are Irish time.</p>
+              <p id="drop-hint" style="font-size:0.75rem;color:var(--muted);margin:0.6rem 0 0;">Leave the drop off to publish the piece live straight away. All times are Irish time. Shown before it drops, the piece appears in the shop and its collection with a &ldquo;Drops&rdquo; tag and no way to buy it; untick to keep it hidden until the moment it drops.</p>
             </div>
           </div>
 
@@ -1795,7 +1799,7 @@
       document.getElementById('f-price').value = product.price || '';
       document.getElementById('f-category').value = product.category || 'rings';
       updateSizeVisibility();
-      setDropValue(product.dropAt || '');
+      setDropValue(product.dropAt || '', product.previewDrop);
       updateShareLinks();
       document.getElementById('f-available').checked = product.available !== false;
       document.getElementById('f-featured').checked = product.featured === true;
@@ -2065,10 +2069,12 @@
     // Load a product's saved drop into the form. Only a *future* drop is still a
     // pending schedule; a past drop means the piece is already live, so show it
     // as unscheduled.
-    function setDropValue(iso) {
+    function setDropValue(iso, previewDrop) {
       const future = iso && !isNaN(Date.parse(iso)) && Date.parse(iso) > Date.now();
       document.getElementById('f-drop-enabled').checked = !!future;
       document.getElementById('f-drop-datetime').value = future ? isoToDropInput(iso) : '';
+      // Absent means show it — that's the norm, and what most drops want.
+      document.getElementById('f-drop-preview').checked = previewDrop !== false;
       updateDropVisibility();
     }
 
@@ -2583,6 +2589,8 @@
           available:   document.getElementById('f-available').checked,
           // Scheduled drop as an ISO UTC instant; '' means live immediately.
           dropAt:      dropInputToISO(),
+          // Whether a scheduled piece is teased on the site before it drops.
+          previewDrop: document.getElementById('f-drop-preview').checked,
           // Date added — used by the shop's "Newest first" sort. For edits this is
           // overwritten with the product's existing value in publishCommit().
           createdAt:   new Date().toISOString(),

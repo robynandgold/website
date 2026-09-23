@@ -536,16 +536,23 @@
       return currentSale;
     }
 
-    // A piece is shown when it isn't sold and any scheduled GMT drop has passed.
+    // A piece is listed when it isn't sold. A scheduled piece is shown ahead
+    // of its drop as a teaser — badged, and with no way to buy until the drop
+    // — unless it's marked previewDrop: false, which keeps it hidden.
     function isLive(product) {
-      if (window.ProductsAPI && window.ProductsAPI.isPubliclyLive) return window.ProductsAPI.isPubliclyLive(product);
+      if (window.ProductsAPI && window.ProductsAPI.isListed) return window.ProductsAPI.isListed(product);
       if (product.available === false) return false;
       if (product.dropAt) {
         const t = Date.parse(product.dropAt);
-        if (!isNaN(t) && t > Date.now()) return false;
+        if (!isNaN(t) && t > Date.now()) return product.previewDrop !== false;
       }
       return true;
     }
+
+    const dropBadgeFor = p =>
+      (window.ProductsAPI && window.ProductsAPI.dropBadge) ? window.ProductsAPI.dropBadge(p) : '';
+    const isScheduledFor = p =>
+      (window.ProductsAPI && window.ProductsAPI.isScheduled) ? window.ProductsAPI.isScheduled(p) : false;
 
     // Load and render products
     async function loadShopProducts() {
@@ -642,7 +649,8 @@
             : '';
 
         return `
-        <article class="product-card">
+        <article class="product-card${isScheduledFor(product) ? ' is-scheduled' : ''}">
+          ${dropBadgeFor(product)}
           <a class="product-card-link-wrap" href="${productLink}">
             ${media}
             <div class="product-card-body">

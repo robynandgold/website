@@ -130,6 +130,17 @@ The sale stops itself at the end time. No piece's own price is changed, so
 there is nothing to undo and no risk of prices staying low — "End it now" just
 clears the setting early.
 
+### Scheduling a drop
+
+Tick **Schedule this piece as a drop** on the admin page and set the date and
+time (Irish time). The piece goes on the site straight away with a
+&ldquo;Drops&rdquo; tag and no way to buy it, and becomes buyable by itself at
+the moment you set — nothing to publish again.
+
+Untick **Show it on the site before it drops** if you'd rather keep it hidden
+until then. Either way you can copy a VIP link from the same screen to let one
+person buy it early.
+
 ### Creating a promo code
 
 **Discounts** tab → code, percentage, optional expiry (Irish time) and optional

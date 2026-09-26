@@ -1,8 +1,8 @@
 # Working on robynandgold.com
 
-Static HTML/CSS/vanilla-JS shop served by one Cloudflare Worker. No framework,
-no bundler, no test suite. The only generated files are the product pages and
-the sitemap. `src/data/products.json` is the single source of truth for the
+Static HTML/CSS/vanilla-JS shop served by one Cloudflare Worker. No framework
+and no bundler. The only generated files are the product pages and the
+sitemap. `src/data/products.json` is the single source of truth for the
 catalogue — every change to it is a commit.
 
 Read `ARCHITECTURE.md` for how the system fits together, `README.md` for
@@ -57,6 +57,37 @@ all 57 product pages change on any run. That's normal, and the
 `convert-videos` Action does the same after each publish.
 
 Nothing else builds. CSS and page HTML are edited directly.
+
+## Tests
+
+```bash
+npm test               # everything, ~60s
+npm run test:unit      # logic, catalogue, security — instant, no browser
+npm run test:integration   # real pages in Chromium
+```
+
+Node's built-in runner; no dependencies. 133 tests in `tests/`:
+
+- **`unit.test.mjs`** — the listed/buyable split, sale pricing, and catalogue
+  integrity (unique slugs, media present on disk, no piece both sold and
+  dropping later, the featured cap).
+- **`security.test.mjs`** — the VIP early-purchase gate, page hygiene
+  (one title, no duplicate ids, canonical-or-noindex), and that every
+  generated product page matches its catalogue entry.
+- **`integration.test.mjs`** — Chromium against a local server: pages load
+  without errors, shop filters and sorting, the cart, drops, sales, navigation
+  consistency, no sideways scroll on a phone, and every sitemap URL resolving.
+
+Run them after touching pricing, drops, the catalogue or `build.js`. Two
+invariants they exist to protect: `priceNow()` in `src/js/products.js` must
+agree with `priceFor()` in `worker/pricing.js`, and `isListed()`/`isScheduled()`
+in `src/js/products.js` must agree with the copies in `scripts/build.js`.
+
+Integration tests need Playwright (global install at
+`/opt/node22/lib/node_modules/playwright`). Without it those tests skip rather
+than fail. The Worker's endpoints are stubbed by the test server, and
+third-party requests (fonts, analytics) are ignored — they're blocked in the
+sandbox and say nothing about the site.
 
 ## Deploy
 
@@ -136,10 +167,11 @@ optional `soldAt`, `dropAt`, `keepsake`.
 
 `src/data/sale.json` sits alongside it: a site-wide percentage with a start and
 end. Prices in the catalogue are never rewritten for a sale — the shop and
-`worker/checkout.js` both apply the percentage at render/charge time, so it
+`worker/pricing.js` both apply the percentage at render/charge time, so it
 ends by itself. If you change one side of that calculation, change the other:
-`priceNow()` in `src/js/products.js` and `priceFor()` in `worker/checkout.js`
-must agree, or the till and the shelf disagree.
+`priceNow()` in `src/js/products.js` and `priceFor()` in `worker/pricing.js`
+must agree, or the till and the shelf disagree. `npm run test:unit` checks
+exactly that against a shared table of cases.
 
 Writes come from three places — the admin page, the Stripe webhook (marking
 sold), and hand edits. Keep the shape identical across all three.

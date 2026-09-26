@@ -655,4 +655,11 @@ function main() {
   );
 }
 
-main();
+// Only build when run directly; `require`d by the tests, which want the
+// predicates above without regenerating every page.
+if (require.main === module) main();
+
+module.exports = {
+  isPubliclyLive, isScheduled, isListed, isSitemapEligible,
+  dropLabel, metaDescription, deriveMaterial, ukSize, relatedTo,
+};

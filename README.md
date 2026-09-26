@@ -63,6 +63,16 @@ Push to `main` — Cloudflare builds and deploys automatically. If Cloudflare's
 build service is having a bad day, run the **"Deploy to Cloudflare (failsafe)"**
 workflow from the repo's GitHub Actions tab.
 
+### 5. Run the tests
+
+```bash
+npm test
+```
+
+133 checks covering the pricing, the catalogue, the early-purchase gate and the
+pages themselves. Worth running before a push that touches anything to do with
+money, drops or the catalogue. Details in `CLAUDE.md`.
+
 ---
 
 ## Managing Products

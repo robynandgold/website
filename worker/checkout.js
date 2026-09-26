@@ -7,6 +7,7 @@
 import Stripe from 'stripe';
 import { Buffer } from 'node:buffer';
 import { purchaseAllowed } from './vip.js';
+import { saleActive, priceFor } from './pricing.js';
 
 const GH_OWNER = 'robynandgold';
 const GH_REPO = 'website';
@@ -161,29 +162,6 @@ async function getCurrentSale(env) {
   }
 
   return null;
-}
-
-/** Mirrors priceNow() in src/js/products.js — keep the two in step. */
-function saleActive(sale, now = Date.now()) {
-  if (!sale) return false;
-  const percent = Number(sale.percent);
-  if (!isFinite(percent) || percent <= 0 || percent >= 100) return false;
-  if (sale.startsAt) {
-    const from = Date.parse(sale.startsAt);
-    if (!isNaN(from) && from > now) return false;
-  }
-  if (sale.endsAt) {
-    const until = Date.parse(sale.endsAt);
-    if (!isNaN(until) && until <= now) return false;
-  }
-  return true;
-}
-
-function priceFor(product, sale) {
-  const full = Number(product.price) || 0;
-  if (!saleActive(sale)) return full;
-  const reduced = Math.round(full * (1 - Number(sale.percent) / 100));
-  return reduced < full ? reduced : full;
 }
 
 export async function handleCheckout(request, env) {

@@ -15,6 +15,7 @@ How robynandgold.com works, end to end. Companion docs: `README.md`
 | Transactional email | **Resend** | Order confirmations + abandoned-checkout recovery, sent as info@robynandgold.com |
 | Inbound email | **Cloudflare Email Routing** | info@robynandgold.com forwards to Gmail; replies sent via Gmail "send as" |
 | Analytics | **Umami** (Umami Cloud) | Cookieless; custom events: Add to cart, Remove from cart, Begin checkout, Purchase |
+| Tests | **Node's built-in runner + Playwright** | 133 unit, security and integration tests in `tests/`; `npm test` |
 | CI / automation | **GitHub Actions** | Media conversion + page generation pipeline, failsafe deploy |
 | Source & catalogue history | **GitHub** (`robynandgold/website`) | Also acts as the "database API" — the Worker and admin page read/write the catalogue through GitHub's API |
 | DNS / domain / email DNS | **Cloudflare** | A/CNAME to the Worker, MX for Email Routing, DKIM for Resend |

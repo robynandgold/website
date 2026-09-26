@@ -495,8 +495,8 @@
             <p class="section-label">Listing options</p>
             <div class="toggle-row">
               <label class="toggle-field">
-                <input type="checkbox" id="f-available" checked />
-                Available for purchase
+                <input type="checkbox" id="f-sold" />
+                Sold &mdash; no longer available
               </label>
               <label class="toggle-field">
                 <input type="checkbox" id="f-featured" />
@@ -507,6 +507,10 @@
                 Keepsake collection
               </label>
             </div>
+            <p class="featured-note full" id="available-drop-note" style="display:none;">
+              This piece has a drop, so don't mark it sold — the drop date is what stops it being
+              bought early. Marking it sold sends it to the Archive.
+            </p>
             <p class="featured-note ok" id="featured-note"></p>
             <p class="featured-note ok" id="keepsake-note"></p>
           </div>
@@ -1801,7 +1805,7 @@
       updateSizeVisibility();
       setDropValue(product.dropAt || '', product.previewDrop);
       updateShareLinks();
-      document.getElementById('f-available').checked = product.available !== false;
+      document.getElementById('f-sold').checked = product.available === false;
       document.getElementById('f-featured').checked = product.featured === true;
       document.getElementById('f-keepsake').checked = product.keepsake === true;
       updateKeepsakeNote();
@@ -2017,6 +2021,10 @@
     function updateDropVisibility() {
       const on = document.getElementById('f-drop-enabled').checked;
       document.getElementById('drop-schedule-row').style.display = on ? '' : 'none';
+      const availNote = document.getElementById('available-drop-note');
+      if (availNote) {
+        availNote.style.display = (on && document.getElementById('f-sold').checked) ? '' : 'none';
+      }
       // "Drop now" only makes sense for pulling an *already-scheduled* piece
       // forward to now — so only show it when editing a piece that currently
       // has a future drop. For a new piece you'd just leave the drop off.
@@ -2079,6 +2087,7 @@
     }
 
     document.getElementById('f-drop-enabled').addEventListener('change', updateDropVisibility);
+    document.getElementById('f-sold').addEventListener('change', updateDropVisibility);
     document.getElementById('drop-now-btn').addEventListener('click', () => {
       // Release right now: drop the schedule so the piece is immediately live.
       document.getElementById('f-drop-enabled').checked = false;
@@ -2243,7 +2252,7 @@
       updateSizeVisibility();
       setDropValue('');
       updateShareLinks();
-      document.getElementById('f-available').checked = true;
+      document.getElementById('f-sold').checked = false;
       document.getElementById('f-featured').checked = false;
       document.getElementById('f-keepsake').checked = false;
       updateKeepsakeNote();
@@ -2539,6 +2548,14 @@
 
       if (!name || !slug) { setStatus('error', 'Please enter at least a name.'); return; }
       if (categoryHasSize() && !document.getElementById('f-size').value) { setStatus('error', 'Please select a ring size.'); return; }
+      // A piece can't be both sold and dropping later. The Sold box stamps
+      // soldAt and sends the piece to the Archive, so paired with a drop it's
+      // always a mistake.
+      if (document.getElementById('f-drop-enabled').checked && document.getElementById('f-sold').checked) {
+        setStatus('error',
+          'Don\'t mark a piece with a drop as sold — that sends it to the Archive. The drop date is what stops anyone buying it before then.');
+        return;
+      }
       if (document.getElementById('f-drop-enabled').checked && !document.getElementById('f-drop-datetime').value) {
         setStatus('error', 'Please set a drop date and time, or turn the drop off / use “Drop now”.');
         return;
@@ -2586,7 +2603,7 @@
           // Keepsake pieces list on the Keepsake collection page, not the shop.
           keepsake:    document.getElementById('f-keepsake').checked,
           category:    document.getElementById('f-category').value,
-          available:   document.getElementById('f-available').checked,
+          available:   !document.getElementById('f-sold').checked,
           // Scheduled drop as an ISO UTC instant; '' means live immediately.
           dropAt:      dropInputToISO(),
           // Whether a scheduled piece is teased on the site before it drops.

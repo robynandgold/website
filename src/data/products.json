@@ -1639,5 +1639,29 @@
     "videos": [
       "/images/products/IMG_2011.mp4"
     ]
+  },
+  {
+    "id": "eos-5w57t",
+    "name": "Eos",
+    "slug": "eos-5w57t",
+    "description": "Goddess of the dawn. \n\nA natural round brilliant cut diamond, approximately 0.40ct, sits in a smooth bezel setting atop a sculptural 18ct yellow gold band. Its sweeping, ridged curves catch the light like the first rays of morning sun. Bold in gold, beautifully easy to wear.\n\nFrench in origin, eagle head hallmark for 18k gold. 3.9g.",
+    "size": "UK P½ · US 8",
+    "price": 1095,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": true,
+    "category": "rings",
+    "available": true,
+    "dropAt": "2026-10-04T16:00:00.000Z",
+    "previewDrop": true,
+    "createdAt": "2026-09-26T16:21:28.550Z",
+    "images": [
+      "/images/products/IMG_2111.jpeg",
+      "/images/products/IMG_2108.jpeg",
+      "/images/products/IMG_2110.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_2018.mp4"
+    ]
   }
 ]

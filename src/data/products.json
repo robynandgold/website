@@ -1614,5 +1614,30 @@
     "videos": [
       "/images/products/IMG_2015.mp4"
     ]
+  },
+  {
+    "id": "hera-osnql",
+    "name": "Hera",
+    "slug": "hera-osnql",
+    "description": "A spectacular 4.01ct pear-cut lab grown diamond set into a reworked vintage 9ct yellow gold ring. The sweeping gold shoulders frame the stone beautifully, giving this piece all the drama its name deserves. A vintage setting with a striking new chapter.\n\nFully hallmarked, IGI-certified, 5.3g.",
+    "size": "UK N · US 6.75",
+    "price": 2575,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": true,
+    "category": "rings",
+    "available": true,
+    "dropAt": "2026-10-04T16:00:00.000Z",
+    "previewDrop": true,
+    "createdAt": "2026-09-26T16:11:56.881Z",
+    "images": [
+      "/images/products/IMG_2152.jpeg",
+      "/images/products/IMG_2160.jpeg",
+      "/images/products/IMG_2166.jpeg",
+      "/images/products/IMG_2156.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_2011.mp4"
+    ]
   }
 ]

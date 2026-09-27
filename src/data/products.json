@@ -1719,5 +1719,30 @@
     "videos": [
       "/images/products/IMG_2009.mp4"
     ]
+  },
+  {
+    "id": "theia-vkj0d",
+    "name": "Theia",
+    "slug": "theia-vkj0d",
+    "description": "Goddess of heavenly light. \n\nThree diamonds, each individually claw set within an elongated, openwork frame of 18ct yellow gold. The sculptural gold curves around the stones like an open envelope, with a slightly larger diamond at the centre. A striking take on the classic three stone ring, with light shining through every part of the setting.\n\nThree round brilliant cut diamonds with a total estimated weight of 0.60ct. Diamonds are bright and lively with no visible inclusions.\n\nFully hallmarked, 4g.",
+    "size": "UK Q · US 8.25",
+    "price": 1180,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": true,
+    "category": "rings",
+    "available": true,
+    "dropAt": "2026-10-04T16:00:00.000Z",
+    "previewDrop": true,
+    "createdAt": "2026-09-27T20:36:42.246Z",
+    "images": [
+      "/images/products/IMG_2114.jpeg",
+      "/images/products/IMG_2115.jpeg",
+      "/images/products/IMG_2117.jpeg",
+      "/images/products/IMG_2116.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_2017.mp4"
+    ]
   }
 ]

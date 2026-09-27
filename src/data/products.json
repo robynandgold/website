@@ -1692,5 +1692,32 @@
     "videos": [
       "/images/products/IMG_2013.mp4"
     ]
+  },
+  {
+    "id": "selene-tnqc6",
+    "name": "Selene",
+    "slug": "selene-tnqc6",
+    "description": "Goddess of the moon.\n\nAn approximately 0.80ct cushion shaped old mine cut diamond set on an 18ct gold band. Her high crown, broad facets and visible open culet give her that unmistakable antique character, with a soft, moonlit sparkle that changes as she moves. A beautifully simple setting for a diamond with a story of her own.\n\nThe diamond sits within an eight prong 18ct white gold basket, set above cathedral shoulders on an 18ct yellow gold band approximately 2mm wide. The stone is bright and lively with no visible inclusions. It has a warm tone characteristic of old cuts, approximately K/L in colour. \n\nCarat weight is an in-setting jewellers approximation.\n\nFully hallmarked, 2.9g.",
+    "size": "UK L · US 5.75",
+    "price": 1495,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": true,
+    "category": "rings",
+    "available": true,
+    "dropAt": "2026-10-04T16:00:00.000Z",
+    "previewDrop": true,
+    "createdAt": "2026-09-27T20:16:51.802Z",
+    "images": [
+      "/images/products/IMG_2191.jpeg",
+      "/images/products/IMG_2193.jpeg",
+      "/images/products/IMG_2188.jpeg",
+      "/images/products/IMG_2198.jpeg",
+      "/images/products/IMG_2192.jpeg",
+      "/images/products/IMG_2263.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_2009.mp4"
+    ]
   }
 ]

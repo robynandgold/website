@@ -1768,5 +1768,31 @@
     "videos": [
       "/images/products/IMG_2016.mp4"
     ]
+  },
+  {
+    "id": "persephone-ythgv",
+    "name": "Persephone",
+    "slug": "persephone-ythgv",
+    "description": "Queen of the underworld.\n\nAn approximately 0.50ct Asscher cut diamond framed by a fine halo of diamonds, set in 18ct white gold. A slender pavé diamond band (1.6mm) completes her Art Deco inspired silhouette. Delicate from a distance, full of detail up close.\n\nFully hallmarked, 2.4g.",
+    "size": "UK L½ · US 6",
+    "price": 1050,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": true,
+    "category": "rings",
+    "available": true,
+    "dropAt": "2026-10-04T16:00:00.000Z",
+    "previewDrop": true,
+    "createdAt": "2026-09-27T21:10:30.300Z",
+    "images": [
+      "/images/products/IMG_2130.jpeg",
+      "/images/products/IMG_2132.jpeg",
+      "/images/products/IMG_2133.jpeg",
+      "/images/products/IMG_2134.jpeg",
+      "/images/products/IMG_2136.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_2008.mp4"
+    ]
   }
 ]

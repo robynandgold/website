@@ -1744,5 +1744,29 @@
     "videos": [
       "/images/products/IMG_2017.mp4"
     ]
+  },
+  {
+    "id": "themis-61f80",
+    "name": "Themis",
+    "slug": "themis-61f80",
+    "description": "Goddess of divine order.\n\nA preloved 2ct lab grown emerald-cut diamond set in beautifully weighty 18ct yellow gold. The diamond’s crisp lines and hall of mirrors sparkle are framed by a substantial 2.6mm band. Understated, assured and impossible to overlook.\n\nStamped ‘750’ for 18ct gold. Diamond is fully IGI-certified. 4.3g.",
+    "size": "UK L½ · US 6",
+    "price": 1850,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": true,
+    "category": "rings",
+    "available": true,
+    "dropAt": "2026-10-04T16:00:00.000Z",
+    "previewDrop": true,
+    "createdAt": "2026-09-27T20:55:00.206Z",
+    "images": [
+      "/images/products/IMG_2183.jpeg",
+      "/images/products/IMG_2184.jpeg",
+      "/images/products/IMG_2182.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_2016.mp4"
+    ]
   }
 ]

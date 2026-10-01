@@ -584,8 +584,11 @@
     "price": 670,
     "currency": "EUR",
     "featured": false,
+    "keepsake": false,
     "category": "rings",
-    "available": true,
+    "available": false,
+    "dropAt": "",
+    "previewDrop": true,
     "createdAt": "2026-07-05T11:48:33.589Z",
     "images": [
       "/images/products/IMG_9257.jpeg",
@@ -594,7 +597,8 @@
     ],
     "videos": [
       "/images/products/4506b152-a6ea-448f-800e-a158aa5a0006.mp4"
-    ]
+    ],
+    "soldAt": "2026-10-01T07:14:17.885Z"
   },
   {
     "id": "14ct-yellow-gold-sapphire-and-diamond-bomb-ring-u2537",

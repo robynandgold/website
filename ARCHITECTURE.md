@@ -203,6 +203,86 @@ Publishing happens from the phone via `/pages/add-product.html`:
 - **Rollback**: Cloudflare keeps prior Worker versions (Deployments → roll
   back); code rollback is ordinary `git revert`.
 
+## Stripe
+
+Everything about payments, in one place. The endpoint summaries above say what
+each file does; this says what of Stripe is actually in use, and why.
+
+**Hosted Checkout, with no Stripe product catalogue.** Sessions are created by
+`worker/checkout.js` (Node SDK v12, running on Workers via
+`Stripe.createFetchHttpClient()`). Line items are built inline with
+`price_data` / `product_data` from `products.json` at the moment of checkout —
+the pieces are never mirrored into Stripe as Products. One source of truth, and
+nothing to drift. Each line carries `metadata.product_id` and
+`quantity: 1`, because every piece is one of a kind.
+
+The price is always `priceFor(product, sale)` from `worker/pricing.js`: the
+catalogue price less any running sale. **Never anything the browser sent.** If
+the catalogue or the sale config can't be read, checkout fails closed rather
+than guess.
+
+### What each session is created with
+
+| Option | Why |
+|---|---|
+| `mode: 'payment'` | One-off purchases; nothing recurring |
+| `expires_at` now + 35 min | A lapsed checkout must not sit on a one-of-a-kind piece. Stripe's minimum is 30; the extra 5 covers clock skew |
+| `after_expiration.recovery` | Issues the resume link the recovery email sends |
+| `allow_promotion_codes: !saleActive(sale)` | The code field — withdrawn while a sale runs so a code can't stack on an already-reduced price |
+| `shipping_address_collection` | ~200 countries |
+| `shipping_options` | **One** tier, picked from Cloudflare's `request.cf.country`: Ireland €10, UK/Europe €15, rest of world €35. Stripe shows every rate offered to every buyer, so offering one avoids a shopper choosing the wrong one |
+| `metadata` | `product_ids`, plus `sale_percent` when a sale is on. This is what makes the abandoned-checkout view possible |
+| *(no `payment_method_types`)* | Deliberately omitted so Stripe offers whatever is enabled in the Dashboard, per device and locale |
+
+### Webhooks (`worker/webhook.js`)
+
+Signatures are verified with **`constructEventAsync`** — the async form, because
+the Workers runtime has no synchronous crypto. Two events are handled:
+
+- **`checkout.session.completed`** → commits `available: false` to
+  products.json via the GitHub API, then sends the order confirmation through
+  Resend. Line items are re-read with `listLineItems` and
+  `expand: ['data.price.product']` for names and photos, and totals come from
+  `session.amount_total`, so any discount or currency conversion is reflected
+  without extra work. It also cross-checks `session.shipping_cost` against the
+  delivery country and flags a mismatch.
+- **`checkout.session.expired`** → one recovery email with Stripe's resume
+  link, only if an email was captured and only if the piece hasn't since sold.
+
+### Discounts
+
+- **Promotion codes** (`worker/promos.js`): a `coupons.create` with
+  `percent_off` and `duration: 'once'`, wrapped in `promotionCodes.create`
+  carrying the customer-facing code, optional `expires_at` and optional
+  `max_redemptions`; listed and switched on/off with `promotionCodes.list` and
+  `promotionCodes.update`. Stripe validates, applies, expires and counts — no
+  discount is ever computed here.
+- **Site-wide sales** are *not* Stripe discounts. They're applied to
+  `unit_amount` before the session is created (see `sale.json` above), so the
+  buyer sees one reduced price rather than a discount line.
+
+### Reading back
+
+`worker/abandoned.js` lists `checkout.sessions.list({ status: 'expired' })` over
+a window (90 days by default), reading `metadata.product_ids` to name the
+pieces. Stripe is both the source and the history — nothing is stored here, and
+the view works over sessions that pre-date the endpoint.
+
+### Set in the Dashboard, not in code
+
+Enabled payment methods (cards, Apple/Google Pay, Link, Klarna, Amazon Pay),
+adaptive pricing for local currencies, and the webhook endpoint itself. Klarna
+is Europe-only on this Irish entity. Four Worker secrets are involved:
+`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_CURRENCY` (`eur`) and
+`SITE_URL` (success/cancel URLs).
+
+### What Stripe doesn't see
+
+A **Payment Link** sent in a DM carries no product metadata: the sale doesn't
+auto-mark the piece sold, no confirmation email is sent, and it never appears
+in the abandoned-checkout view. Those sales are recorded by ticking **Sold** on
+the admin page.
+
 ## Email
 
 - **Outbound (transactional)**: Resend, sending as

@@ -262,10 +262,9 @@ async function sendConfirmationEmail(session, productIds, env) {
   const html = `
   <div style="font-family: Georgia, 'Times New Roman', serif; background:#faf7f2; padding:32px 16px;">
     <div style="max-width:520px; margin:0 auto; background:#fdfbf8; border:1px solid #ddd1c2; border-radius:10px; padding:36px 32px; color:#3d372e;">
-      <p style="text-align:center; margin:0 0 8px;">
+      <p style="text-align:center; margin:0 0 26px;">
         <img src="https://robynandgold.com/images/rg-logo.png" alt="Robyn &amp; Gold" width="120" style="width:120px; height:auto; display:inline-block;" />
       </p>
-      <p style="font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:#8b7355; text-align:center; margin:0 0 26px;">Vintage Jewellery</p>
       <h1 style="font-size:22px; font-weight:500; text-align:center; margin:0 0 6px;">Thank you, ${escapeHtml(firstName)}</h1>
       <p style="font-size:14px; line-height:1.7; text-align:center; color:#8a8172; margin:0 0 22px;">Your order is confirmed &mdash; here are the details.</p>
       ${photoUrl ? `<p style="text-align:center; margin:0 0 22px;"><img src="${photoUrl}" alt="" width="190" style="width:190px; max-width:100%; height:auto; border-radius:8px; display:inline-block;" /></p>` : ''}
@@ -371,10 +370,9 @@ async function sendRecoveryEmail(session, env) {
   const html = `
   <div style="font-family: Georgia, 'Times New Roman', serif; background:#faf7f2; padding:32px 16px;">
     <div style="max-width:520px; margin:0 auto; background:#fdfbf8; border:1px solid #ddd1c2; border-radius:10px; padding:36px 32px; color:#3d372e;">
-      <p style="text-align:center; margin:0 0 8px;">
+      <p style="text-align:center; margin:0 0 26px;">
         <img src="https://robynandgold.com/images/rg-logo.png" alt="Robyn &amp; Gold" width="120" style="width:120px; height:auto; display:inline-block;" />
       </p>
-      <p style="font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:#8b7355; text-align:center; margin:0 0 26px;">Vintage Jewellery</p>
       <h1 style="font-size:22px; font-weight:500; text-align:center; margin:0 0 18px;">Still thinking it over?</h1>
       ${photoUrl ? `<p style="text-align:center; margin:0 0 18px;">
         <img src="${photoUrl}" alt="${pieceLabel.replace(/&[a-z]+;/g, '')}" width="190" style="width:190px; max-width:100%; height:auto; border-radius:8px; display:inline-block;" />

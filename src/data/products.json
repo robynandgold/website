@@ -1682,8 +1682,8 @@
     "featured": false,
     "keepsake": true,
     "category": "rings",
-    "available": true,
-    "dropAt": "2026-10-04T16:00:00.000Z",
+    "available": false,
+    "dropAt": "",
     "previewDrop": true,
     "createdAt": "2026-09-27T19:57:19.373Z",
     "images": [
@@ -1696,7 +1696,8 @@
     ],
     "videos": [
       "/images/products/IMG_2013.mp4"
-    ]
+    ],
+    "soldAt": "2026-10-05T12:03:19.030Z"
   },
   {
     "id": "selene-tnqc6",

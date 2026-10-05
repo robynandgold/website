@@ -1658,8 +1658,8 @@
     "featured": false,
     "keepsake": true,
     "category": "rings",
-    "available": true,
-    "dropAt": "2026-10-04T16:00:00.000Z",
+    "available": false,
+    "dropAt": "",
     "previewDrop": true,
     "createdAt": "2026-09-26T16:21:28.550Z",
     "images": [
@@ -1669,7 +1669,8 @@
     ],
     "videos": [
       "/images/products/IMG_2018.mp4"
-    ]
+    ],
+    "soldAt": "2026-10-05T12:20:01.554Z"
   },
   {
     "id": "athena-7n3jt",

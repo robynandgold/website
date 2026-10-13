@@ -352,7 +352,7 @@
     "currency": "EUR",
     "featured": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "images": [
       "/images/products/IMG_4594.jpeg",
       "/images/products/IMG_4596.jpeg"
@@ -360,7 +360,8 @@
     "videos": [
       "/images/products/IMG_5642.mp4"
     ],
-    "createdAt": "2026-06-15T22:30:03+01:00"
+    "createdAt": "2026-06-15T22:30:03+01:00",
+    "soldAt": "2026-10-13T20:26:17.439Z"
   },
   {
     "id": "9ct-yellow-gold-sapphire-and-opal-gypsy-ring-lz9rp",
@@ -478,7 +479,7 @@
     "currency": "EUR",
     "featured": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "createdAt": "2026-06-21T14:08:40.585Z",
     "images": [
       "/images/products/IMG_8865.jpeg",
@@ -487,7 +488,8 @@
     ],
     "videos": [
       "/images/products/IMG_8837.mp4"
-    ]
+    ],
+    "soldAt": "2026-10-13T20:26:17.439Z"
   },
   {
     "id": "9ct-white-gold-diamond-milgrain-half-eternity-pf0kt",
@@ -1441,7 +1443,7 @@
     "featured": false,
     "keepsake": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "dropAt": "",
     "createdAt": "2026-08-23T12:34:38.002Z",
     "images": [
@@ -1451,7 +1453,8 @@
     ],
     "videos": [
       "/images/products/IMG_1186.mp4"
-    ]
+    ],
+    "soldAt": "2026-10-13T20:26:17.439Z"
   },
   {
     "id": "9ct-yellow-gold-omega-bracelet-zp2o1",

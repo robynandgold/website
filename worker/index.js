@@ -9,6 +9,7 @@ import { handleView } from './views.js';
 import { handleCosts } from './costs.js';
 import { handleAbandoned } from './abandoned.js';
 import { handlePromos } from './promos.js';
+import { handleShipping } from './shipping-api.js';
 
 const methodNotAllowed = () =>
   new Response(JSON.stringify({ error: 'Method not allowed' }), {
@@ -28,9 +29,20 @@ const routes = {
   '/api/promos': handlePromos,
 };
 
+// Endpoints that only read, and are therefore fetched with GET.
+const readRoutes = {
+  '/api/shipping': handleShipping,
+};
+
 export default {
   async fetch(request, env, ctx) {
     const { pathname } = new URL(request.url);
+
+    const reader = readRoutes[pathname];
+    if (reader) {
+      if (request.method !== 'GET') return methodNotAllowed();
+      return reader(request, env);
+    }
 
     const handler = routes[pathname];
     if (handler) {

@@ -83,8 +83,28 @@
             <span>Subtotal</span>
             <span id="cart-subtotal">€0</span>
           </div>
-          <p class="cart-summary-note">
-            Shipping and any taxes are calculated at checkout.
+
+          <!-- Postage is quoted here, before checkout, because Stripe's own
+               payment page shows whatever rates it is handed without matching
+               them to the address typed into it. The country chosen here is
+               what the session is created with. -->
+          <div class="cart-shipping" id="cart-shipping" hidden>
+            <label class="cart-shipping-label" for="ship-country">Delivering to</label>
+            <select id="ship-country" class="cart-shipping-select"></select>
+            <div class="cart-summary-row">
+              <span>Postage</span>
+              <span id="cart-postage">—</span>
+            </div>
+            <p class="cart-shipping-estimate" id="cart-postage-estimate"></p>
+          </div>
+
+          <div class="cart-summary-row cart-summary-row--total" id="cart-total-row" hidden>
+            <span>Total</span>
+            <span id="cart-total">€0</span>
+          </div>
+
+          <p class="cart-summary-note" id="cart-summary-note">
+            Postage and any taxes are calculated at checkout.
           </p>
 
           <button id="checkout-button" class="btn btn-primary btn-full">
@@ -111,7 +131,7 @@
   <!-- Sticky mobile checkout bar -->
   <div class="mobile-checkout-bar" id="mobile-checkout-bar" hidden>
     <div class="mcb-subtotal">
-      <small>Subtotal</small>
+      <small id="mcb-label">Subtotal</small>
       <strong id="mcb-subtotal">€0</strong>
     </div>
     <button class="btn btn-primary" id="mcb-checkout-button">Checkout</button>
@@ -176,6 +196,118 @@
       return live ? live : { price: item.price, was: null };
     }
 
+    // ---- Postage -------------------------------------------------------
+    // The rates come from the Worker (GET /api/shipping) rather than being
+    // written down again here, so there is still one place a postage amount
+    // is set. Until they arrive — or if the request fails — the postage rows
+    // stay hidden and checkout behaves as it did before, quoting from the
+    // country Cloudflare reports for the connection.
+    const COUNTRY_MEMORY = 'rg_ship_country';
+    let shipping = null;   // { zones, zoneOf: Map, detected }
+
+    function rememberedCountry() {
+      try { return localStorage.getItem(COUNTRY_MEMORY) || null; } catch (e) { return null; }
+    }
+
+    function rememberCountry(code) {
+      try { localStorage.setItem(COUNTRY_MEMORY, code); } catch (e) { /* private mode */ }
+    }
+
+    // The country the order is being quoted for, or null before the rates
+    // have loaded. stripe-integration.js reads this when creating the session.
+    window.getShippingCountry = function () {
+      const select = document.getElementById('ship-country');
+      return (shipping && select && select.value) || null;
+    };
+
+    function countryName(code) {
+      try {
+        const name = new Intl.DisplayNames(['en'], { type: 'region' }).of(code);
+        if (name && name !== code) return name;
+      } catch (e) { /* older browser — fall through to the code */ }
+      return code;
+    }
+
+    function zoneFor(code) {
+      if (!shipping || !code) return null;
+      const key = shipping.zoneOf.get(code);
+      return key ? shipping.zones[key] : null;
+    }
+
+    async function loadShipping() {
+      let data;
+      try {
+        const res = await fetch('/api/shipping', { headers: { 'Accept': 'application/json' } });
+        if (!res.ok) return;
+        data = await res.json();
+      } catch (e) { return; }
+      if (!data || !data.zones || !Array.isArray(data.countries)) return;
+
+      shipping = {
+        zones: data.zones,
+        zoneOf: new Map(data.countries),
+        detected: data.detected || null,
+      };
+
+      // "ZZ" is Stripe's catch-all rather than a place anyone lives.
+      const options = data.countries
+        .map(([code]) => code)
+        .filter(code => code !== 'ZZ')
+        .map(code => ({ code, name: countryName(code) }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+      const select = document.getElementById('ship-country');
+      select.innerHTML = options
+        .map(o => `<option value="${o.code}">${o.name}</option>`)
+        .join('');
+
+      // Last choice, then where they appear to be, then home.
+      const remembered = rememberedCountry();
+      const preferred = [remembered, shipping.detected, 'IE']
+        .find(code => code && shipping.zoneOf.has(code));
+      select.value = preferred;
+
+      select.addEventListener('change', () => {
+        rememberCountry(select.value);
+        renderCart();
+      });
+
+      document.getElementById('cart-shipping').hidden = false;
+      document.getElementById('cart-summary-note').textContent =
+        'Postage is confirmed at checkout. Any customs or import charges are the buyer’s responsibility.';
+      renderCart();
+    }
+
+    // Subtotal, postage and total, in the summary and the sticky mobile bar.
+    function renderTotals(subtotal) {
+      const zone = zoneFor(window.getShippingCountry());
+      const fmt = (v) => window.ProductsAPI.formatPrice(v, 'EUR');
+
+      document.getElementById('cart-subtotal').textContent = fmt(subtotal);
+
+      const totalRow = document.getElementById('cart-total-row');
+      const mcbLabel = document.getElementById('mcb-label');
+
+      if (!zone) {
+        // Rates unavailable: show the bag's value only and say nothing about
+        // postage we can't quote.
+        totalRow.hidden = true;
+        mcbLabel.textContent = 'Subtotal';
+        document.getElementById('mcb-subtotal').textContent = fmt(subtotal);
+        return;
+      }
+
+      const postage = zone.amount / 100;
+      document.getElementById('cart-postage').textContent = postage === 0 ? 'Free' : fmt(postage);
+      document.getElementById('cart-postage-estimate').textContent =
+        `${zone.minDays}–${zone.maxDays} business days, tracked and insured`;
+
+      totalRow.hidden = false;
+      document.getElementById('cart-total').textContent = fmt(subtotal + postage);
+      mcbLabel.textContent = 'Total';
+      document.getElementById('mcb-subtotal').textContent = fmt(subtotal + postage);
+    }
+
     // Render cart items
     function renderCart() {
       const cart = window.CartAPI.getCart();
@@ -184,9 +316,7 @@
       const cartLayout = document.getElementById('cart-layout');
       const continueEl = document.getElementById('cart-continue');
       const countEl = document.getElementById('cart-item-count');
-      const subtotalEl = document.getElementById('cart-subtotal');
       const mcbBar = document.getElementById('mobile-checkout-bar');
-      const mcbSubtotal = document.getElementById('mcb-subtotal');
       const shopCta = document.getElementById('cart-shop-cta');
       const checkoutBtn = document.getElementById('checkout-button');
 
@@ -200,7 +330,7 @@
         continueEl.hidden = true;
         mcbBar.hidden = true;
         shopCta.hidden = false;   // floating "Explore the collection" (mobile, empty only)
-        subtotalEl.textContent = window.ProductsAPI.formatPrice(0, 'EUR');
+        renderTotals(0);
         checkoutBtn.disabled = true;
         return;
       }
@@ -241,11 +371,8 @@
         </div>
       `).join('');
       
-      // Update subtotal (desktop summary + sticky mobile bar)
-      const total = cart.reduce((sum, item) => sum + currentPriceOf(item).price, 0);
-      const formatted = window.ProductsAPI.formatPrice(total, 'EUR');
-      subtotalEl.textContent = formatted;
-      mcbSubtotal.textContent = formatted;
+      // Update the money (desktop summary + sticky mobile bar)
+      renderTotals(cart.reduce((sum, item) => sum + currentPriceOf(item).price, 0));
 
       // Add remove button listeners
       document.querySelectorAll('.cart-item-remove').forEach(btn => {
@@ -274,7 +401,9 @@
     document.addEventListener('DOMContentLoaded', () => {
       renderCart();
       refreshLivePrices().then(renderCart);
+      loadShipping();
     });
   </script>
+  <script src="../js/banners.js"></script>
 </body>
 </html>

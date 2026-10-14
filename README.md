@@ -69,8 +69,8 @@ workflow from the repo's GitHub Actions tab.
 npm test
 ```
 
-133 checks covering the pricing, the catalogue, the early-purchase gate and the
-pages themselves. Worth running before a push that touches anything to do with
+166 checks covering the pricing, the postage, the catalogue, the
+early-purchase gate and the pages themselves. Worth running before a push that touches anything to do with
 money, drops or the catalogue. Details in `CLAUDE.md`.
 
 ---
@@ -160,6 +160,21 @@ code off stops it working immediately. Nothing on the site needs republishing.
 
 Codes and a sale never combine: while a sale is running the payment page
 doesn't offer the code field, so nobody can take a code off a sale price.
+
+### Changing the postage rates
+
+All three live in one place: `SHIPPING_ZONES` at the top of
+`worker/shipping.js`. Amounts are in cents, so `1500` is €15 and `0` is free.
+
+Currently: **free within Ireland**, €15 to the UK and Europe, €35 to the rest
+of the world.
+
+Editing that one object updates the cart's quote, the total it shows, what
+Stripe charges, and the webhook's check that an order didn't underpay its
+postage. The free-postage banner also reads it, so it takes itself down if
+Ireland ever stops being free. The prose rates on the FAQ and Terms pages are
+the one thing it does *not* update — `npm run test:unit` fails if those stop
+matching, and tells you which page to edit.
 
 ### Recording what a piece cost you
 

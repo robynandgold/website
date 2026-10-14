@@ -12,6 +12,7 @@ import http from 'node:http';
 import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { catalogue, loadProductsApi, SRC } from './helpers.mjs';
+import { SHIPPING_ZONES, shippingTable } from '../worker/shipping.js';
 
 const PORT = 8123;
 const BASE = `http://localhost:${PORT}`;
@@ -50,6 +51,13 @@ before(async () => {
     // page log a 404 it would never see in production.
     if (p.startsWith('/api/')) {
       res.writeHead(200, { 'Content-Type': 'application/json' });
+      // The postage table is served for real, from the same module the Worker
+      // uses, so the cart's quote and the free-postage band are tested against
+      // the actual rates rather than a fixture that can drift from them.
+      // "detected" stands in for Cloudflare's country header.
+      if (p === '/api/shipping') {
+        return res.end(JSON.stringify({ ...shippingTable(), detected: 'IE' }));
+      }
       return res.end('{}');
     }
     if (p === '/') p = '/index.html';
@@ -236,6 +244,163 @@ describe('the cart', () => {
     await page.click('.cart-item-remove');
     await page.waitForTimeout(400);
     assert.equal(await page.$$eval('.cart-item', e => e.length), 1);
+    await page.close();
+  });
+});
+
+// The whole point of quoting postage in the bag is that Stripe's payment page
+// can't: it shows whatever rates it is handed without matching them to the
+// address typed in. So these check the shopper sees the right number *here*,
+// and that the number follows the country they pick.
+describe('postage in the cart', () => {
+  const bag = (p) => [{ id: p.id, name: p.name, price: p.price, currency: 'EUR', image: p.images[0], quantity: 1 }];
+
+  /** The cart with one piece in it and the postage rows settled. */
+  async function cartWith(piece) {
+    const page = await visit('/pages/cart.html');
+    await page.evaluate(items => localStorage.setItem('robyn_gold_cart', JSON.stringify(items)), bag(piece));
+    // The last country chosen is remembered, so clear it for a clean default.
+    await page.evaluate(() => localStorage.removeItem('rg_ship_country'));
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(900);
+    return page;
+  }
+
+  const money = el => page => page.textContent(el).then(t => t.trim());
+
+  test('opens on the visitor’s own country, free for Ireland', { skip: skip() }, async () => {
+    const piece = listed.find(p => !API.isScheduled(p));
+    const page = await cartWith(piece);
+
+    assert.equal(await page.evaluate(() => document.getElementById('cart-shipping').hidden), false,
+      'the postage rows never appeared');
+    assert.equal(await page.inputValue('#ship-country'), 'IE',
+      'the picker did not open on the detected country');
+    assert.equal(await money('#cart-postage')(page), 'Free', 'Irish postage is not shown as free');
+
+    const total = Number((await money('#cart-total')(page)).replace(/[^\d]/g, ''));
+    assert.equal(total, piece.price, 'free postage changed the total');
+
+    assert.match(await money('#cart-postage-estimate')(page), /business days/);
+    assert.equal(await page.problems.length, 0, page.problems.join('\n'));
+    await page.close();
+  });
+
+  test('picking Australia adds the rest-of-world rate to the total', { skip: skip() }, async () => {
+    const piece = listed.find(p => !API.isScheduled(p));
+    const page = await cartWith(piece);
+
+    await page.selectOption('#ship-country', 'AU');
+    await page.waitForTimeout(250);
+
+    const postage = SHIPPING_ZONES.world.amount / 100;
+    assert.ok((await money('#cart-postage')(page)).includes(String(postage)),
+      `expected €${postage} postage to Australia`);
+    const total = Number((await money('#cart-total')(page)).replace(/[^\d]/g, ''));
+    assert.equal(total, piece.price + postage, 'the total does not include postage to Australia');
+    await page.close();
+  });
+
+  test('the UK gets the European rate', { skip: skip() }, async () => {
+    const piece = listed.find(p => !API.isScheduled(p));
+    const page = await cartWith(piece);
+
+    await page.selectOption('#ship-country', 'GB');
+    await page.waitForTimeout(250);
+    const postage = SHIPPING_ZONES.europe.amount / 100;
+    assert.ok((await money('#cart-postage')(page)).includes(String(postage)),
+      `expected €${postage} postage to the UK`);
+    await page.close();
+  });
+
+  test('the chosen country is remembered and sent to checkout', { skip: skip() }, async () => {
+    const piece = listed.find(p => !API.isScheduled(p));
+    const page = await cartWith(piece);
+
+    await page.selectOption('#ship-country', 'US');
+    await page.waitForTimeout(250);
+    assert.equal(await page.evaluate(() => localStorage.getItem('rg_ship_country')), 'US');
+    assert.equal(await page.evaluate(() => window.getShippingCountry()), 'US');
+
+    // What the browser would actually post to the Worker.
+    let sent = null;
+    await page.route('**/api/create-checkout-session', route => {
+      sent = JSON.parse(route.request().postData() || '{}');
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ url: BASE + '/pages/cart.html' }) });
+    });
+    await page.click('#checkout-button');
+    await page.waitForTimeout(500);
+    assert.equal(sent && sent.shippingCountry, 'US', 'checkout was not told the destination');
+    await page.close();
+  });
+
+  test('countries are listed by name, and the catch-all is not offered', { skip: skip() }, async () => {
+    const page = await cartWith(listed.find(p => !API.isScheduled(p)));
+    const options = await page.$$eval('#ship-country option', els =>
+      els.map(e => ({ code: e.value, name: e.textContent })));
+
+    assert.ok(options.length > 150, `only ${options.length} countries offered`);
+    assert.ok(!options.some(o => o.code === 'ZZ'), 'the ZZ catch-all is in the list');
+    assert.equal(options.find(o => o.code === 'IE').name, 'Ireland');
+    assert.equal(options.find(o => o.code === 'AU').name, 'Australia');
+    // Sorted by name, which is the only order a shopper can scan.
+    const names = options.map(o => o.name);
+    assert.deepEqual(names, [...names].sort((a, b) => a.localeCompare(b)), 'the list is not alphabetical');
+    await page.close();
+  });
+
+  test('with no postage table, the bag falls back to a subtotal', { skip: skip() }, async () => {
+    const page = await visit('/pages/cart.html', { routes: { '/api/shipping': {} } });
+    await page.evaluate(items => localStorage.setItem('robyn_gold_cart', JSON.stringify(items)),
+      bag(listed.find(p => !API.isScheduled(p))));
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(900);
+
+    assert.equal(await page.evaluate(() => document.getElementById('cart-shipping').hidden), true,
+      'postage rows shown without any rates to show');
+    assert.equal(await page.evaluate(() => document.getElementById('cart-total-row').hidden), true,
+      'a total was claimed without postage');
+    assert.equal(await page.evaluate(() => window.getShippingCountry()), null,
+      'a country was reported without a table behind it');
+    // Checkout must still work — the Worker falls back to the request's country.
+    assert.equal(await page.evaluate(() => document.getElementById('checkout-button').disabled), false);
+    await page.close();
+  });
+});
+
+describe('the free-postage band', () => {
+  test('appears site-wide while Ireland is free', { skip: skip() }, async () => {
+    for (const url of ['/', '/pages/shop.html', '/pages/faq.html', '/pages/terms.html']) {
+      const page = await visit(url);
+      const band = await page.$eval('.postage-banner', e => e.textContent).catch(() => null);
+      assert.match(band || '', /Free insured postage/, `${url} has no free-postage band`);
+      await page.close();
+    }
+  });
+
+  test('a running sale takes the slot instead', { skip: skip() }, async () => {
+    const sale = { percent: 20, label: 'Test sale', endsAt: new Date(Date.now() + 86400e3).toISOString() };
+    const page = await visit('/pages/shop.html', { routes: { '/data/sale.json': sale } });
+    assert.ok(await page.$('.sale-banner'), 'the sale band is missing');
+    assert.equal(await page.$('.postage-banner'), null, 'both bands are showing at once');
+    await page.close();
+  });
+
+  test('it retires itself if Ireland stops being free', { skip: skip() }, async () => {
+    const paid = shippingTable();
+    paid.zones.ireland = { ...paid.zones.ireland, amount: 1000 };
+    const page = await visit('/pages/shop.html', { routes: { '/api/shipping': { ...paid, detected: 'IE' } } });
+    assert.equal(await page.$('.postage-banner'), null,
+      'the band still claims free postage after the rate changed');
+    await page.close();
+  });
+
+  test('the band links to the postage rates', { skip: skip() }, async () => {
+    const page = await visit('/pages/shop.html');
+    await page.click('.postage-banner a');
+    await page.waitForTimeout(600);
+    assert.match(page.url(), /faq\.html#postage$/, 'the band does not reach the postage section');
+    assert.ok(await page.$('#postage'), 'the FAQ has no postage section to land on');
     await page.close();
   });
 });

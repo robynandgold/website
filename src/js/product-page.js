@@ -345,12 +345,8 @@
       } catch (e) { /* leave malformed blocks alone */ }
     });
 
-    if (!document.querySelector('.sale-banner')) {
-      const banner = document.createElement('div');
-      banner.className = 'sale-banner';
-      banner.innerHTML = `${String(sale.label || 'Sale').trim()} — <strong>${percent}% off</strong> everything`;
-      document.body.insertBefore(banner, document.body.firstChild);
-    }
+    // The sale band itself is rendered by js/banners.js, which this page also
+    // loads; only the prices are this file's business.
   }
 
   function init() {

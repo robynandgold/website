@@ -6,7 +6,7 @@
 // before verifying.
 import Stripe from 'stripe';
 import { Buffer } from 'node:buffer';
-import { SHIPPING_ZONES, zoneForCountry } from './checkout.js';
+import { SHIPPING_ZONES, zoneForCountry } from './shipping.js';
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -91,8 +91,9 @@ export async function handleWebhook(request, env) {
       }
 
       // Cross-check the shipping rate the buyer paid against where the order
-      // actually ships (e.g. paid Ireland €10 but delivering to Poland) and
-      // alert the shop on a mismatch so it can be settled before dispatch.
+      // actually ships (e.g. quoted free Irish postage but delivering to
+      // Poland) and alert the shop on a mismatch so it can be settled before
+      // dispatch.
       try {
         await alertOnShippingMismatch(session, env);
       } catch (alertErr) {
@@ -170,8 +171,11 @@ async function alertOnShippingMismatch(session, env) {
   if (!country || paid == null) return;
 
   const zone = zoneForCountry(country);
-  const expected = zone && SHIPPING_ZONES[zone].amount;
-  if (!expected || paid >= expected) return;
+  if (!zone) return;
+  // A free zone can never be underpaid, so it drops out here rather than
+  // being treated as an unknown destination.
+  const expected = SHIPPING_ZONES[zone].amount;
+  if (paid >= expected) return;
 
   const money = (m) => `€${(m / 100).toFixed(2)}`;
   const resp = await fetch('https://api.resend.com/emails', {
@@ -230,6 +234,8 @@ async function sendConfirmationEmail(session, productIds, env) {
       typeof session.shipping_cost.shipping_rate === 'object' &&
       session.shipping_cost.shipping_rate.display_name) ||
     'Shipping';
+  // Free postage reads as "Free" rather than "€0.00".
+  const shippingLine = shippingAmount > 0 ? money(shippingAmount, currency) : 'Free';
 
   // The delivery address location differs by Stripe API version: newer
   // versions (2024+) nest it under collected_information.shipping_details;
@@ -272,7 +278,7 @@ async function sendConfirmationEmail(session, productIds, env) {
         ${itemRows}
       </table>
       <table style="width:100%; border-collapse:collapse; border-top:1px solid #eadfce; padding-top:10px;">
-        <tr><td style="padding:8px 0 2px; font-size:13px; color:#8a8172;">${escapeHtml(shippingName)}</td><td style="padding:8px 0 2px; font-size:13px; color:#8a8172; text-align:right;">${money(shippingAmount, currency)}</td></tr>
+        <tr><td style="padding:8px 0 2px; font-size:13px; color:#8a8172;">${escapeHtml(shippingName)}</td><td style="padding:8px 0 2px; font-size:13px; color:#8a8172; text-align:right;">${shippingLine}</td></tr>
         <tr><td style="padding:2px 0; font-size:15px; color:#3d372e;"><strong>Total paid</strong></td><td style="padding:2px 0; font-size:15px; color:#3d372e; text-align:right;"><strong>${money(session.amount_total, currency)}</strong></td></tr>
       </table>
       ${addressLines ? `<p style="font-size:13px; line-height:1.7; color:#8a8172; margin:22px 0 0;"><strong style="color:#3d372e;">Shipping to</strong><br>${addressLines}</p>` : ''}

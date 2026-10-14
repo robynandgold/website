@@ -48,6 +48,34 @@ export function loadProductsApi() {
   return sandbox.window.ProductsAPI;
 }
 
+/**
+ * src/js/banners.js in the same kind of sandbox, for its `saleRunning` rule.
+ * The file renders on load, so the stubs below have to absorb a render that
+ * finds neither a sale nor a postage table.
+ */
+export function loadBanners() {
+  const sandbox = {
+    console,
+    fetch: async () => ({ ok: false }),          // no network in unit tests
+    Promise,
+    window: {},
+    document: {
+      readyState: 'complete',
+      addEventListener: () => {},
+      querySelector: () => null,
+      createElement: () => ({ style: {} }),
+      body: { insertBefore() {}, firstChild: null },
+    },
+  };
+  sandbox.window = sandbox;
+  vm.createContext(sandbox);
+  vm.runInContext(readFileSync(path.join(SRC, 'js', 'banners.js'), 'utf8'), sandbox, {
+    filename: 'banners.js',
+  });
+  if (!sandbox.window.BannersInternal) throw new Error('banners.js did not expose BannersInternal');
+  return sandbox.window.BannersInternal;
+}
+
 /** scripts/build.js predicates, without running a build. */
 export const loadBuild = () =>
   createRequire(import.meta.url)(path.join(ROOT, 'scripts', 'build.js'));

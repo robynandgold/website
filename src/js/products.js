@@ -299,8 +299,8 @@ function lazyPlayVideos(container) {
   });
 }
 
-// The band above the header — the sale announcement and the free-postage
-// notice — is rendered by js/banners.js, which every page loads.
+// The sale band above the header is rendered by js/banners.js, which every
+// page loads.
 
 // Export functions for use in other files
 if (typeof window !== 'undefined') {

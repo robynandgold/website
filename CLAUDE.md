@@ -148,7 +148,7 @@ everywhere. `add-product.html` intentionally carries a shorter nav.
 
 Every one of those pages also loads `js/banners.js` before `</body>` (relative
 path per file, as with the nav) — a new hand-written page needs that line or it
-will be the only page without the band above the header.
+will be the only page that doesn't announce a sale.
 
 The single `.nav-left` element is the desktop menu row *and* the mobile
 hamburger panel, so one link addition covers both. The desktop header is
@@ -176,7 +176,7 @@ optional `soldAt`, `dropAt`, `keepsake`.
 ## Postage
 
 `SHIPPING_ZONES` in `worker/shipping.js` is the only place a rate is written
-down (cents; `0` is free). Ireland is free, UK/Europe €15, rest of world €35.
+down (cents; `0` would be free). Ireland €10, UK/Europe €15, rest of world €35.
 That file deliberately imports nothing so the tests can load it without the
 Stripe SDK — the same reason `worker/pricing.js` exists.
 
@@ -186,10 +186,9 @@ session is created: the cart asks `GET /api/shipping` for the table, the
 shopper picks a country, and that country is posted to
 `/api/create-checkout-session`, which offers that one rate. Cloudflare's
 `request.cf.country` is only the fallback for when the cart couldn't reach the
-endpoint. With no country at all, the two paid tiers are offered and the free
-Irish one withheld — never give away postage to an address nobody has claimed
-is Irish. The webhook still cross-checks the paid rate against the real
-delivery country afterwards and emails the shop on a shortfall.
+endpoint, and with no country at all all three tiers are offered. The webhook
+cross-checks the paid rate against the real delivery country afterwards and
+emails the shop on a shortfall.
 
 The rates are also written out as prose on the FAQ and Terms pages; a unit test
 fails if those stop matching `SHIPPING_ZONES`, so change both or neither.
@@ -225,9 +224,8 @@ dashboard or ask, rather than claiming a deploy is live.
 - Client-side JS is duplicated between pages by design (each page has its own
   inline loader with a `ProductsAPI` fallback). Follow the local pattern rather
   than centralising. The one exception is the band above the header: the sale
-  announcement and the free-postage notice both live in `src/js/banners.js`,
-  which every page loads, because neither has any page-specific behaviour to
-  follow. Only one of the two is ever shown — a sale takes the slot.
+  announcement lives in `src/js/banners.js`, which every page loads, because it
+  has no page-specific behaviour to follow.
 - `src/js/products.js` has no trailing newline; leave it alone.
 - `src/pages/product-detail.html` is not a page — it's a `noindex` redirect
   shim forwarding old `product-detail.html?slug=…` links to the generated

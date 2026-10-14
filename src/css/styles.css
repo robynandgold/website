@@ -251,29 +251,6 @@ a {
   color: var(--accent-soft);
 }
 
-/* The standing free-postage notice. Same band as a sale, in the quieter ink
-   tone so a real sale still stands out when one is running — the two are
-   never shown together. */
-.postage-banner {
-  background: var(--ink);
-  color: #f7f3ec;
-  text-align: center;
-  font-size: 0.74rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  padding: 0.5rem 1rem;
-}
-
-.postage-banner strong {
-  font-weight: 600;
-}
-
-.postage-banner a {
-  color: #f7f3ec;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
 .nav-link::after {
   content: "";
   position: absolute;

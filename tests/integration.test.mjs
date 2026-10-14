@@ -52,8 +52,8 @@ before(async () => {
     if (p.startsWith('/api/')) {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       // The postage table is served for real, from the same module the Worker
-      // uses, so the cart's quote and the free-postage band are tested against
-      // the actual rates rather than a fixture that can drift from them.
+      // uses, so the cart's quote is tested against the actual rates rather
+      // than a fixture that can drift from them.
       // "detected" stands in for Cloudflare's country header.
       if (p === '/api/shipping') {
         return res.end(JSON.stringify({ ...shippingTable(), detected: 'IE' }));
@@ -268,7 +268,7 @@ describe('postage in the cart', () => {
 
   const money = el => page => page.textContent(el).then(t => t.trim());
 
-  test('opens on the visitor’s own country, free for Ireland', { skip: skip() }, async () => {
+  test('opens on the visitor’s own country, at the Irish rate', { skip: skip() }, async () => {
     const piece = listed.find(p => !API.isScheduled(p));
     const page = await cartWith(piece);
 
@@ -276,10 +276,12 @@ describe('postage in the cart', () => {
       'the postage rows never appeared');
     assert.equal(await page.inputValue('#ship-country'), 'IE',
       'the picker did not open on the detected country');
-    assert.equal(await money('#cart-postage')(page), 'Free', 'Irish postage is not shown as free');
 
+    const postage = SHIPPING_ZONES.ireland.amount / 100;
+    assert.ok((await money('#cart-postage')(page)).includes(String(postage)),
+      `expected €${postage} postage within Ireland`);
     const total = Number((await money('#cart-total')(page)).replace(/[^\d]/g, ''));
-    assert.equal(total, piece.price, 'free postage changed the total');
+    assert.equal(total, piece.price + postage, 'the total does not include Irish postage');
 
     assert.match(await money('#cart-postage-estimate')(page), /business days/);
     assert.equal(await page.problems.length, 0, page.problems.join('\n'));
@@ -364,43 +366,6 @@ describe('postage in the cart', () => {
       'a country was reported without a table behind it');
     // Checkout must still work — the Worker falls back to the request's country.
     assert.equal(await page.evaluate(() => document.getElementById('checkout-button').disabled), false);
-    await page.close();
-  });
-});
-
-describe('the free-postage band', () => {
-  test('appears site-wide while Ireland is free', { skip: skip() }, async () => {
-    for (const url of ['/', '/pages/shop.html', '/pages/faq.html', '/pages/terms.html']) {
-      const page = await visit(url);
-      const band = await page.$eval('.postage-banner', e => e.textContent).catch(() => null);
-      assert.match(band || '', /Free insured postage/, `${url} has no free-postage band`);
-      await page.close();
-    }
-  });
-
-  test('a running sale takes the slot instead', { skip: skip() }, async () => {
-    const sale = { percent: 20, label: 'Test sale', endsAt: new Date(Date.now() + 86400e3).toISOString() };
-    const page = await visit('/pages/shop.html', { routes: { '/data/sale.json': sale } });
-    assert.ok(await page.$('.sale-banner'), 'the sale band is missing');
-    assert.equal(await page.$('.postage-banner'), null, 'both bands are showing at once');
-    await page.close();
-  });
-
-  test('it retires itself if Ireland stops being free', { skip: skip() }, async () => {
-    const paid = shippingTable();
-    paid.zones.ireland = { ...paid.zones.ireland, amount: 1000 };
-    const page = await visit('/pages/shop.html', { routes: { '/api/shipping': { ...paid, detected: 'IE' } } });
-    assert.equal(await page.$('.postage-banner'), null,
-      'the band still claims free postage after the rate changed');
-    await page.close();
-  });
-
-  test('the band links to the postage rates', { skip: skip() }, async () => {
-    const page = await visit('/pages/shop.html');
-    await page.click('.postage-banner a');
-    await page.waitForTimeout(600);
-    assert.match(page.url(), /faq\.html#postage$/, 'the band does not reach the postage section');
-    assert.ok(await page.$('#postage'), 'the FAQ has no postage section to land on');
     await page.close();
   });
 });

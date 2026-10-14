@@ -2,20 +2,14 @@
  * BANNERS.JS — the band above the header
  * ======================================
  *
- * Two messages compete for one slot and only one is ever shown:
- *
- *   1. a running sale, which takes precedence because it's time-limited;
- *   2. otherwise, free postage within Ireland.
+ * One band, shown while a sale is running and read from the same `sale.json`
+ * the shop and the Worker price from, so there is no claim written down here
+ * to go stale.
  *
  * This file is loaded by every page (and by the generated product pages via
  * the build template), so the markup lives here once rather than in each
  * page's own inline loader — unlike the per-page product loaders, a banner has
  * no page-specific behaviour to follow.
- *
- * Both messages are read from the same sources the rest of the site uses:
- * `sale.json` for the sale, and `GET /api/shipping` for the postage table. The
- * postage banner therefore retires itself if Ireland ever stops being free —
- * there is no claim written down here to go stale.
  */
 (function () {
   if (typeof window === 'undefined' || typeof document === 'undefined') return;
@@ -45,7 +39,7 @@
   }
 
   function show(className, html) {
-    if (document.querySelector('.sale-banner, .postage-banner')) return;
+    if (document.querySelector('.sale-banner')) return;
     const banner = document.createElement('div');
     banner.className = className;
     banner.innerHTML = html;
@@ -58,27 +52,10 @@
     fetch(url, init).then(r => (r.ok ? r.json() : null)).catch(() => null);
 
   function render() {
-    Promise.all([
-      readJson('/data/sale.json', { cache: 'no-store' }),
-      readJson('/api/shipping', { headers: { 'Accept': 'application/json' } }),
-    ]).then(function (results) {
-      const sale = results[0];
-      const shipping = results[1];
-
-      if (saleRunning(sale)) {
-        const label = String((sale && sale.label) || 'Sale').trim();
-        show('sale-banner', `${label} — <strong>${Number(sale.percent)}% off</strong> everything`);
-        return;
-      }
-
-      const ireland = shipping && shipping.zones && shipping.zones.ireland;
-      if (ireland && ireland.amount === 0) {
-        show(
-          'postage-banner',
-          '<strong>Free insured postage</strong> within Ireland — ' +
-            '<a href="/pages/faq.html#postage">see all postage rates</a>'
-        );
-      }
+    readJson('/data/sale.json', { cache: 'no-store' }).then(function (sale) {
+      if (!saleRunning(sale)) return;
+      const label = String((sale && sale.label) || 'Sale').trim();
+      show('sale-banner', `${label} — <strong>${Number(sale.percent)}% off</strong> everything`);
     });
   }
 

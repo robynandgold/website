@@ -15,12 +15,12 @@
 // No imports: this file is loaded by the tests directly, which the Stripe SDK
 // would otherwise prevent.
 export const SHIPPING_ZONES = {
-  ireland: { amount: 0, name: 'Delivery within Ireland', minDays: 2, maxDays: 5 },
+  ireland: { amount: 1000, name: 'Delivery within Ireland', minDays: 2, maxDays: 5 },
   europe: { amount: 1500, name: 'Delivery to the UK and Europe', minDays: 5, maxDays: 10 },
   world: { amount: 3500, name: 'Delivery to the rest of the world', minDays: 7, maxDays: 14 },
 };
 
-// UK + Europe for the €15 tier (Ireland has its own, free, tier).
+// UK + Europe for the €15 tier (Ireland has its own tier).
 export const EUROPE_COUNTRIES = new Set([
   'GB', 'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE',
   'GR', 'HU', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK',
@@ -98,16 +98,15 @@ export function shippingOptionFor(zoneKey) {
 
 /**
  * The rates to offer for a destination. A known country gets its own single
- * rate. When the country can't be established at all, the paid tiers are
- * offered for the shopper to choose from — deliberately without the free Irish
- * one, which should only ever apply to an address we have actually been told
- * is in Ireland.
+ * rate; when the country can't be established at all, all three are offered
+ * for the shopper to choose from, and the webhook's cross-check catches one
+ * that doesn't match where the parcel actually goes.
  */
 export function shippingOptionsForCountry(country) {
   const zone = zoneForCountry(country);
   return zone
     ? [shippingOptionFor(zone)]
-    : [shippingOptionFor('europe'), shippingOptionFor('world')];
+    : [shippingOptionFor('ireland'), shippingOptionFor('europe'), shippingOptionFor('world')];
 }
 
 /**

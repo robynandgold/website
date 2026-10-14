@@ -260,11 +260,10 @@ describe('build helpers', () => {
 // read from there by the cart, the Stripe session and the webhook's
 // underpayment check — but they're also written out as prose on the FAQ and
 // Terms pages, which nothing can derive. These tests are what stops those two
-// drifting apart, and what stops the free Irish rate leaking to destinations
-// nobody has said are Irish.
+// drifting apart.
 describe('postage zones', () => {
-  test('Ireland is free, Europe €15, the rest of the world €35', () => {
-    assert.equal(SHIPPING_ZONES.ireland.amount, 0);
+  test('Ireland €10, Europe €15, the rest of the world €35', () => {
+    assert.equal(SHIPPING_ZONES.ireland.amount, 1000);
     assert.equal(SHIPPING_ZONES.europe.amount, 1500);
     assert.equal(SHIPPING_ZONES.world.amount, 3500);
   });
@@ -294,9 +293,10 @@ describe('postage zones', () => {
     assert.equal(zoneForCountry(''), null);
   });
 
-  test('Ireland is the only free destination', () => {
-    const free = ALLOWED_COUNTRIES.filter(c => SHIPPING_ZONES[zoneForCountry(c)].amount === 0);
-    assert.deepEqual(free, ['IE']);
+  test('nothing ships for nothing', () => {
+    for (const code of ALLOWED_COUNTRIES) {
+      assert.ok(SHIPPING_ZONES[zoneForCountry(code)].amount > 0, `${code} ships free`);
+    }
   });
 
   test('the countries Stripe takes an address for all have a rate', () => {
@@ -341,7 +341,7 @@ describe('which destination a checkout is quoted for', () => {
   });
 
   test('a known destination is offered exactly one rate', () => {
-    for (const [country, cents] of [['IE', 0], ['GB', 1500], ['AU', 3500]]) {
+    for (const [country, cents] of [['IE', 1000], ['GB', 1500], ['AU', 3500]]) {
       const options = shippingOptionsForCountry(country);
       assert.equal(options.length, 1, `${country} was offered ${options.length} rates`);
       assert.equal(options[0].shipping_rate_data.fixed_amount.amount, cents);
@@ -350,11 +350,10 @@ describe('which destination a checkout is quoted for', () => {
     }
   });
 
-  test('an unknown destination is never offered the free Irish rate', () => {
+  test('an unknown destination is offered every tier to choose from', () => {
     const options = shippingOptionsForCountry(null);
     const amounts = options.map(o => o.shipping_rate_data.fixed_amount.amount);
-    assert.deepEqual(amounts, [1500, 3500]);
-    assert.ok(!amounts.includes(0), 'free postage was offered to an unknown destination');
+    assert.deepEqual(amounts, [1000, 1500, 3500]);
   });
 });
 
@@ -385,8 +384,8 @@ describe('the postage rates the pages promise', () => {
   test('the FAQ quotes the real rates', () => {
     const faq = read('pages', 'faq.html');
     assert.match(faq, /id="postage"/, 'the FAQ has no postage section to link to');
-    assert.match(faq, /Ireland<\/th><td><strong>Free<\/strong>/,
-      'the FAQ table no longer says Irish postage is free');
+    assert.ok(faq.includes(`Ireland</th><td>€${euros(SHIPPING_ZONES.ireland.amount)}</td>`),
+      `the FAQ table does not quote €${euros(SHIPPING_ZONES.ireland.amount)} for Ireland`);
     assert.ok(faq.includes(`€${euros(SHIPPING_ZONES.europe.amount)}`),
       `the FAQ does not quote €${euros(SHIPPING_ZONES.europe.amount)} for Europe`);
     assert.ok(faq.includes(`€${euros(SHIPPING_ZONES.world.amount)}`),
@@ -395,8 +394,8 @@ describe('the postage rates the pages promise', () => {
 
   test('the Terms quote the real rates', () => {
     const terms = read('pages', 'terms.html');
-    assert.match(terms, /free within\s+Ireland/,
-      'the Terms no longer say Irish postage is free');
+    assert.ok(terms.includes(`€${euros(SHIPPING_ZONES.ireland.amount)} within`),
+      'the Terms do not quote the Irish rate');
     assert.ok(terms.includes(`€${euros(SHIPPING_ZONES.europe.amount)}`),
       'the Terms do not quote the European rate');
     assert.ok(terms.includes(`€${euros(SHIPPING_ZONES.world.amount)}`),
@@ -446,6 +445,13 @@ describe('the band above the header', () => {
     for (const file of ['products.js', 'product-page.js']) {
       assert.ok(!/className = 'sale-banner'/.test(read('js', file)),
         `${file} has grown its own copy of the banner again`);
+    }
+  });
+
+  test('nothing claims free postage any more', () => {
+    for (const file of ['js/banners.js', 'css/styles.css']) {
+      assert.ok(!read(...file.split('/')).includes('postage-banner'),
+        `${file} still carries the free-postage band`);
     }
   });
 });

@@ -66,22 +66,26 @@ npm run test:unit      # logic, catalogue, security — instant, no browser
 npm run test:integration   # real pages in Chromium
 ```
 
-Node's built-in runner; no dependencies. 133 tests in `tests/`:
+Node's built-in runner; no dependencies. 166 tests in `tests/`:
 
-- **`unit.test.mjs`** — the listed/buyable split, sale pricing, and catalogue
-  integrity (unique slugs, media present on disk, no piece both sold and
-  dropping later, the featured cap).
+- **`unit.test.mjs`** — the listed/buyable split, sale pricing, postage
+  zones, and catalogue integrity (unique slugs, media present on disk, no
+  piece both sold and dropping later, the featured cap).
 - **`security.test.mjs`** — the VIP early-purchase gate, page hygiene
   (one title, no duplicate ids, canonical-or-noindex), and that every
   generated product page matches its catalogue entry.
 - **`integration.test.mjs`** — Chromium against a local server: pages load
-  without errors, shop filters and sorting, the cart, drops, sales, navigation
-  consistency, no sideways scroll on a phone, and every sitemap URL resolving.
+  without errors, shop filters and sorting, the cart, the postage quote and the
+  band above the header, drops, sales, navigation consistency, no sideways
+  scroll on a phone, and every sitemap URL resolving.
 
-Run them after touching pricing, drops, the catalogue or `build.js`. Two
-invariants they exist to protect: `priceNow()` in `src/js/products.js` must
-agree with `priceFor()` in `worker/pricing.js`, and `isListed()`/`isScheduled()`
-in `src/js/products.js` must agree with the copies in `scripts/build.js`.
+Run them after touching pricing, postage, drops, the catalogue or
+`build.js`. Three invariants they exist to protect: `priceNow()` in
+`src/js/products.js` must agree with `priceFor()` in `worker/pricing.js`,
+`isListed()`/`isScheduled()` in `src/js/products.js` must agree with the copies
+in `scripts/build.js`, and `saleRunning()` in `src/js/banners.js` must agree
+with both copies of `saleActive()`. The postage prose on the FAQ and Terms
+pages is checked against `SHIPPING_ZONES` the same way.
 
 Integration tests need Playwright (global install at
 `/opt/node22/lib/node_modules/playwright`). Without it those tests skip rather
@@ -142,6 +146,10 @@ Nav hrefs are relative and differ per file (`shop.html` vs `pages/shop.html` vs
 `../shop.html`) — match the neighbouring links rather than pasting one form
 everywhere. `add-product.html` intentionally carries a shorter nav.
 
+Every one of those pages also loads `js/banners.js` before `</body>` (relative
+path per file, as with the nav) — a new hand-written page needs that line or it
+will be the only page without the band above the header.
+
 The single `.nav-left` element is the desktop menu row *and* the mobile
 hamburger panel, so one link addition covers both. The desktop header is
 stacked (brand above a centred link row, cart absolute right) specifically so
@@ -164,6 +172,27 @@ optional `soldAt`, `dropAt`, `keepsake`.
   still appears in the shop. The page shows a "coming soon" dictionary card
   while no live keepsake exists and swaps itself for the grid when one does,
   so launching it needs no code change.
+
+## Postage
+
+`SHIPPING_ZONES` in `worker/shipping.js` is the only place a rate is written
+down (cents; `0` is free). Ireland is free, UK/Europe €15, rest of world €35.
+That file deliberately imports nothing so the tests can load it without the
+Stripe SDK — the same reason `worker/pricing.js` exists.
+
+Stripe's payment page shows every rate it is handed and does **not** match them
+to the address the shopper types, so the destination is settled *before* the
+session is created: the cart asks `GET /api/shipping` for the table, the
+shopper picks a country, and that country is posted to
+`/api/create-checkout-session`, which offers that one rate. Cloudflare's
+`request.cf.country` is only the fallback for when the cart couldn't reach the
+endpoint. With no country at all, the two paid tiers are offered and the free
+Irish one withheld — never give away postage to an address nobody has claimed
+is Irish. The webhook still cross-checks the paid rate against the real
+delivery country afterwards and emails the shop on a shortfall.
+
+The rates are also written out as prose on the FAQ and Terms pages; a unit test
+fails if those stop matching `SHIPPING_ZONES`, so change both or neither.
 
 `src/data/sale.json` sits alongside it: a site-wide percentage with a start and
 end. Prices in the catalogue are never rewritten for a sale — the shop and
@@ -195,7 +224,10 @@ dashboard or ask, rather than claiming a deploy is live.
 
 - Client-side JS is duplicated between pages by design (each page has its own
   inline loader with a `ProductsAPI` fallback). Follow the local pattern rather
-  than centralising.
+  than centralising. The one exception is the band above the header: the sale
+  announcement and the free-postage notice both live in `src/js/banners.js`,
+  which every page loads, because neither has any page-specific behaviour to
+  follow. Only one of the two is ever shown — a sale takes the slot.
 - `src/js/products.js` has no trailing newline; leave it alone.
 - `src/pages/product-detail.html` is not a page — it's a `noindex` redirect
   shim forwarding old `product-detail.html?slug=…` links to the generated

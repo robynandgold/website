@@ -67,8 +67,8 @@ compare; `/api/view` is public and writes nothing but a daily tally.
   from the live catalogue** (fetched from GitHub), quantity is forced to 1,
   and if the catalogue can't be loaded it fails closed. Sessions expire
   after **35 minutes** (so an abandoned checkout doesn't sit on a
-  one-of-a-kind piece) with Stripe recovery links enabled. Shipping tiers:
-  Ireland €10, UK/Europe €15, rest of world €35.
+  one-of-a-kind piece) with Stripe recovery links enabled. Postage tiers
+  (`worker/shipping.js`): Ireland free, UK/Europe €15, rest of world €35.
 - **`/api/webhook`** (`webhook.js`) — Stripe webhook (async signature
   verification via Web Crypto). Handles:
   - `checkout.session.completed` → marks the piece(s) sold by committing
@@ -98,6 +98,15 @@ compare; `/api/view` is public and writes nothing but a daily tally.
   so Stripe is both source of truth and history, and the view works
   retroactively over sessions that pre-date the endpoint. The Sales tab groups
   them by piece — the same ring left three times is the signal worth seeing.
+- **`/api/shipping`** (`shipping-api.js`) — the postage table plus the
+  visitor's country, and the only `GET` endpoint on the Worker. It exists so
+  the cart can quote postage *before* checkout: Stripe's payment page shows
+  whatever rates it is handed without matching them to the address typed into
+  it, so the destination has to be settled before the session is created. The
+  cart's country picker, the total it shows and the free-postage banner all
+  read this, which keeps `SHIPPING_ZONES` in `worker/shipping.js` the one place
+  a rate is written down — change it there and the site, the banner and Stripe
+  all follow. Nothing is gated: the rates are public information.
 - **`/api/costs`** (`costs.js`) — what each piece cost to buy, read and
   written by the admin Sales tab. Stored in the `product_costs` table in D1
   and **never in products.json**: the repository is public and the catalogue
@@ -229,9 +238,9 @@ than guess.
 | `expires_at` now + 35 min | A lapsed checkout must not sit on a one-of-a-kind piece. Stripe's minimum is 30; the extra 5 covers clock skew |
 | `after_expiration.recovery` | Issues the resume link the recovery email sends |
 | `allow_promotion_codes: !saleActive(sale)` | The code field — withdrawn while a sale runs so a code can't stack on an already-reduced price |
-| `shipping_address_collection` | ~200 countries |
-| `shipping_options` | **One** tier, picked from Cloudflare's `request.cf.country`: Ireland €10, UK/Europe €15, rest of world €35. Stripe shows every rate offered to every buyer, so offering one avoids a shopper choosing the wrong one |
-| `metadata` | `product_ids`, plus `sale_percent` when a sale is on. This is what makes the abandoned-checkout view possible |
+| `shipping_address_collection` | ~200 countries, from `ALLOWED_COUNTRIES` in `worker/shipping.js` |
+| `shipping_options` | **One** tier for one destination — the country the shopper chose in the cart, else Cloudflare's `request.cf.country`. Stripe shows every rate it is handed to every buyer without matching them to the address typed in, so offering one avoids a shopper picking the wrong one. With no country at all, the two paid tiers are offered and the free Irish one withheld |
+| `metadata` | `product_ids`, plus `sale_percent` when a sale is on and `quoted_for` (the destination the postage was quoted against). This is what makes the abandoned-checkout view possible |
 | *(no `payment_method_types`)* | Deliberately omitted so Stripe offers whatever is enabled in the Dashboard, per device and locale |
 
 ### Webhooks (`worker/webhook.js`)

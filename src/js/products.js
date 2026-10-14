@@ -299,28 +299,8 @@ function lazyPlayVideos(container) {
   });
 }
 
-/**
- * Announce a running sale in a band above the header. Injected from here so
- * every page that loads this file gets it without twelve copies of the markup;
- * product pages do the same from product-page.js.
- */
-function renderSaleBanner(sale) {
-  if (!saleActive(sale) || document.querySelector('.sale-banner')) return;
-  const banner = document.createElement('div');
-  banner.className = 'sale-banner';
-  const label = String(sale.label || 'Sale').trim();
-  banner.innerHTML = `${label} — <strong>${Number(sale.percent)}% off</strong> everything`;
-  document.body.insertBefore(banner, document.body.firstChild);
-}
-
-if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-  const showBanner = () => loadSale().then(renderSaleBanner).catch(() => {});
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', showBanner);
-  } else {
-    showBanner();
-  }
-}
+// The band above the header — the sale announcement and the free-postage
+// notice — is rendered by js/banners.js, which every page loads.
 
 // Export functions for use in other files
 if (typeof window !== 'undefined') {

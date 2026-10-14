@@ -251,6 +251,29 @@ a {
   color: var(--accent-soft);
 }
 
+/* The standing free-postage notice. Same band as a sale, in the quieter ink
+   tone so a real sale still stands out when one is running — the two are
+   never shown together. */
+.postage-banner {
+  background: var(--ink);
+  color: #f7f3ec;
+  text-align: center;
+  font-size: 0.74rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.5rem 1rem;
+}
+
+.postage-banner strong {
+  font-weight: 600;
+}
+
+.postage-banner a {
+  color: #f7f3ec;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .nav-link::after {
   content: "";
   position: absolute;
@@ -1276,6 +1299,51 @@ a {
   margin-bottom: 0.6rem;
 }
 
+.cart-summary-row--total {
+  border-top: 1px solid rgba(221, 209, 194, 0.9);
+  padding-top: 0.7rem;
+  margin-top: 0.2rem;
+  font-weight: 600;
+}
+
+/* Postage quote — country picker above the rate it produces */
+.cart-shipping {
+  margin: 0.9rem 0 0.6rem;
+}
+
+.cart-shipping-label {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.cart-shipping-select {
+  width: 100%;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid rgba(221, 209, 194, 0.9);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.6rem;
+  margin-bottom: 0.7rem;
+}
+
+.cart-shipping-estimate {
+  font-size: 0.76rem;
+  color: var(--muted);
+  margin: -0.2rem 0 0;
+}
+
+/* The sticky bar is for phones only — on desktop the order summary already
+   carries the total and the checkout button. It is turned back on, and its
+   hidden state handled, in the phone media query further down. */
+.mobile-checkout-bar { display: none; }
+
 .cart-summary-note {
   font-size: 0.82rem;
   color: var(--muted);
@@ -1390,7 +1458,7 @@ a {
     font-size: 1rem;
   }
 
-  /* Sticky mobile checkout bar — keeps subtotal + checkout always reachable */
+  /* Sticky mobile checkout bar — keeps the total + checkout always reachable */
   .mobile-checkout-bar {
     display: flex;
     align-items: center;

@@ -35,6 +35,13 @@ async function initiateCheckout() {
     checkoutButton.textContent = 'Processing...';
   }
 
+  // The country the cart quoted postage for, so Stripe charges the rate the
+  // shopper was actually shown. Null until the cart's rates have loaded (or
+  // if they failed to), in which case the Worker falls back to the country
+  // Cloudflare reports for the connection.
+  const shippingCountry =
+    (typeof window.getShippingCountry === 'function' && window.getShippingCountry()) || undefined;
+
   try {
     // Call our serverless function to create Stripe Checkout session
     const response = await fetch('/api/create-checkout-session', {
@@ -44,6 +51,7 @@ async function initiateCheckout() {
       },
       body: JSON.stringify({
         items: cartItems,
+        shippingCountry,
         successUrl: `${window.location.origin}/pages/success.html`,
         cancelUrl: `${window.location.origin}/pages/cart.html`
       })

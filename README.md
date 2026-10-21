@@ -69,7 +69,7 @@ workflow from the repo's GitHub Actions tab.
 npm test
 ```
 
-166 checks covering the pricing, the postage, the catalogue, the
+170 checks covering the pricing, the postage, the catalogue, the
 early-purchase gate and the pages themselves. Worth running before a push that touches anything to do with
 money, drops or the catalogue. Details in `CLAUDE.md`.
 

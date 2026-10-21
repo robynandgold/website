@@ -9,7 +9,7 @@
 //      written by three different places (admin page, webhook, by hand).
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { saleActive, priceFor } from '../worker/pricing.js';
 import {
@@ -452,6 +452,60 @@ describe('the band above the header', () => {
     for (const file of ['js/banners.js', 'css/styles.css']) {
       assert.ok(!read(...file.split('/')).includes('postage-banner'),
         `${file} still carries the free-postage band`);
+    }
+  });
+});
+
+// Google rejects a Product whose sku is over 50 characters — the whole item,
+// not just the field — and our ids are full slugs, so the longest names went
+// over. These guard the shortening: every piece must publish a sku Google will
+// accept, and no two pieces may end up sharing one.
+describe('the sku published to Google', () => {
+  test('no piece exceeds the length Google allows', () => {
+    for (const p of products) {
+      const sku = BUILD.skuFor(p);
+      assert.ok(sku.length <= BUILD.SKU_MAX,
+        `${p.slug}: sku is ${sku.length} characters, over the ${BUILD.SKU_MAX} allowed`);
+      assert.ok(sku.length > 0, `${p.slug}: empty sku`);
+    }
+  });
+
+  test('every piece still has its own', () => {
+    const skus = products.map(p => BUILD.skuFor(p));
+    const dupes = skus.filter((s, i) => skus.indexOf(s) !== i);
+    assert.deepEqual([...new Set(dupes)], [], 'two pieces publish the same sku');
+  });
+
+  test('an id that already fits is published unchanged', () => {
+    for (const p of products) {
+      if (String(p.id).length <= BUILD.SKU_MAX) {
+        assert.equal(BUILD.skuFor(p), String(p.id), `${p.slug}: a short id was rewritten`);
+      }
+    }
+  });
+
+  test('shortening keeps the token that makes an id unique', () => {
+    const long = { id: '18ct-yellow-gold-emerald-and-diamond-star-set-band-z1dmn' };
+    const sku = BUILD.skuFor(long);
+    assert.equal(sku.length, 50);
+    assert.ok(sku.endsWith('-z1dmn'), `${sku} dropped its unique suffix`);
+    assert.ok(long.id.startsWith(sku.slice(0, sku.lastIndexOf('-'))), 'the head is not a prefix of the id');
+  });
+
+  test('it is stable — the same id always gives the same sku', () => {
+    const p = { id: '9ct-yellow-gold-sapphire-and-diamond-triple-row-cigar-band-16quj' };
+    assert.equal(BUILD.skuFor(p), BUILD.skuFor({ ...p }));
+  });
+
+  test('an id with no suffix to keep is simply cut to length', () => {
+    assert.equal(BUILD.skuFor({ id: 'x'.repeat(80) }).length, BUILD.SKU_MAX);
+  });
+
+  test('the generated pages carry the shortened sku, not the raw id', () => {
+    for (const p of products) {
+      const html = readFileSync(path.join(SRC, 'pages', 'product', `${p.slug}.html`), 'utf8');
+      assert.ok(html.includes(`"sku":"${BUILD.skuFor(p)}"`),
+        `${p.slug}: the page does not publish the sku the build produces`);
     }
   });
 });

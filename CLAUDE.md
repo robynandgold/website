@@ -66,18 +66,18 @@ npm run test:unit      # logic, catalogue, security — instant, no browser
 npm run test:integration   # real pages in Chromium
 ```
 
-Node's built-in runner; no dependencies. 166 tests in `tests/`:
+Node's built-in runner; no dependencies. 170 tests in `tests/`:
 
 - **`unit.test.mjs`** — the listed/buyable split, sale pricing, postage
-  zones, and catalogue integrity (unique slugs, media present on disk, no
-  piece both sold and dropping later, the featured cap).
+  zones, the published `sku`, and catalogue integrity (unique slugs, media
+  present on disk, no piece both sold and dropping later, the featured cap).
 - **`security.test.mjs`** — the VIP early-purchase gate, page hygiene
   (one title, no duplicate ids, canonical-or-noindex), and that every
   generated product page matches its catalogue entry.
 - **`integration.test.mjs`** — Chromium against a local server: pages load
-  without errors, shop filters and sorting, the cart, the postage quote and the
-  band above the header, drops, sales, navigation consistency, no sideways
-  scroll on a phone, and every sitemap URL resolving.
+  without errors, shop filters and sorting, the cart, the postage quote, drops,
+  sales, navigation consistency, no sideways scroll on a phone, and every
+  sitemap URL resolving.
 
 Run them after touching pricing, postage, drops, the catalogue or
 `build.js`. Three invariants they exist to protect: `priceNow()` in
@@ -168,6 +168,13 @@ optional `soldAt`, `dropAt`, `keepsake`.
   hidden until the moment it drops instead. `isListed()` (shown) and
   `isPubliclyLive()` (buyable) are different questions — don't collapse them,
   and both are mirrored in `scripts/build.js`.
+- `id` is the slug, and keys the cart, Stripe's session metadata and the
+  `product_costs` rows in D1 — renaming one orphans a piece's history, so
+  don't. Google caps a Product's `sku` at 50 characters and rejects the whole
+  item above it, so `skuFor()` in `scripts/build.js` trims the *head* of a long
+  id and keeps its trailing token (the part that disambiguates two similar
+  names). Nothing to do when adding a long name; a unit test checks every
+  published sku fits and stays unique.
 - `keepsake: true` → also listed on the Keepsake collection page; the piece
   still appears in the shop. The page shows a "coming soon" dictionary card
   while no live keepsake exists and swaps itself for the grid when one does,

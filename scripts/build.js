@@ -177,6 +177,30 @@ function gridMarkup(products, linkPrefix) {
 
 // --- per-product structured data -------------------------------------------
 
+// Google caps a Product's sku at 50 characters and rejects the whole item
+// above it ("Invalid string length in field 'sku'"), and our ids are the full
+// slug — "18ct-yellow-gold-emerald-and-diamond-star-set-band-z1dmn" is 56.
+//
+// The id itself is left alone: it keys the cart, Stripe's session metadata and
+// the product_costs rows in D1, so renaming one would orphan a piece's history.
+// Only the published sku is shortened, and only for the ids that need it.
+//
+// The trailing token is the part that actually disambiguates two similar
+// names, so the *head* is trimmed and that token kept. A piece's sku is
+// therefore stable — it only ever changes if its id does — and
+// `npm run test:unit` checks the whole catalogue still comes out unique.
+const SKU_MAX = 50;
+
+function skuFor(product) {
+  const id = String(product.id);
+  if (id.length <= SKU_MAX) return id;
+  const cut = id.lastIndexOf('-');
+  if (cut === -1) return id.slice(0, SKU_MAX);
+  const tail = id.slice(cut + 1);
+  const head = id.slice(0, cut).slice(0, SKU_MAX - tail.length - 1).replace(/-+$/, '');
+  return `${head}-${tail}`;
+}
+
 function productJsonLd(product, url) {
   const inStock = product.available !== false;
   const material = deriveMaterial(product.name);
@@ -225,7 +249,7 @@ function productJsonLd(product, url) {
     '@type': 'Product',
     name: product.name,
     description: product.description,
-    sku: product.id,
+    sku: skuFor(product),
     image: (product.images || []).map(i => SITE + i),
     brand: { '@type': 'Brand', name: 'Robyn & Gold' },
     category: 'Vintage Jewellery',
@@ -663,4 +687,5 @@ if (require.main === module) main();
 module.exports = {
   isPubliclyLive, isScheduled, isListed, isSitemapEligible,
   dropLabel, metaDescription, deriveMaterial, ukSize, relatedTo,
+  skuFor, SKU_MAX,
 };

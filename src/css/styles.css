@@ -32,6 +32,13 @@ body {
   padding: 0;
 }
 
+/* Match the page's warm tone on the root element so any area iOS Safari paints
+   beyond the body box (overscroll, or the phantom scroll region created by the
+   fixed mobile CTA) doesn't flash the browser's default white background. */
+html {
+  background-color: #f3eee6;
+}
+
 /* Offset in-page anchor jumps so the sticky header doesn't cover the target */
 :target,
 section[id],

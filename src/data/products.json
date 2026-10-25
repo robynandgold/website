@@ -1835,5 +1835,29 @@
     "videos": [
       "/images/products/IMG_2019.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-ej-signet-ring-vpy6i",
+    "name": "9ct Yellow Gold ‘EJ’ Signet Ring",
+    "slug": "9ct-yellow-gold-ej-signet-ring-vpy6i",
+    "description": "Is EJ sentimental to you?\n\nA classic 9ct yellow gold signet featuring an ornate ‘EJ’ monogram on a softly angular face. Smooth, tapered shoulders balance the decorative lettering, giving this piece an understated elegance. A little piece of history, ready for its next chapter.\n\nThe hallmark symbols are quite worn but appear consistent with London, 1968; the assay office and date cannot be confirmed with certainty.\n\n3.4g",
+    "size": "UK O · US 7.25",
+    "price": 385,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "",
+    "previewDrop": true,
+    "createdAt": "2026-10-25T13:36:38.043Z",
+    "images": [
+      "/images/products/IMG_3002.jpeg",
+      "/images/products/IMG_3003.jpeg",
+      "/images/products/IMG_3004.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_2986.mp4"
+    ]
   }
 ]

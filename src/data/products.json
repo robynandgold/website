@@ -1934,5 +1934,30 @@
     "videos": [
       "/images/products/IMG_2987.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-engraved-leaf-band-qpako",
+    "name": "9ct Yellow Gold Engraved Leaf Band",
+    "slug": "9ct-yellow-gold-engraved-leaf-band-qpako",
+    "description": "An elegant 9ct yellow gold band featuring a repeating engraved leaf motif, framed by finely beaded edges. The detailed pattern catches the light beautifully against the polished gold, giving this classic silhouette plenty of character. A lovely choice as a distinctive wedding band, a stacking piece or an everyday favourite.\n\nHallmarked for London, 1986.\n\n2g",
+    "size": "UK O½ · US 7.5",
+    "price": 265,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "",
+    "previewDrop": true,
+    "createdAt": "2026-10-25T13:50:12.852Z",
+    "images": [
+      "/images/products/IMG_3024.jpeg",
+      "/images/products/IMG_3026.jpeg",
+      "/images/products/IMG_3025.jpeg",
+      "/images/products/IMG_3027.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_2984.mp4"
+    ]
   }
 ]

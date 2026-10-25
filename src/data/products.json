@@ -1959,5 +1959,29 @@
     "videos": [
       "/images/products/IMG_2984.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-heart-signet-l94fb",
+    "name": "9ct Yellow Gold Heart Signet",
+    "slug": "9ct-yellow-gold-heart-signet-l94fb",
+    "description": "A romantic take on the traditional signet, this yellow gold ring features a polished heart-shaped face with delicate engraved detailing to one side. Smooth, tapered shoulders lend a lovely simplicity to the design, allowing the heart to take centre stage. A charming keepsake to give or to treasure yourself.\n\nStamped 375 for 9ct gold.\n\n3.8g",
+    "size": "UK L½ · US 6",
+    "price": 405,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "",
+    "previewDrop": true,
+    "createdAt": "2026-10-25T13:52:24.915Z",
+    "images": [
+      "/images/products/IMG_3038.jpeg",
+      "/images/products/IMG_3037.jpeg",
+      "/images/products/IMG_3035.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_2994.mp4"
+    ]
   }
 ]

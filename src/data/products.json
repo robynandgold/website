@@ -1995,7 +1995,7 @@
     "featured": false,
     "keepsake": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "dropAt": "",
     "previewDrop": true,
     "createdAt": "2026-10-25T13:54:55.248Z",
@@ -2005,7 +2005,8 @@
     ],
     "videos": [
       "/images/products/IMG_2983.mp4"
-    ]
+    ],
+    "soldAt": "2026-10-25T17:53:11.825Z"
   },
   {
     "id": "18ct-yellow-gold-scattered-diamond-geometric-band-qqh7j",

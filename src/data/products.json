@@ -1859,5 +1859,29 @@
     "videos": [
       "/images/products/IMG_2986.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-ruby-crossover-ring-9imh9",
+    "name": "9ct Yellow Gold Ruby Crossover Ring",
+    "slug": "9ct-yellow-gold-ruby-crossover-ring-9imh9",
+    "description": "Rich raspberry-red rubies trace intertwining ribbons of polished 9ct yellow gold in this elegant crossover ring. The flowing design brings lovely movement to the piece, with warm gold framing each sweep of colour. A distinctive addition to your everyday collection.\n\nThe hallmark symbols are worn, but the assay office mark appears to be London; this cannot be confirmed with certainty.\n\n3.3g",
+    "size": "UK I½ · US 4.5",
+    "price": 445,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "",
+    "previewDrop": true,
+    "createdAt": "2026-10-25T13:41:49.083Z",
+    "images": [
+      "/images/products/IMG_3008.jpeg",
+      "/images/products/IMG_3007.jpeg",
+      "/images/products/IMG_3006.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_2990.mp4"
+    ]
   }
 ]

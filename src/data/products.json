@@ -1909,5 +1909,30 @@
     "videos": [
       "/images/products/IMG_2992.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-diamond-crossover-ring-64wew",
+    "name": "9ct Yellow Gold Diamond Crossover Ring",
+    "slug": "9ct-yellow-gold-diamond-crossover-ring-64wew",
+    "description": "A sparkling row of round diamonds is framed by sweeping curves of polished yellow gold in this elegant crossover ring. The gently sculptural design brings movement to a classic diamond band, making it lovely worn alone or alongside your favourite gold pieces.\n\nStamped 375 for 9ct gold, with a further stamp indicating a total diamond weight of 0.15ct.\n\n2.4g",
+    "size": "UK O½ · US 7.5",
+    "price": 345,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "dropAt": "",
+    "previewDrop": true,
+    "createdAt": "2026-10-25T13:47:37.861Z",
+    "images": [
+      "/images/products/IMG_3019.jpeg",
+      "/images/products/IMG_3021.jpeg",
+      "/images/products/IMG_3022.jpeg",
+      "/images/products/IMG_3020.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_2987.mp4"
+    ]
   }
 ]

@@ -1516,7 +1516,7 @@
     "featured": false,
     "keepsake": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "dropAt": "",
     "createdAt": "2026-09-13T13:03:30.913Z",
     "images": [
@@ -1528,7 +1528,8 @@
     ],
     "videos": [
       "/images/products/IMG_1682.mp4"
-    ]
+    ],
+    "soldAt": "2026-10-31T13:12:30.748Z"
   },
   {
     "id": "18ct-yellow-gold-curved-diamond-band-jwl1n",

@@ -93,6 +93,7 @@
         </div>
 
         <p class="shop-count" id="archive-count">Loading…</p>
+        <h2 class="visually-hidden">Pieces that have sold</h2>
         <!-- Pre-rendered by scripts/build.js; the inline JS below re-renders it. -->
         <div id="archive-list" class="product-grid"><!-- BUILD:archive-grid -->
         <article class="product-card is-sold">
@@ -340,7 +341,7 @@
         <article class="product-card is-sold">
           <span class="sold-badge">Sold</span>
           <a class="product-card-link-wrap" href="product/9ct-yellow-gold-herringbone-bracelet-g4etl.html">
-            
+            <img src="/images/products/9ct-yellow-gold-herringbone-bracelet-1.jpeg" alt="9ct Yellow Gold Herringbone Bracelet" class="product-card-image" width="600" height="600" loading="lazy" />
             <div class="product-card-body">
               <h3 class="product-card-title">9ct Yellow Gold Herringbone Bracelet</h3>
               <p class="product-card-price">€215.00</p>
@@ -632,7 +633,7 @@
         const video = product.videos?.[0];
         const image = product.images?.[0];
         const media = video
-          ? `<div class="product-media"><video src="${video}" class="product-card-image" muted loop playsinline preload="none"${image ? ` poster="${image}"` : ''}></video>${image ? `<img src="${image}" alt="" aria-hidden="true" class="media-poster" loading="lazy" />` : ''}</div>`
+          ? `<div class="product-media"><video src="${video}" class="product-card-image" muted loop playsinline preload="none"${image ? ` poster="${image}"` : ''}></video>${image ? `<img src="${image}" alt="" aria-hidden="true" class="media-poster" width="600" height="600" loading="lazy" />` : ''}</div>`
           : image
             ? `<img src="${image}" alt="${product.name}" class="product-card-image" width="600" height="600" loading="lazy" onerror="this.style.display='none'" />`
             : '';

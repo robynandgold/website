@@ -123,11 +123,49 @@ describe('page hygiene', () => {
     assert.ok(!sitemap.includes('add-product'), 'the admin page is listed in the sitemap');
   });
 
+  // One top-level heading per page, and no level skipped on the way down.
+  // Both are cheap to get wrong on hand-written pages: the keepsake page
+  // carried two <h1>s, one in each of its two swapped states.
+  for (const { name, html } of pageFiles()) {
+    test(`${name} has exactly one h1 and skips no heading level`, () => {
+      const headings = [...html.matchAll(/<h([1-6])[\s>]/g)].map(m => Number(m[1]));
+      const h1s = headings.filter(n => n === 1).length;
+      assert.equal(h1s, 1, `${name} has ${h1s} <h1> elements`);
+
+      const skips = [];
+      for (let i = 1; i < headings.length; i++) {
+        if (headings[i] - headings[i - 1] > 1) skips.push(`h${headings[i - 1]} to h${headings[i]}`);
+      }
+      assert.deepEqual([...new Set(skips)], [], `${name} skips a heading level`);
+    });
+  }
+
+  // The footer is hand-copied into every page, so one edit that misses a page
+  // leaves it quietly short of links. add-product.html is the shop's own tool
+  // and deliberately carries a shorter one.
+  test('every page carries the same footer links', () => {
+    const linksOf = (html) => {
+      const block = html.match(/<div class="footer-links">([\s\S]*?)<\/div>/);
+      return block ? [...block[1].matchAll(/<a [^>]*>([^<]*)<\/a>/g)].map(m => m[1].trim()) : null;
+    };
+    const pages = pageFiles().filter(p => p.name !== 'pages/add-product.html');
+    const reference = linksOf(readFileSync(path.join(SRC, 'index.html'), 'utf8'));
+    assert.ok(reference && reference.length >= 8, 'the homepage footer looks wrong');
+
+    for (const { name, html } of pages) {
+      const links = linksOf(html);
+      assert.ok(links, `${name} has no footer-links block`);
+      const missing = reference.filter(l => !links.includes(l));
+      assert.deepEqual(missing, [], `${name} is missing footer links`);
+    }
+  });
+
   test('the build regions the build script owns are all present', () => {
     const regions = {
       'pages/shop.html': ['shop-grid', 'shop-jsonld'],
       'pages/archive.html': ['archive-grid'],
       'index.html': ['featured-grid'],
+      'pages/keepsake-collection.html': ['keepsake-grid', 'keepsake-count', 'keepsake-coming-heading'],
     };
     for (const [file, names] of Object.entries(regions)) {
       const html = readFileSync(path.join(SRC, file), 'utf8');

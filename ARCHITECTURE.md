@@ -128,9 +128,13 @@ compare; `/api/view` is public and writes nothing but a daily tally.
   onto the finest pieces. A piece joins it by being ticked *Keepsake
   collection* on the admin page (`keepsake: true`) and still sits in the shop
   alongside everything else — the page gathers them, it doesn't take them away.
-  It ships as a "coming soon" dictionary card and swaps itself for the grid as
-  soon as one live keepsake exists, so the collection launches without a code
-  change (and reverts to the card if the last keepsake sells).
+  It ships as a "coming soon" dictionary card and becomes the grid as soon as
+  one live keepsake exists, so the collection launches without a code change
+  (and reverts to the card if the last keepsake sells). Which of the two the
+  page ships in is decided by `scripts/build.js`, not only by the page's own
+  JS: both states live in the document, and the build hides the one not in
+  play and pre-renders the grid, so a crawler that runs no JavaScript sees the
+  real collection rather than the placeholder.
 - **Site-wide sale** (optional): `src/data/sale.json` holds a percentage, a
   label and a start/end instant. Prices are **never rewritten** — the shop, the
   cart, the product pages and `checkout.js` all apply the percentage at the

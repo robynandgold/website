@@ -40,7 +40,8 @@ const SITE = 'https://robynandgold.com';
 const INJECT_PAGES = {
   shop: path.join(SRC, 'pages', 'shop.html'),
   archive: path.join(SRC, 'pages', 'archive.html'),
-  index: path.join(SRC, 'index.html')
+  index: path.join(SRC, 'index.html'),
+  keepsake: path.join(SRC, 'pages', 'keepsake-collection.html')
 };
 
 // --- helpers ----------------------------------------------------------------
@@ -201,6 +202,35 @@ function skuFor(product) {
   return `${head}-${tail}`;
 }
 
+// Postage, as the Offer's shipping block needs it.
+//
+// This mirrors SHIPPING_ZONES in worker/shipping.js, which stays the one place
+// a rate is actually set — it can't be imported here because this file is
+// CommonJS and that one is an ES module kept free of imports so the tests can
+// load it without the Stripe SDK. `npm run test:unit` fails if the two drift,
+// the same guard the FAQ and Terms prose has.
+//
+// A DefinedRegion is matched on country, and there is no way to say
+// "everywhere else", so the rest-of-world entry names the markets worth
+// naming rather than enumerating two hundred. Humans get the full table on
+// the FAQ page.
+const SHIPPING_ZONES_SEO = [
+  { zone: 'ireland', euros: 10, minDays: 2, maxDays: 5, countries: ['IE'] },
+  {
+    zone: 'europe', euros: 15, minDays: 5, maxDays: 10,
+    countries: [
+      'GB', 'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE',
+      'GR', 'HU', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK',
+      'SI', 'ES', 'SE', 'CH', 'NO', 'IS', 'LI', 'MC', 'SM', 'VA', 'AD', 'GG',
+      'JE', 'IM', 'GI', 'FO', 'AX', 'AL', 'BA', 'MD', 'ME', 'MK', 'RS', 'UA', 'XK',
+    ],
+  },
+  {
+    zone: 'world', euros: 35, minDays: 7, maxDays: 14,
+    countries: ['US', 'CA', 'AU', 'NZ', 'JP', 'SG', 'HK', 'AE', 'ZA', 'BR', 'MX', 'IN'],
+  },
+];
+
 function productJsonLd(product, url) {
   const inStock = product.available !== false;
   const material = deriveMaterial(product.name);
@@ -222,26 +252,45 @@ function productJsonLd(product, url) {
     seller: { '@type': 'Organization', name: 'Robyn & Gold' },
     hasMerchantReturnPolicy: {
       '@type': 'MerchantReturnPolicy',
+      // Both names are written out on purpose: `applicableCountry` is the
+      // schema.org property, `returnPolicyCountry` is the one Google's return
+      // policy documentation asks for. They carry the same value, so emitting
+      // each costs nothing and neither reading of the spec is left short.
       applicableCountry: 'IE',
+      returnPolicyCountry: 'IE',
       returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
       merchantReturnDays: 14,
       returnMethod: 'https://schema.org/ReturnByMail',
-      returnFees: 'https://schema.org/ReturnShippingFees'
+      // The buyer pays to send a piece back (see the Returns page), which is
+      // what this value means. The previous `ReturnShippingFees` is the "we
+      // charge a specific fee" case and is incomplete without an amount.
+      returnFees: 'https://schema.org/ReturnFeesCustomerResponsibility'
     },
     // Google's product rich results pair the return policy with a shipping
     // block; without one the offer is flagged as incomplete in Search Console.
-    shippingDetails: {
+    // One entry per postage zone, each naming the countries it covers — a
+    // DefinedRegion is matched on `addressCountry`, so the previous single
+    // entry reading `name: 'Worldwide'` told Google nothing it could use.
+    shippingDetails: SHIPPING_ZONES_SEO.map(zone => ({
       '@type': 'OfferShippingDetails',
+      shippingRate: {
+        '@type': 'MonetaryAmount',
+        value: zone.euros,
+        currency: 'EUR'
+      },
       shippingDestination: {
         '@type': 'DefinedRegion',
-        name: 'Worldwide'
+        addressCountry: zone.countries
       },
       deliveryTime: {
         '@type': 'ShippingDeliveryTime',
         handlingTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 3, unitCode: 'DAY' },
-        transitTime: { '@type': 'QuantitativeValue', minValue: 2, maxValue: 10, unitCode: 'DAY' }
+        transitTime: {
+          '@type': 'QuantitativeValue',
+          minValue: zone.minDays, maxValue: zone.maxDays, unitCode: 'DAY'
+        }
       }
-    }
+    }))
   };
 
   const product_ld = {
@@ -299,7 +348,7 @@ function carouselMarkup(product) {
     }
     return `
             <div class="carousel-slide${activeClass}" data-index="${index}">
-              <img src="${escapeHtml(item.src)}" alt="${escapeHtml(product.name)} view ${index + 1}" onerror="this.style.display='none'" />
+              <img src="${escapeHtml(item.src)}" alt="${escapeHtml(product.name)} view ${index + 1}" width="1000" height="1000" onerror="this.style.display='none'" />
             </div>`;
   }).join('');
 
@@ -602,6 +651,27 @@ function writeRegion(file, name, body) {
   if (next !== html) fs.writeFileSync(file, next);
 }
 
+// Show or hide one of the keepsake page's two states.
+//
+// The page carries both the collection and the "coming soon" card and swaps
+// them in JS once it has read the catalogue. That left a crawler which doesn't
+// run JavaScript looking at "coming soon" no matter how many keepsakes were
+// live, so the build now ships the page in the right state to begin with — the
+// same reasoning as the pre-rendered grids, applied to an attribute.
+function setHidden(html, id, hidden) {
+  const re = new RegExp(`(<div id="${id}")((?:\\s+[a-z-]+(?:="[^"]*")?)*)(\\s*>)`);
+  const m = html.match(re);
+  if (!m) throw new Error(`Expected <div id="${id}"> on the keepsake page`);
+  const attrs = m[2].replace(/\s+hidden\b/g, '');
+  return html.replace(re, `${m[1]}${attrs}${hidden ? ' hidden' : ''}${m[3]}`);
+}
+
+function writeKeepsakeState(file, hasLive) {
+  const html = fs.readFileSync(file, 'utf8');
+  const next = setHidden(setHidden(html, 'keepsake-collection', !hasLive), 'keepsake-coming', hasLive);
+  if (next !== html) fs.writeFileSync(file, next);
+}
+
 // The shop's ItemList tells search and answer engines what the collection page
 // actually lists, which a JS-rendered grid can't.
 function shopItemListJsonLd(live) {
@@ -631,6 +701,8 @@ function injectPages(products) {
     .filter(p => p.slug && p.available === false)
     .sort((a, b) => new Date(b.soldAt || b.createdAt || 0) - new Date(a.soldAt || a.createdAt || 0));
   const featured = live.filter(p => p.featured).slice(0, 3);
+  // Dearest first, matching the order the page's own JS sorts them into.
+  const keepsakes = live.filter(p => p.keepsake === true).sort((a, b) => b.price - a.price);
 
   writeRegion(INJECT_PAGES.shop, 'shop-grid', gridMarkup(live, 'product/') + '\n          ');
   writeRegion(
@@ -641,7 +713,15 @@ function injectPages(products) {
   writeRegion(INJECT_PAGES.archive, 'archive-grid', gridMarkup(sold, 'product/') + '\n        ');
   writeRegion(INJECT_PAGES.index, 'featured-grid', gridMarkup(featured, 'pages/product/') + '\n        ');
 
-  return { live: live.length, sold: sold.length, featured: featured.length };
+  writeRegion(INJECT_PAGES.keepsake, 'keepsake-count',
+    keepsakes.length ? `Showing ${keepsakes.length} ${keepsakes.length === 1 ? 'piece' : 'pieces'}` : '');
+  writeRegion(INJECT_PAGES.keepsake, 'keepsake-grid', gridMarkup(keepsakes, 'product/') + '\n          ');
+  // Exactly one <h1> in the document, and always inside the state on show.
+  writeRegion(INJECT_PAGES.keepsake, 'keepsake-coming-heading',
+    keepsakes.length ? '' : '\n          <h1 class="visually-hidden">Keepsake collection</h1>\n          ');
+  writeKeepsakeState(INJECT_PAGES.keepsake, keepsakes.length > 0);
+
+  return { live: live.length, sold: sold.length, featured: featured.length, keepsakes: keepsakes.length };
 }
 
 // --- run --------------------------------------------------------------------
@@ -676,7 +756,8 @@ function main() {
   console.log(`Generated ${written} product page(s) in src/pages/product/`);
   console.log(`Wrote sitemap with ${products.filter(isSitemapEligible).length} live product URL(s)`);
   console.log(
-    `Pre-rendered grids: shop ${injected.live}, archive ${injected.sold}, homepage featured ${injected.featured}`
+    `Pre-rendered grids: shop ${injected.live}, archive ${injected.sold}, ` +
+    `homepage featured ${injected.featured}, keepsakes ${injected.keepsakes}`
   );
 }
 
@@ -687,5 +768,5 @@ if (require.main === module) main();
 module.exports = {
   isPubliclyLive, isScheduled, isListed, isSitemapEligible,
   dropLabel, metaDescription, deriveMaterial, ukSize, relatedTo,
-  skuFor, SKU_MAX,
+  skuFor, SKU_MAX, SHIPPING_ZONES_SEO, setHidden,
 };

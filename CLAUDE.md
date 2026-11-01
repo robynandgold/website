@@ -44,6 +44,9 @@ marked `<!-- BUILD:name --> … <!-- /BUILD:name -->`:
 | `src/pages/shop.html` | `shop-jsonld` | `CollectionPage` + `ItemList` |
 | `src/pages/archive.html` | `archive-grid` | a card per sold piece |
 | `src/index.html` | `featured-grid` | the three featured pieces |
+| `src/pages/keepsake-collection.html` | `keepsake-grid` | a card per live keepsake |
+| `src/pages/keepsake-collection.html` | `keepsake-count` | "Showing N pieces" |
+| `src/pages/keepsake-collection.html` | `keepsake-coming-heading` | the `h1` for the coming-soon state |
 
 Each page's own inline JS overwrites the grid's `innerHTML` on load, so
 shoppers get the interactive version; the pre-rendered markup exists so
@@ -56,6 +59,12 @@ Expect noise in the diff: `priceValidUntil` is stamped as today + 1 year, so
 all 57 product pages change on any run. That's normal, and the
 `convert-videos` Action does the same after each publish.
 
+The keepsake page is the one that needs more than a region. It holds both
+its states — the collection and the "coming soon" card — and swaps them in JS,
+so the build also sets `hidden` on whichever is not in play (`setHidden()`) and
+writes the `h1` into the state that is. That keeps exactly one `h1` in the
+document and means a crawler which runs no JavaScript sees the real collection.
+
 Nothing else builds. CSS and page HTML are edited directly.
 
 ## Tests
@@ -66,13 +75,14 @@ npm run test:unit      # logic, catalogue, security — instant, no browser
 npm run test:integration   # real pages in Chromium
 ```
 
-Node's built-in runner; no dependencies. 170 tests in `tests/`:
+Node's built-in runner; no dependencies. 194 tests in `tests/`:
 
 - **`unit.test.mjs`** — the listed/buyable split, sale pricing, postage
   zones, the published `sku`, and catalogue integrity (unique slugs, media
   present on disk, no piece both sold and dropping later, the featured cap).
 - **`security.test.mjs`** — the VIP early-purchase gate, page hygiene
-  (one title, no duplicate ids, canonical-or-noindex), and that every
+  (one title, one `h1`, no skipped heading levels, no duplicate ids,
+  canonical-or-noindex, the same footer links on every page), and that every
   generated product page matches its catalogue entry.
 - **`integration.test.mjs`** — Chromium against a local server: pages load
   without errors, shop filters and sorting, the cart, the postage quote, drops,
@@ -177,8 +187,13 @@ optional `soldAt`, `dropAt`, `keepsake`.
   published sku fits and stays unique.
 - `keepsake: true` → also listed on the Keepsake collection page; the piece
   still appears in the shop. The page shows a "coming soon" dictionary card
-  while no live keepsake exists and swaps itself for the grid when one does,
-  so launching it needs no code change.
+  while no live keepsake exists and becomes the grid when one is added, so
+  launching it needs no code change — but it is the *build* that picks the
+  state, so run the build after ticking the first or unticking the last one.
+- Every piece needs at least one entry in `images`. A video-only piece
+  publishes a Product with no image, which Google requires; a unit test fails
+  on it. `ffmpeg -ss 1 -i <video> -frames:v 1 -vf scale=1000:-2` lifts a
+  usable still out of the clip.
 
 ## Postage
 

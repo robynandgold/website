@@ -509,3 +509,113 @@ describe('the sku published to Google', () => {
     }
   });
 });
+
+// The Offer's shipping block is written in scripts/build.js because that file
+// is CommonJS and worker/shipping.js is an ES module kept free of imports.
+// That makes it the one copy of the rates the build can't read directly, so
+// this is what stops the two drifting — the same guard the FAQ prose has.
+describe('the postage in the product structured data', () => {
+  test('it quotes the same rates the shop charges', () => {
+    const byZone = Object.fromEntries(BUILD.SHIPPING_ZONES_SEO.map(z => [z.zone, z]));
+    assert.deepEqual(Object.keys(byZone).sort(), ['europe', 'ireland', 'world']);
+    for (const [zone, real] of Object.entries(SHIPPING_ZONES)) {
+      const seo = byZone[zone];
+      assert.equal(seo.euros * 100, real.amount, `${zone}: structured data says €${seo.euros}`);
+      assert.equal(seo.minDays, real.minDays, `${zone}: transit minimum disagrees`);
+      assert.equal(seo.maxDays, real.maxDays, `${zone}: transit maximum disagrees`);
+    }
+  });
+
+  test('every country it names falls in the zone it is listed under', () => {
+    for (const z of BUILD.SHIPPING_ZONES_SEO) {
+      assert.ok(z.countries.length, `${z.zone} names no countries`);
+      for (const c of z.countries) {
+        assert.equal(zoneForCountry(c), z.zone, `${c} is listed as ${z.zone}`);
+        assert.ok(ALLOWED_COUNTRIES.includes(c), `${c} is quoted but Stripe won't ship there`);
+      }
+    }
+  });
+
+  test('no country is quoted twice', () => {
+    const all = BUILD.SHIPPING_ZONES_SEO.flatMap(z => z.countries);
+    assert.equal(new Set(all).size, all.length, 'a country appears under two zones');
+  });
+
+  test('the generated pages carry it', () => {
+    const html = readFileSync(path.join(SRC, 'pages', 'product', `${products[0].slug}.html`), 'utf8');
+    const ld = JSON.parse(html.match(/<script type="application\/ld\+json">(.*?)<\/script>/s)[1]);
+    const ship = ld.offers.shippingDetails;
+    assert.ok(Array.isArray(ship) && ship.length === 3, 'expected one shipping entry per zone');
+    for (const s of ship) {
+      assert.ok(s.shippingRate && typeof s.shippingRate.value === 'number', 'a zone has no rate');
+      assert.ok(Array.isArray(s.shippingDestination.addressCountry), 'a zone names no countries');
+    }
+    const rp = ld.offers.hasMerchantReturnPolicy;
+    assert.equal(rp.returnPolicyCountry, 'IE');
+    assert.equal(rp.applicableCountry, 'IE');
+  });
+});
+
+// The keepsake page keeps both of its states in the document and swaps them in
+// JS. That left crawlers which don't run JavaScript — the ones the other
+// pre-rendered grids exist for — seeing "coming soon" while seven keepsakes
+// were live, so the build now ships the page in the right state.
+describe('the keepsake collection page', () => {
+  const page = () => read('pages', 'keepsake-collection.html');
+  const liveKeepsakes = () => products.filter(p => p.keepsake === true && API.isListed(p));
+
+  const hiddenState = (html, id) => {
+    const m = html.match(new RegExp(`<div id="${id}"([^>]*)>`));
+    assert.ok(m, `no <div id="${id}">`);
+    return /\shidden\b/.test(m[1]);
+  };
+
+  test('it shows the collection when keepsakes are live, the card when none are', () => {
+    const html = page();
+    const any = liveKeepsakes().length > 0;
+    assert.equal(hiddenState(html, 'keepsake-collection'), !any,
+      any ? 'keepsakes are live but the collection ships hidden' : 'no keepsakes but the collection ships visible');
+    assert.equal(hiddenState(html, 'keepsake-coming'), any,
+      any ? 'keepsakes are live but the coming-soon card ships visible' : 'no keepsakes but the card ships hidden');
+  });
+
+  test('a crawler that runs no JavaScript still gets a link to every live keepsake', () => {
+    const html = page();
+    for (const p of liveKeepsakes()) {
+      assert.ok(html.includes(`href="product/${p.slug}.html"`),
+        `${p.slug} is a live keepsake but is not pre-rendered on the page`);
+    }
+  });
+
+  test('nothing that is not a live keepsake is pre-rendered there', () => {
+    const slugs = new Set(liveKeepsakes().map(p => p.slug));
+    const rendered = [...page().matchAll(/href="product\/([a-z0-9-]+)\.html"/g)].map(m => m[1]);
+    for (const s of rendered) assert.ok(slugs.has(s), `${s} is listed but is not a live keepsake`);
+    assert.equal(rendered.length, slugs.size, 'the pre-rendered grid and the catalogue disagree');
+  });
+
+  test('the count matches what is listed', () => {
+    const n = liveKeepsakes().length;
+    const shown = page().match(/BUILD:keepsake-count -->(.*?)<!--/s)[1].trim();
+    assert.equal(shown, n ? `Showing ${n} ${n === 1 ? 'piece' : 'pieces'}` : '');
+  });
+
+  test('setHidden adds and removes the attribute without touching anything else', () => {
+    const before = '<div id="x" class="a">body</div>';
+    assert.equal(BUILD.setHidden(before, 'x', true), '<div id="x" class="a" hidden>body</div>');
+    assert.equal(BUILD.setHidden('<div id="x" class="a" hidden>body</div>', 'x', false), before);
+    // Idempotent: hiding something already hidden must not stack attributes.
+    const twice = BUILD.setHidden(BUILD.setHidden(before, 'x', true), 'x', true);
+    assert.equal(twice.match(/hidden/g).length, 1);
+    assert.throws(() => BUILD.setHidden(before, 'nope', true), /nope/);
+  });
+});
+
+describe('every piece has a photo', () => {
+  test('no product ships with an empty image list', () => {
+    for (const p of products) {
+      assert.ok((p.images || []).length > 0,
+        `${p.slug} has no image — its Product structured data would have none either`);
+    }
+  });
+});

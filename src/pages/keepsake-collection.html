@@ -172,7 +172,7 @@
     <section class="section section--compact">
       <div class="container">
         <!-- The collection itself, revealed once pieces have been added to it. -->
-        <div id="keepsake-collection" hidden>
+        <div id="keepsake-collection">
           <div class="keepsake-intro">
             <p class="eyebrow">Keepsake collection</p>
             <h1 class="page-title">Pieces made to be handed down</h1>
@@ -183,13 +183,93 @@
               <a href="shop.html" style="color: var(--ink);">shop</a>.
             </p>
           </div>
-          <p class="shop-count" id="keepsake-count"></p>
-          <div id="keepsake-list" class="product-grid"></div>
+          <p class="shop-count" id="keepsake-count"><!-- BUILD:keepsake-count -->Showing 7 pieces<!-- /BUILD:keepsake-count --></p>
+          <h2 class="visually-hidden">Keepsake pieces</h2>
+          <div id="keepsake-list" class="product-grid"><!-- BUILD:keepsake-grid -->
+        <article class="product-card">
+          <a class="product-card-link-wrap" href="product/amphitrite-9s688.html">
+            <img src="/images/products/IMG_2104.jpeg" alt="Amphitrite" class="product-card-image" width="600" height="600" loading="lazy" />
+            <div class="product-card-body">
+              <h3 class="product-card-title">Amphitrite</h3>
+              <p class="product-card-price">€3250.00</p>
+              <span class="product-card-link">View details</span>
+            </div>
+          </a>
+        </article>
+        <article class="product-card">
+          <a class="product-card-link-wrap" href="product/hera-osnql.html">
+            <img src="/images/products/IMG_2152.jpeg" alt="Hera" class="product-card-image" width="600" height="600" loading="lazy" />
+            <div class="product-card-body">
+              <h3 class="product-card-title">Hera</h3>
+              <p class="product-card-price">€2575.00</p>
+              <span class="product-card-link">View details</span>
+            </div>
+          </a>
+        </article>
+        <article class="product-card">
+          <a class="product-card-link-wrap" href="product/themis-61f80.html">
+            <img src="/images/products/IMG_2183.jpeg" alt="Themis" class="product-card-image" width="600" height="600" loading="lazy" />
+            <div class="product-card-body">
+              <h3 class="product-card-title">Themis</h3>
+              <p class="product-card-price">€1850.00</p>
+              <span class="product-card-link">View details</span>
+            </div>
+          </a>
+        </article>
+        <article class="product-card">
+          <a class="product-card-link-wrap" href="product/asteria-31y52.html">
+            <img src="/images/products/IMG_2123.jpeg" alt="Asteria" class="product-card-image" width="600" height="600" loading="lazy" />
+            <div class="product-card-body">
+              <h3 class="product-card-title">Asteria</h3>
+              <p class="product-card-price">€1675.00</p>
+              <span class="product-card-link">View details</span>
+            </div>
+          </a>
+        </article>
+        <article class="product-card">
+          <a class="product-card-link-wrap" href="product/selene-tnqc6.html">
+            <img src="/images/products/IMG_2191.jpeg" alt="Selene" class="product-card-image" width="600" height="600" loading="lazy" />
+            <div class="product-card-body">
+              <h3 class="product-card-title">Selene</h3>
+              <p class="product-card-price">€1495.00</p>
+              <span class="product-card-link">View details</span>
+            </div>
+          </a>
+        </article>
+        <article class="product-card">
+          <a class="product-card-link-wrap" href="product/theia-vkj0d.html">
+            <img src="/images/products/IMG_2114.jpeg" alt="Theia" class="product-card-image" width="600" height="600" loading="lazy" />
+            <div class="product-card-body">
+              <h3 class="product-card-title">Theia</h3>
+              <p class="product-card-price">€1180.00</p>
+              <span class="product-card-link">View details</span>
+            </div>
+          </a>
+        </article>
+        <article class="product-card">
+          <a class="product-card-link-wrap" href="product/persephone-ythgv.html">
+            <img src="/images/products/IMG_2130.jpeg" alt="Persephone" class="product-card-image" width="600" height="600" loading="lazy" />
+            <div class="product-card-body">
+              <h3 class="product-card-title">Persephone</h3>
+              <p class="product-card-price">€1050.00</p>
+              <span class="product-card-link">View details</span>
+            </div>
+          </a>
+        </article>
+          <!-- /BUILD:keepsake-grid --></div>
         </div>
 
-        <div id="keepsake-coming">
+        <div id="keepsake-coming" hidden>
+          <!-- The page's heading while the card is what's showing. The
+               collection carries its own above, and only one of the two
+               states is ever in play, so the build writes whichever heading
+               belongs to the state it ships. -->
+          <!-- BUILD:keepsake-coming-heading --><!-- /BUILD:keepsake-coming-heading -->
           <article class="dict-card">
-            <h1 class="dict-word">keepsake</h1>
+            <!-- A display word, not the page's heading. The top-level
+                 heading belongs to whichever of the two states is showing,
+                 and the build writes it just above. -->
+            <p class="dict-word">keepsake</p>
             <p class="dict-pron">/ˈkiːpseɪk/</p>
             <p class="dict-pos">noun</p>
 
@@ -276,7 +356,7 @@
         const video = product.videos?.[0];
         const image = product.images?.[0];
         const media = video
-          ? `<div class="product-media"><video src="${video}" class="product-card-image" muted loop playsinline preload="none"${image ? ` poster="${image}"` : ''}></video>${image ? `<img src="${image}" alt="" aria-hidden="true" class="media-poster" loading="lazy" />` : ''}</div>`
+          ? `<div class="product-media"><video src="${video}" class="product-card-image" muted loop playsinline preload="none"${image ? ` poster="${image}"` : ''}></video>${image ? `<img src="${image}" alt="" aria-hidden="true" class="media-poster" width="600" height="600" loading="lazy" />` : ''}</div>`
           : image
             ? `<img src="${image}" alt="${product.name}" class="product-card-image" width="600" height="600" loading="lazy" onerror="this.style.display='none'" />`
             : '';

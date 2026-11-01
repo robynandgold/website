@@ -1217,7 +1217,9 @@
     "available": false,
     "dropAt": "",
     "createdAt": "2026-08-01T07:44:52.989Z",
-    "images": [],
+    "images": [
+      "/images/products/9ct-yellow-gold-herringbone-bracelet-1.jpeg"
+    ],
     "videos": [
       "/images/products/IMG_0355.mp4"
     ],

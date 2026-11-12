@@ -1950,7 +1950,7 @@
     "featured": false,
     "keepsake": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "dropAt": "",
     "previewDrop": true,
     "createdAt": "2026-10-25T13:50:12.852Z",
@@ -1962,7 +1962,8 @@
     ],
     "videos": [
       "/images/products/IMG_2984.mp4"
-    ]
+    ],
+    "soldAt": "2026-11-12T21:21:14.719Z"
   },
   {
     "id": "9ct-yellow-gold-heart-signet-l94fb",

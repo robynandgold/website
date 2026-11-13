@@ -1851,7 +1851,7 @@
     "featured": false,
     "keepsake": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "dropAt": "",
     "previewDrop": true,
     "createdAt": "2026-10-25T13:36:38.043Z",
@@ -1862,7 +1862,8 @@
     ],
     "videos": [
       "/images/products/IMG_2986.mp4"
-    ]
+    ],
+    "soldAt": "2026-11-13T00:09:37.753Z"
   },
   {
     "id": "9ct-yellow-gold-ruby-crossover-ring-9imh9",

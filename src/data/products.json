@@ -332,7 +332,7 @@
     "currency": "EUR",
     "featured": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "images": [
       "/images/products/IMG_4602.jpeg",
       "/images/products/IMG_4600.jpeg"
@@ -340,7 +340,8 @@
     "videos": [
       "/images/products/IMG_4586.mp4"
     ],
-    "createdAt": "2026-06-15T22:21:03+01:00"
+    "createdAt": "2026-06-15T22:21:03+01:00",
+    "soldAt": "2026-11-14T07:50:05.431Z"
   },
   {
     "id": "18ct-yellow-gold-diamond-trilogy-2ern2",

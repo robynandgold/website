@@ -394,7 +394,7 @@
     "currency": "EUR",
     "featured": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "images": [
       "/images/products/IMG_7383.jpeg",
       "/images/products/IMG_7381.jpeg",
@@ -403,7 +403,8 @@
     "videos": [
       "/images/products/IMG_7359.mp4"
     ],
-    "createdAt": "2026-06-17T21:31:29+01:00"
+    "createdAt": "2026-06-17T21:31:29+01:00",
+    "soldAt": "2026-11-15T16:24:41.796Z"
   },
   {
     "id": "18ct-yellow-gold-diamond-crossover-band-3z7x2",

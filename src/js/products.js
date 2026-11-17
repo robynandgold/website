@@ -59,11 +59,26 @@ async function loadProducts() {
  */
 function isPubliclyLive(product) {
   if (product.available === false) return false;
+  if (isReserved(product)) return false;
   if (product.dropAt) {
     const dropTime = Date.parse(product.dropAt);
     if (!isNaN(dropTime) && dropTime > Date.now()) return false;
   }
   return true;
+}
+
+/**
+ * A piece being held for a buyer. It keeps its place in the shop with a
+ * "Reserved" badge and no way to buy it, and moves to the Archive only when
+ * it's actually marked sold — so a hold that falls through is undone by
+ * unticking one box, with nothing to relist.
+ *
+ * Buying is refused server-side in worker/checkout.js, before the VIP gate,
+ * so neither a crafted request nor an early-access link can take a piece
+ * somebody else is already holding.
+ */
+function isReserved(product) {
+  return !!product && product.reserved === true && product.available !== false;
 }
 
 /** A piece whose drop is still ahead of it. */
@@ -99,8 +114,14 @@ function dropLabel(product) {
   });
 }
 
-/** Badge markup for a card, or '' for a piece that's simply on sale now. */
+/**
+ * Badge markup for a card, or '' for a piece that's simply on sale now.
+ *
+ * Reserved wins over a pending drop: "Drops 1 Dec" on a piece already being
+ * held would promise something the shopper can't have.
+ */
 function dropBadge(product) {
+  if (isReserved(product)) return '<span class="reserved-badge">Reserved</span>';
   return isScheduled(product) ? `<span class="drop-badge">Drops ${dropLabel(product)}</span>` : '';
 }
 
@@ -314,6 +335,7 @@ if (typeof window !== 'undefined') {
     formatPrice,
     isPubliclyLive,
     isScheduled,
+    isReserved,
     isListed,
     dropLabel,
     dropBadge,

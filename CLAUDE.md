@@ -75,7 +75,7 @@ npm run test:unit      # logic, catalogue, security — instant, no browser
 npm run test:integration   # real pages in Chromium
 ```
 
-Node's built-in runner; no dependencies. 194 tests in `tests/`:
+Node's built-in runner; no dependencies. 213 tests in `tests/`:
 
 - **`unit.test.mjs`** — the listed/buyable split, sale pricing, postage
   zones, the published `sku`, and catalogue integrity (unique slugs, media
@@ -92,9 +92,9 @@ Node's built-in runner; no dependencies. 194 tests in `tests/`:
 Run them after touching pricing, postage, drops, the catalogue or
 `build.js`. Three invariants they exist to protect: `priceNow()` in
 `src/js/products.js` must agree with `priceFor()` in `worker/pricing.js`,
-`isListed()`/`isScheduled()` in `src/js/products.js` must agree with the copies
-in `scripts/build.js`, and `saleRunning()` in `src/js/banners.js` must agree
-with both copies of `saleActive()`. The postage prose on the FAQ and Terms
+`isListed()`/`isScheduled()`/`isReserved()` in `src/js/products.js` must agree
+with the copies in `scripts/build.js`, and `saleRunning()` in
+`src/js/banners.js` must agree with both copies of `saleActive()`. The postage prose on the FAQ and Terms
 pages is checked against `SHIPPING_ZONES` the same way.
 
 Integration tests need Playwright (global install at
@@ -172,6 +172,15 @@ Fields: `id`, `name`, `slug`, `description`, `size`, `price`, `currency`,
 optional `soldAt`, `dropAt`, `keepsake`.
 
 - `available: false` → sold. Page stays live showing SOLD, appears in Archive.
+- `reserved: true` → on hold for a buyer. The piece **stays in the shop** with
+  a "Reserved" tag and no way to buy it, and reaches the Archive only when it
+  is actually ticked Sold — so a hold that falls through is undone by unticking
+  one box, with nothing to relist. `isListed()` is unchanged by it;
+  `isPubliclyLive()` is false. Reserved and sold are mutually exclusive (the
+  admin page clears one when you tick the other), and Reserved wins the card
+  badge over a pending drop. Refused in `worker/checkout.js` **before** the VIP
+  gate: an early-access link is permission to buy ahead of a drop, never
+  permission to take a piece somebody else is holding.
 - `featured: true` → homepage, capped at 3 (enforced in the admin page).
 - `dropAt` → ISO UTC instant. The piece is shown before it drops with a
   "Drops <date>" badge and no way to buy it; `previewDrop: false` keeps it

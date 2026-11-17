@@ -619,3 +619,68 @@ describe('every piece has a photo', () => {
     }
   });
 });
+
+// A piece held for a buyer. It keeps its place in the shop with a "Reserved"
+// tag and no way to buy it, and only reaches the Archive once it is actually
+// marked sold — so a hold that falls through is undone by unticking one box.
+//
+// The rule lives in two places, as isListed/isScheduled do, so the matrix
+// below is checked against both implementations at once. Getting these apart
+// would either sell a piece twice or hide one that is still for sale.
+describe('a reserved piece', () => {
+  const future = () => new Date(Date.now() + 3 * 86400e3).toISOString();
+  const past = () => new Date(Date.now() - 3 * 86400e3).toISOString();
+
+  // name, product, listed?, buyable?, reserved?
+  const cases = [
+    ['a plain live piece',            {},                                              true,  true,  false],
+    ['reserved',                      { reserved: true },                              true,  false, true],
+    ['reserved: false is just live',  { reserved: false },                             true,  true,  false],
+    ['sold',                          { available: false },                            false, false, false],
+    ['sold and reserved',             { available: false, reserved: true },            false, false, false],
+    ['reserved with a drop ahead',    { reserved: true, dropAt: future() },            true,  false, true],
+    ['reserved, drop already passed', { reserved: true, dropAt: past() },              true,  false, true],
+    ['scheduled but not reserved',    { dropAt: future() },                            true,  false, false],
+    ['held back before its drop',     { dropAt: future(), previewDrop: false },        false, false, false],
+  ];
+
+  for (const [label, product, listed, buyable, reserved] of cases) {
+    test(label, () => {
+      assert.equal(API.isReserved(product), reserved, `shop: isReserved`);
+      assert.equal(BUILD.isReserved(product), reserved, `build: isReserved`);
+      assert.equal(API.isListed(product), listed, `shop: isListed`);
+      assert.equal(BUILD.isListed(product), listed, `build: isListed`);
+      assert.equal(API.isPubliclyLive(product), buyable, `shop: isPubliclyLive`);
+    });
+  }
+
+  test('a hold keeps the piece out of the Archive', () => {
+    // The Archive is built from `available === false` alone, so a reserved
+    // piece must still read as available or it would vanish from the shop
+    // and appear among the sold pieces before any money changed hands.
+    assert.equal({ reserved: true }.available, undefined);
+    assert.equal(API.isListed({ reserved: true }), true);
+  });
+
+  test('the badge says Reserved, and says it instead of a drop date', () => {
+    assert.match(API.dropBadge({ reserved: true }), /reserved-badge">Reserved</);
+    assert.match(API.dropBadge({ reserved: true, dropAt: future() }), /reserved-badge">Reserved</);
+    assert.ok(!API.dropBadge({ reserved: true, dropAt: future() }).includes('drop-badge'),
+      'a held piece still advertises a drop date it cannot honour');
+    assert.match(API.dropBadge({ dropAt: future() }), /drop-badge">Drops /);
+    assert.equal(API.dropBadge({}), '');
+  });
+
+  test('a sitemap entry survives a hold', () => {
+    // The page stays up and the piece may yet come back, so it keeps its URL.
+    assert.equal(BUILD.isSitemapEligible({ slug: 'x', reserved: true }), true);
+    assert.equal(BUILD.isSitemapEligible({ slug: 'x', available: false }), false);
+  });
+
+  test('nothing in the catalogue is both sold and reserved', () => {
+    for (const p of products) {
+      assert.ok(!(p.available === false && p.reserved === true),
+        `${p.slug} is marked sold and reserved at once`);
+    }
+  });
+});

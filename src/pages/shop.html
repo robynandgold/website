@@ -581,8 +581,12 @@
 
     const dropBadgeFor = p =>
       (window.ProductsAPI && window.ProductsAPI.dropBadge) ? window.ProductsAPI.dropBadge(p) : '';
+    const isReservedFor = p =>
+      (window.ProductsAPI && window.ProductsAPI.isReserved) ? window.ProductsAPI.isReserved(p) : p.reserved === true;
+    // Reserved wins over a pending drop, as dropBadge() does.
     const isScheduledFor = p =>
-      (window.ProductsAPI && window.ProductsAPI.isScheduled) ? window.ProductsAPI.isScheduled(p) : false;
+      !isReservedFor(p) &&
+      ((window.ProductsAPI && window.ProductsAPI.isScheduled) ? window.ProductsAPI.isScheduled(p) : false);
 
     // Load and render products
     async function loadShopProducts() {
@@ -679,7 +683,7 @@
             : '';
 
         return `
-        <article class="product-card${isScheduledFor(product) ? ' is-scheduled' : ''}">
+        <article class="product-card${isReservedFor(product) ? ' is-reserved' : ''}${isScheduledFor(product) ? ' is-scheduled' : ''}">
           ${dropBadgeFor(product)}
           <a class="product-card-link-wrap" href="${productLink}">
             ${media}

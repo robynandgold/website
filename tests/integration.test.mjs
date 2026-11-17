@@ -401,6 +401,54 @@ describe('a scheduled drop', () => {
   });
 });
 
+describe('a reserved piece', () => {
+  // Injected rather than written to the catalogue, so the test never depends
+  // on a real piece happening to be on hold.
+  const withReserved = () => {
+    const copy = JSON.parse(JSON.stringify(products));
+    const target = copy.find(p => p.slug === listed.find(x => !API.isScheduled(x)).slug);
+    target.reserved = true;
+    return { copy, slug: target.slug, name: target.name };
+  };
+
+  test('stays in the shop, wearing a Reserved tag', { skip: skip() }, async () => {
+    const { copy, slug } = withReserved();
+    const page = await visit('/pages/shop.html', { routes: { '/data/products.json': copy } });
+
+    const card = await page.$(`#product-list .product-card a[href$="${slug}.html"]`);
+    assert.ok(card, 'a reserved piece disappeared from the shop');
+
+    const badge = await page.$eval(
+      `#product-list .product-card:has(a[href$="${slug}.html"]) .reserved-badge`,
+      e => e.textContent.trim()).catch(() => null);
+    assert.equal(badge, 'Reserved', `expected a Reserved tag, got ${badge}`);
+    assert.equal(await page.problems.length, 0, page.problems.join('\n'));
+    await page.close();
+  });
+
+  test('is not in the Archive — that is for pieces actually sold', { skip: skip() }, async () => {
+    const { copy, slug } = withReserved();
+    const page = await visit('/pages/archive.html', { routes: { '/data/products.json': copy } });
+    assert.equal(await page.$(`.product-card a[href$="${slug}.html"]`), null,
+      'a piece on hold was filed with the sold ones');
+    await page.close();
+  });
+
+  test('a Reserved tag replaces a drop date rather than joining it', { skip: skip() }, async () => {
+    const copy = JSON.parse(JSON.stringify(products));
+    const target = copy.find(p => p.slug === listed.find(x => !API.isScheduled(x)).slug);
+    target.reserved = true;
+    target.dropAt = new Date(Date.now() + 3 * 86400e3).toISOString();
+    const page = await visit('/pages/shop.html', { routes: { '/data/products.json': copy } });
+
+    const sel = `#product-list .product-card:has(a[href$="${target.slug}.html"])`;
+    assert.ok(await page.$(`${sel} .reserved-badge`), 'no Reserved tag on a held piece');
+    assert.equal(await page.$(`${sel} .drop-badge`), null,
+      'a held piece still advertises a drop date it cannot honour');
+    await page.close();
+  });
+});
+
 describe('a running sale', () => {
   const sale = { percent: 20, label: 'Test sale', startsAt: '', endsAt: new Date(Date.now() + 86400e3).toISOString() };
 

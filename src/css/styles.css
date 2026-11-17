@@ -223,6 +223,49 @@ a {
   white-space: nowrap;
 }
 
+/* A piece on hold for a buyer. Same badge shape as a drop, in the quieter ink
+   tone: it is a "not for you" rather than something to look forward to. The
+   card keeps its full colour — the piece is still for sale if the hold falls
+   through, unlike a sold one. */
+.product-card.is-reserved { position: relative; }
+
+.reserved-badge {
+  position: absolute;
+  top: 0.7rem;
+  left: 0.7rem;
+  z-index: 2;
+  background: var(--ink);
+  color: #f7f3ec;
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.28rem 0.6rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* The panel in place of the buy button on a reserved piece's own page. */
+.product-detail-reserved {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  text-align: center;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+}
+
+.product-detail-reserved strong {
+  font-size: 1.1rem;
+  letter-spacing: 0.14em;
+}
+
+.product-detail-reserved p {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
 /* Sale pricing — the old price struck through beside the new one */
 .price-was {
   text-decoration: line-through;

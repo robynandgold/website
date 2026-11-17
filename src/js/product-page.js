@@ -70,6 +70,9 @@
   // "coming soon" note so it can't be added to the cart before its time —
   // unless the visitor arrived with a valid early-access (VIP) link.
   function applyDropGate() {
+    // A reserved piece is not waiting on a date, so the drop note would be
+    // the wrong thing to show; its own panel is already on the page.
+    if (currentProduct && currentProduct.reserved === true && currentProduct.available !== false) return true;
     if (!isScheduled(currentProduct)) return false;
     if (hasEarlyAccess) { markEarlyAccess(); return false; }
     const label = `Available ${formatDropTime(currentProduct.dropAt)}`;
@@ -181,6 +184,10 @@
 
   // ---- Add to cart ------------------------------------------------------
   function setupAddToCart() {
+    // The generated page already leaves the button out for a reserved piece;
+    // this is the belt to that's braces, for a page served from cache before
+    // the hold was published. Buying is refused server-side regardless.
+    if (currentProduct && currentProduct.reserved === true && currentProduct.available !== false) return;
     if (isScheduled(currentProduct) && !hasEarlyAccess) return;
     const btn = document.getElementById('add-to-cart-btn');
     const message = document.getElementById('cart-message');

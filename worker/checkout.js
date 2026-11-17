@@ -169,6 +169,14 @@ export async function handleCheckout(request, env) {
         unavailable.push({ id: item.id, name: (product && product.name) || item.name });
         continue;
       }
+      // A piece held for a buyer is refused like a sold one. Checked *before*
+      // the VIP gate on purpose: an early-access link is permission to buy
+      // ahead of a drop, never permission to take a piece somebody else is
+      // already holding.
+      if (product.reserved === true) {
+        unavailable.push({ id: item.id, name: product.name });
+        continue;
+      }
       // A piece scheduled as a future drop can only be bought with a valid VIP
       // token for it — otherwise it's treated as unavailable, just like a sold
       // piece. Live pieces are unaffected.

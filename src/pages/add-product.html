@@ -499,6 +499,10 @@
                 Sold &mdash; no longer available
               </label>
               <label class="toggle-field">
+                <input type="checkbox" id="f-reserved" />
+                Reserved &mdash; on hold for a buyer
+              </label>
+              <label class="toggle-field">
                 <input type="checkbox" id="f-featured" />
                 Featured on homepage
               </label>
@@ -507,6 +511,11 @@
                 Keepsake collection
               </label>
             </div>
+            <p class="featured-note full" id="reserved-note" style="display:none;">
+              This piece stays in the shop with a &ldquo;Reserved&rdquo; tag and no way to buy it. It moves
+              to the Archive only when you tick Sold &mdash; so if the hold falls through, untick this and
+              it is back on sale straight away.
+            </p>
             <p class="featured-note full" id="available-drop-note" style="display:none;">
               This piece has a drop, so don't mark it sold — the drop date is what stops it being
               bought early. Marking it sold sends it to the Archive.
@@ -827,6 +836,29 @@
 
     document.getElementById('f-keepsake').addEventListener('change', updateKeepsakeNote);
     document.getElementById('f-price').addEventListener('input', updateKeepsakeNote);
+
+    // Reserved and Sold are the same piece at two different moments, never at
+    // once: a hold ends either by the sale completing or by being let go. So
+    // ticking one clears the other, which also keeps the published record
+    // unambiguous for the shop, the site and the Worker alike.
+    function updateReservedNote() {
+      const sold = document.getElementById('f-sold');
+      const reserved = document.getElementById('f-reserved');
+      const note = document.getElementById('reserved-note');
+      if (note) note.style.display = reserved.checked && !sold.checked ? '' : 'none';
+    }
+
+    document.getElementById('f-reserved').addEventListener('change', () => {
+      if (document.getElementById('f-reserved').checked) {
+        document.getElementById('f-sold').checked = false;
+        updateDropVisibility();
+      }
+      updateReservedNote();
+    });
+    document.getElementById('f-sold').addEventListener('change', () => {
+      if (document.getElementById('f-sold').checked) document.getElementById('f-reserved').checked = false;
+      updateReservedNote();
+    });
 
     // ── What you paid (private) ───────────────────────────────────
     // Buying prices are kept in the Worker's D1 database, never in
@@ -1672,9 +1704,11 @@
           const thumb = product.images?.[0]
             ? `<img class="product-pick-thumb" src="https://robynandgold.com${product.images[0]}" alt="" onerror="this.style.background='#e8e0d4';this.style.display='block'" />`
             : `<div class="product-pick-thumb"></div>`;
+          const held = product.reserved === true && product.available !== false;
           const status = product.available === false ? 'Sold' : `€${product.price}`;
           const dropsFuture = isScheduled(product);
-          const badge = (dropsFuture ? ' <span class="product-pick-drop-badge">◷ Drop</span>' : '')
+          const badge = (held ? ' <span class="product-pick-drop-badge">◷ Reserved</span>' : '')
+            + (dropsFuture ? ' <span class="product-pick-drop-badge">◷ Drop</span>' : '')
             + (product.featured === true ? ' <span class="product-pick-featured-badge">★ Featured</span>' : '')
             + (product.keepsake === true ? ' <span class="product-pick-featured-badge">✦ Keepsake</span>' : '');
           const dropNote = dropsFuture
@@ -1806,6 +1840,9 @@
       setDropValue(product.dropAt || '', product.previewDrop);
       updateShareLinks();
       document.getElementById('f-sold').checked = product.available === false;
+      document.getElementById('f-reserved').checked =
+        product.reserved === true && product.available !== false;
+      updateReservedNote();
       document.getElementById('f-featured').checked = product.featured === true;
       document.getElementById('f-keepsake').checked = product.keepsake === true;
       updateKeepsakeNote();
@@ -2253,6 +2290,8 @@
       setDropValue('');
       updateShareLinks();
       document.getElementById('f-sold').checked = false;
+      document.getElementById('f-reserved').checked = false;
+      updateReservedNote();
       document.getElementById('f-featured').checked = false;
       document.getElementById('f-keepsake').checked = false;
       updateKeepsakeNote();
@@ -2604,6 +2643,9 @@
           keepsake:    document.getElementById('f-keepsake').checked,
           category:    document.getElementById('f-category').value,
           available:   !document.getElementById('f-sold').checked,
+          // On hold for a buyer: stays listed, cannot be bought, and only
+          // reaches the Archive once it is actually ticked Sold.
+          reserved:    document.getElementById('f-reserved').checked,
           // Scheduled drop as an ISO UTC instant; '' means live immediately.
           dropAt:      dropInputToISO(),
           // Whether a scheduled piece is teased on the site before it drops.

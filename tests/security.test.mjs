@@ -233,12 +233,50 @@ describe('generated product pages', () => {
         // The button is never written into the page for a held piece, rather
         // than written and hidden, so no stale script can bring it back.
         assert.ok(html.includes('RESERVED'), `${p.slug} is reserved but its page does not say so`);
-        assert.ok(!html.includes('id="add-to-cart-btn"'), `${p.slug} is reserved but has a buy button`);
         assert.ok(html.includes('schema.org/OutOfStock'),
           `${p.slug} is reserved but still published as in stock`);
       } else {
         assert.ok(html.includes('id="add-to-cart-btn"'), `${p.slug} has no buy button`);
       }
     }
+  });
+
+  // A product page carries TWO buy buttons: the one under the price and the
+  // one in the bar that follows you up the page on a phone. The reserved
+  // state was first shipped having silenced only the first, so this asks the
+  // question the other way round — find every control that adds to the bag
+  // and assert none of them survives on a piece that cannot be bought. A
+  // third button added later is caught without anyone remembering to.
+  const BUY_CONTROLS = ['add-to-cart-btn', 'psb-add-btn'];
+
+  test('a piece that cannot be bought has no way to buy it, anywhere on the page', () => {
+    for (const p of products) {
+      const unbuyable = p.available === false || p.reserved === true;
+      if (!unbuyable) continue;
+      const html = readFileSync(path.join(dir, `${p.slug}.html`), 'utf8');
+      for (const id of BUY_CONTROLS) {
+        assert.ok(!html.includes(`id="${id}"`),
+          `${p.slug} cannot be bought but its page still carries #${id}`);
+      }
+    }
+  });
+
+  test('a live piece keeps both of them', () => {
+    const live = products.find(p => p.available !== false && p.reserved !== true);
+    assert.ok(live, 'no live piece to check against');
+    const html = readFileSync(path.join(dir, `${live.slug}.html`), 'utf8');
+    for (const id of BUY_CONTROLS) {
+      assert.ok(html.includes(`id="${id}"`), `${live.slug} is live but is missing #${id}`);
+    }
+  });
+
+  test('the list of buy controls is still complete', () => {
+    // If the template grows another button that adds to the bag, it has to be
+    // named above or the check silently stops covering it.
+    const build = readFileSync(path.join(SRC, '..', 'scripts', 'build.js'), 'utf8');
+    const ids = [...build.matchAll(/<button[^>]*\bid="([^"]+)"/g)].map(m => m[1]);
+    const unknown = ids.filter(id => !BUY_CONTROLS.includes(id) && !id.startsWith('carousel-'));
+    assert.deepEqual(unknown, [],
+      `scripts/build.js renders button(s) the reserved/sold check does not know about: ${unknown.join(', ')}`);
   });
 });

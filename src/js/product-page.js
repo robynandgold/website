@@ -212,6 +212,21 @@
     const bar = document.getElementById('product-sticky-bar');
     if (!bar) return;
     const addBtn = document.getElementById('psb-add-btn');
+    // A held piece keeps the bar — it still shows the name and price, as a
+    // sold one does — but the button becomes the same label the build would
+    // have written. This only bites on a page cached from before the hold was
+    // published; buying is refused on the server either way.
+    if (currentProduct && currentProduct.reserved === true && currentProduct.available !== false) {
+      if (addBtn) {
+        const held = document.createElement('span');
+        held.className = 'psb-sold';
+        held.id = 'psb-reserved';
+        held.textContent = 'Reserved';
+        addBtn.replaceWith(held);
+      }
+      bar.hidden = false;
+      return;
+    }
     if (addBtn && window.CartAPI) {
       addBtn.onclick = () => {
         const result = window.CartAPI.addToCart(currentProduct);

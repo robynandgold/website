@@ -571,7 +571,9 @@
     "keepsake": false,
     "category": "rings",
     "available": true,
+    "reserved": true,
     "dropAt": "",
+    "previewDrop": true,
     "createdAt": "2026-07-02T17:59:31.691Z",
     "images": [
       "/images/products/IMG_9145.jpeg",

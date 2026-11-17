@@ -205,6 +205,62 @@ a {
   white-space: nowrap;
 }
 
+/* The desktop header, refined. Still the centred stack — brand above a row of
+   links — but tighter, with a hairline that makes the links read as part of
+   the header, and the cart moved down onto the row of links instead of
+   floating beside the logo. 166px tall before, 142px now.
+
+   Scoped above the phone breakpoint: the hamburger panel reuses .nav-left,
+   and a border and padding meant for a row would show inside it. */
+@media (min-width: 641px) {
+  .header-inner {
+    padding: 0.85rem 1.5rem 0.7rem;
+    gap: 0.5rem;
+  }
+
+  .brand-center { gap: 0.1rem; }
+  .brand-center img { height: 40px; }
+  .brand-center .brand-main { font-size: 1.15rem; }
+  .brand-center .brand-tagline { font-size: 0.62rem; }
+
+  .nav-left {
+    width: 100%;
+    gap: 2.4rem;
+    padding-top: 0.65rem;
+    /* Room for the cart at either end, so the centred links wrap before they
+       ever run into it on a narrow window. */
+    padding-inline: 3rem;
+    border-top: 1px solid rgba(221, 209, 194, 0.7);
+  }
+
+  .nav {
+    font-size: 0.78rem;
+    letter-spacing: 0.2em;
+  }
+
+  .nav-right {
+    top: auto;
+    bottom: 0.45rem;
+  }
+}
+
+/* A narrow window, short of the phone layout: at full spacing the links need
+   758px to sit on one row, so they close up here rather than wrap onto a
+   second line and make the header taller than it was before. */
+@media (min-width: 641px) and (max-width: 767px) {
+  .nav-left {
+    gap: 1.1rem;
+    padding-inline: 2.75rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 679px) {
+  .nav-left {
+    gap: 0.85rem;
+    padding-inline: 2.6rem;
+  }
+}
+
 /* A piece shown ahead of its drop: visible, tagged, and not yet buyable */
 .product-card.is-scheduled { position: relative; }
 
@@ -949,6 +1005,111 @@ a {
 .shop-count {
   font-size: 0.82rem;
   color: var(--muted);
+}
+
+/* The shop on a wide screen. Everything starts on one left edge and the grid
+   gets the full width — three columns of the same size as Archive and
+   Keepsake, where it used to be three narrower ones beside a sidebar.
+
+   Below 901px none of this applies, and the shop keeps the stacked layout it
+   has always had on phones and tablets. The filter box stays where it is in
+   the page's markup throughout; on desktop the grid below lifts it into a bar
+   beside the piece count, so the two layouts share one set of controls. */
+@media (min-width: 901px) {
+  /* Heading in the first column, paragraph across the other two: the same
+     three columns and 1.9rem gap as .product-grid, so the paragraph starts
+     exactly where the second card does and ends where the third one ends. */
+  .shop-intro {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 1.9rem;
+    align-items: start;
+  }
+
+  .shop-intro .page-title {
+    grid-column: 1;
+    font-size: 1.65rem;
+    line-height: 1.25;
+    letter-spacing: 0.04em;
+    margin: 0.15rem 0 0;
+    text-wrap: balance;
+  }
+
+  .shop-intro .page-intro {
+    grid-column: 2 / span 2;
+    max-width: none;
+    margin: 0;
+    font-size: 0.98rem;
+  }
+
+  .shop-layout {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "count filters"
+      "grid  grid";
+    column-gap: 2rem;
+    row-gap: 0;
+    align-items: center;
+  }
+
+  /* Lets the count and the grid take part in the layout above alongside the
+     filters, which sit outside this wrapper in the markup. */
+  .shop-results { display: contents; }
+  .shop-results-header { grid-area: count; }
+
+  .shop-filters {
+    grid-area: filters;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 0;
+  }
+
+  /* "Refine" goes unseen in a one-line bar but stays for screen readers, and
+     keeps the heading order unbroken between the page's h1 and the cards. */
+  .filters-title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .filter-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .filter-label { font-size: 0.7rem; }
+
+  .filter-select {
+    padding: 0.45rem 2rem 0.45rem 0.7rem;
+    font-size: 0.85rem;
+  }
+
+  /* Only offered once there is something to clear. */
+  #clear-filters { display: none; }
+
+  .shop-layout.is-filtered #clear-filters {
+    display: inline-flex;
+    width: auto;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.72rem;
+  }
+
+  .shop-layout .product-grid {
+    grid-area: grid;
+    margin-top: 0.9rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid rgba(221, 209, 194, 0.9);
+  }
 }
 
 /* =========================

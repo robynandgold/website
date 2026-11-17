@@ -370,6 +370,117 @@ describe('postage in the cart', () => {
   });
 });
 
+// The desktop shop was re-laid out so that everything starts on one left edge
+// and the grid gets the full width, after the heading, the filter sidebar and
+// the grid had each started at a different point. These pin the alignment
+// itself, in pixels, so a later edit can't quietly undo it.
+describe('the shop on a wide screen', () => {
+  const measure = page => page.evaluate(() => {
+    const R = s => document.querySelector(s).getBoundingClientRect();
+    const cards = [...document.querySelectorAll('#product-list .product-card')].map(c => c.getBoundingClientRect());
+    const links = [...document.querySelectorAll('.nav-left .nav-link')].map(l => l.getBoundingClientRect());
+    return {
+      h1: R('.page-title'), intro: R('.page-intro'), count: R('#product-count'),
+      filters: R('.shop-filters'), grid: R('#product-list'), cards, links,
+      cart: R('.nav-right'), header: R('.site-header'),
+      clearShown: getComputedStyle(document.getElementById('clear-filters')).display !== 'none',
+    };
+  });
+  const near = (a, b, px = 1) => Math.abs(a - b) <= px;
+
+  for (const width of [1280, 1024]) {
+    test(`at ${width}px the heading, count and grid share one left edge`, { skip: skip() }, async () => {
+      const page = await visit('/pages/shop.html', { viewport: { width, height: 900 } });
+      const m = await measure(page);
+      assert.ok(near(m.h1.left, m.grid.left), `heading starts at ${m.h1.left}, grid at ${m.grid.left}`);
+      assert.ok(near(m.count.left, m.grid.left), `count starts at ${m.count.left}, grid at ${m.grid.left}`);
+      await page.close();
+    });
+
+    test(`at ${width}px the intro paragraph spans the second and third cards exactly`, { skip: skip() }, async () => {
+      const page = await visit('/pages/shop.html', { viewport: { width, height: 900 } });
+      const m = await measure(page);
+      assert.ok(near(m.intro.left, m.cards[1].left), `paragraph starts at ${m.intro.left}, second card at ${m.cards[1].left}`);
+      assert.ok(near(m.intro.right, m.grid.right), `paragraph ends at ${m.intro.right}, grid at ${m.grid.right}`);
+      await page.close();
+    });
+  }
+
+  test('the grid uses the full width in three columns', { skip: skip() }, async () => {
+    const page = await visit('/pages/shop.html', { viewport: { width: 1280, height: 900 } });
+    const m = await measure(page);
+    const firstRow = m.cards.filter(c => near(c.top, m.cards[0].top));
+    assert.equal(firstRow.length, 3, `${firstRow.length} cards in the first row`);
+    assert.ok(near(firstRow[2].right, m.grid.right), 'the third card does not reach the edge of the grid');
+    assert.ok(m.cards[0].width > 300, `cards are only ${Math.round(m.cards[0].width)}px wide`);
+    await page.close();
+  });
+
+  test('the filters sit in a bar beside the count, above the grid', { skip: skip() }, async () => {
+    const page = await visit('/pages/shop.html', { viewport: { width: 1280, height: 900 } });
+    const m = await measure(page);
+    assert.ok(m.filters.top < m.count.bottom && m.filters.bottom > m.count.top,
+      'the filters are not on the same row as the piece count');
+    assert.ok(m.filters.left > m.count.right, 'the filters are not to the right of the count');
+    assert.ok(m.filters.bottom <= m.grid.top, 'the filters overlap the grid');
+    await page.close();
+  });
+
+  test('Clear appears only once a filter is in play, and puts everything back', { skip: skip() }, async () => {
+    const page = await visit('/pages/shop.html', { viewport: { width: 1280, height: 900 } });
+    assert.equal((await measure(page)).clearShown, false, 'Clear is offered with nothing to clear');
+
+    const category = await page.$eval('#filter-category option:nth-child(2)', o => o.value);
+    await page.selectOption('#filter-category', category);
+    await page.waitForTimeout(250);
+    assert.equal((await measure(page)).clearShown, true, 'no way to clear an active filter');
+
+    await page.click('#clear-filters');
+    await page.waitForTimeout(250);
+    assert.equal(await page.inputValue('#filter-category'), '');
+    assert.equal((await measure(page)).clearShown, false, 'Clear stays after clearing');
+    await page.close();
+  });
+});
+
+describe('the header', () => {
+  // The cart moved from beside the logo onto the row of links. Checked across
+  // the range where the desktop header applies, down to the narrowest window
+  // before the phone menu takes over, so the links can never run into it.
+  for (const width of [1440, 1280, 900, 768, 700, 646]) {
+    test(`at ${width}px the links fit on one row and clear the cart`, { skip: skip() }, async () => {
+      const page = await visit('/', { viewport: { width, height: 800 } });
+      const m = await page.evaluate(() => ({
+        links: [...document.querySelectorAll('.nav-left .nav-link')].map(l => l.getBoundingClientRect()),
+        cart: document.querySelector('.nav-right').getBoundingClientRect(),
+      }));
+      const tops = new Set(m.links.map(l => Math.round(l.top)));
+      assert.equal(tops.size, 1, `the links wrap onto ${tops.size} rows`);
+      const last = m.links.reduce((a, b) => (b.right > a.right ? b : a));
+      assert.ok(last.right < m.cart.left, `the last link runs into the cart (${Math.round(last.right)} vs ${Math.round(m.cart.left)})`);
+      const linkMid = m.links[0].top + m.links[0].height / 2, cartMid = m.cart.top + m.cart.height / 2;
+      assert.ok(Math.abs(linkMid - cartMid) < 8, 'the cart is not on the row of links');
+      await page.close();
+    });
+  }
+
+  test('on a phone the menu is still the hamburger, with no desktop styling leaking in', { skip: skip() }, async () => {
+    const page = await visit('/pages/shop.html', { viewport: { width: 390, height: 844 } });
+    const m = await page.evaluate(() => ({
+      toggle: getComputedStyle(document.querySelector('.nav-toggle')).display,
+      navBorder: getComputedStyle(document.querySelector('.nav-left')).borderTopWidth,
+      refine: document.querySelector('.filters-title').getBoundingClientRect().width,
+      filtersAboveGrid: document.querySelector('.shop-filters').getBoundingClientRect().bottom
+        <= document.getElementById('product-list').getBoundingClientRect().top,
+    }));
+    assert.notEqual(m.toggle, 'none', 'the hamburger is gone on a phone');
+    assert.equal(m.navBorder, '0px', 'the desktop hairline shows in the phone menu');
+    assert.ok(m.refine > 2, 'the Refine heading is hidden on a phone');
+    assert.ok(m.filtersAboveGrid, 'the filter box no longer sits above the grid on a phone');
+    await page.close();
+  });
+});
+
 describe('a scheduled drop', () => {
   // Injected rather than written to the catalogue, so the test never touches
   // real data.

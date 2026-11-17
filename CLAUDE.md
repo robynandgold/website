@@ -75,7 +75,7 @@ npm run test:unit      # logic, catalogue, security — instant, no browser
 npm run test:integration   # real pages in Chromium
 ```
 
-Node's built-in runner; no dependencies. 213 tests in `tests/`:
+Node's built-in runner; no dependencies. 230 tests in `tests/`:
 
 - **`unit.test.mjs`** — the listed/buyable split, sale pricing, postage
   zones, the published `sku`, and catalogue integrity (unique slugs, media
@@ -85,9 +85,10 @@ Node's built-in runner; no dependencies. 213 tests in `tests/`:
   canonical-or-noindex, the same footer links on every page), and that every
   generated product page matches its catalogue entry.
 - **`integration.test.mjs`** — Chromium against a local server: pages load
-  without errors, shop filters and sorting, the cart, the postage quote, drops,
-  sales, navigation consistency, no sideways scroll on a phone, and every
-  sitemap URL resolving.
+  without errors, shop filters and sorting, the desktop shop's alignment and
+  the header's link row (measured in pixels), the cart, the postage quote,
+  drops, sales, navigation consistency, no sideways scroll on a phone, and
+  every sitemap URL resolving.
 
 Run them after touching pricing, postage, drops, the catalogue or
 `build.js`. Three invariants they exist to protect: `priceNow()` in
@@ -162,8 +163,22 @@ will be the only page that doesn't announce a sale.
 
 The single `.nav-left` element is the desktop menu row *and* the mobile
 hamburger panel, so one link addition covers both. The desktop header is
-stacked (brand above a centred link row, cart absolute right) specifically so
-the logo stays centred as links are added.
+stacked (brand above a centred link row) specifically so the logo stays
+centred as links are added. The cart sits at the right-hand end of the link
+row, and the row keeps space clear for it at both ends; below 768px the links
+close up so they stay on one line. Header styling for the desktop lives in
+`@media (min-width: 641px)` blocks, because the phone menu reuses `.nav-left`
+and would otherwise pick up the row's hairline and padding. A sixth link will
+need the spacing re-checked: the integration tests fail if the links wrap or
+touch the cart at any width from 646px up.
+
+On a wide screen (901px+) the shop puts everything on one left edge: the
+heading sits in the grid's first column with the intro across the other two,
+and the filter box is lifted by CSS grid into a bar beside the piece count.
+The filter box is **not** moved in the markup — phones and tablets keep the
+stacked layout with the box above the grid, from the same HTML. Keep the
+intro's column gap equal to `.product-grid`'s (1.9rem) or the paragraph stops
+lining up with the cards; a test measures it in pixels.
 
 ## products.json
 

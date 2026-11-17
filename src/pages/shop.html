@@ -80,7 +80,7 @@
 
   <main>
     <section class="section section--compact" style="padding-bottom: 0;">
-      <div class="container" style="max-width: 720px;">
+      <div class="container shop-intro">
         <h1 class="page-title">Vintage gold, sourced in Ireland</h1>
         <p class="page-intro">
           Every piece here is preloved, solid-gold and one of a kind: antique and vintage pieces in
@@ -758,6 +758,8 @@
         });
       }
 
+      document.querySelector('.shop-layout')
+        .classList.toggle('is-filtered', Boolean(category) || sort !== 'newest');
       renderProducts(filtered);
     }
     

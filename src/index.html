@@ -115,10 +115,10 @@
     <section class="hero">
       <div class="container hero-inner">
         <div class="hero-copy">
-          <p class="eyebrow">Curated vintage rings</p>
-          <h1>Vintage jewellery for lives that don't follow trends.</h1>
+          <p class="eyebrow">Sourced in Ireland</p>
+          <h1>Vintage jewellery that has already outlasted every trend.</h1>
           <p class="hero-text">
-            Robyn &amp; Gold curates vintage pieces in solid gold and natural diamonds – jewellery chosen
+            Robyn &amp; Gold curates vintage pieces in solid gold and diamonds – jewellery chosen
             for its craftsmanship, history and quiet beauty.
           </p>
           <div class="hero-actions">
@@ -302,7 +302,36 @@
   <script src="js/products.js"></script>
   <script src="js/cart.js"></script>
 
-    <a href="/pages/shop.html" class="btn btn-primary mobile-shop-cta" aria-label="Explore the collection">Explore the collection</a>
+    <a href="/pages/shop.html" class="btn btn-primary mobile-shop-cta" aria-label="Explore the collection" hidden>Explore the collection</a>
+  <script>
+    // The floating "Explore the collection" button is for when the hero's own
+    // one is out of reach. Before the shopper scrolls past the hero it would
+    // sit on top of the hero copy and repeat the button just beneath it, so it
+    // stays hidden until then, and hides again on the way back up. Hidden in
+    // the markup so it never flashes up before this runs.
+    //
+    // Checked on every scroll rather than with an IntersectionObserver, which
+    // only reports crossings: a jump straight back to the top (tapping the
+    // status bar on an iPhone) never crosses the hero button, and left the
+    // floating one showing over the hero.
+    (function () {
+      var floating = document.querySelector('.mobile-shop-cta');
+      var heroButton = document.querySelector('.hero-actions .btn-primary');
+      if (!floating || !heroButton) return;
+      var queued = false;
+      function update() {
+        queued = false;
+        // Shown only once the hero button is entirely off the top of the screen.
+        floating.hidden = heroButton.getBoundingClientRect().bottom > 0;
+      }
+      function queue() {
+        if (!queued) { queued = true; requestAnimationFrame(update); }
+      }
+      window.addEventListener('scroll', queue, { passive: true });
+      window.addEventListener('resize', queue);
+      update();
+    })();
+  </script>
 <footer class="site-footer">
     <div class="container footer-inner">
       <div class="footer-brand">

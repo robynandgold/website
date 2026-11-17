@@ -146,6 +146,22 @@ describe('page hygiene', () => {
     }
   });
 
+  // The Terms promise that a lab-grown stone is named as such in its listing,
+  // and some live pieces are lab-grown. So no page may say the shop's diamonds
+  // are natural across the board — in its copy or in the description Google
+  // shows — without the qualifier the shop page carries.
+  test('no page claims every diamond is natural', () => {
+    const offenders = [];
+    for (const { name, html } of pageFiles()) {
+      const text = html.replace(/\s+/g, ' ');
+      for (const m of text.matchAll(/natural diamonds/gi)) {
+        const after = text.slice(m.index, m.index + 160);
+        if (!/unless otherwise stated/i.test(after)) offenders.push(`${name}: "…${text.slice(Math.max(0, m.index - 50), m.index + 40)}…"`);
+      }
+    }
+    assert.deepEqual(offenders, [], 'a page makes a blanket natural-diamonds claim');
+  });
+
   test('the admin page is not indexable and not in the sitemap', () => {
     const sitemap = readFileSync(path.join(SRC, 'sitemap.xml'), 'utf8');
     assert.ok(!sitemap.includes('add-product'), 'the admin page is listed in the sitemap');

@@ -436,8 +436,13 @@ function infoMarkup(product) {
         </div>`;
 }
 
+// The bar that follows the shopper up the page on a phone. It carries its own
+// buy button, so every rule about whether a piece can be bought has to be
+// applied here as well as to the main one — a tested invariant now, because
+// this is exactly where the reserved state was first missed.
 function stickyBarMarkup(product) {
   const isSold = product.available === false;
+  const reserved = isReserved(product);
   const price = formatPrice(product.price, product.currency);
   return `
   <div class="product-sticky-bar" id="product-sticky-bar" hidden>
@@ -447,7 +452,9 @@ function stickyBarMarkup(product) {
     </div>
     ${isSold
       ? `<span class="psb-sold" id="psb-sold">Sold</span>`
-      : `<button class="btn btn-primary" id="psb-add-btn">Add to cart</button>`}
+      : reserved
+        ? `<span class="psb-sold" id="psb-reserved">Reserved</span>`
+        : `<button class="btn btn-primary" id="psb-add-btn">Add to cart</button>`}
   </div>`;
 }
 

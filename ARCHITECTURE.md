@@ -135,6 +135,13 @@ compare; `/api/view` is public and writes nothing but a daily tally.
   JS: both states live in the document, and the build hides the one not in
   play and pre-renders the grid, so a crawler that runs no JavaScript sees the
   real collection rather than the placeholder.
+- **Reserved** (`reserved: true`): a piece on hold for a buyer. It keeps its
+  place in the shop with a "Reserved" tag and no way to buy it, and moves to
+  the Archive only when it is actually marked sold — so a hold that falls
+  through costs one tick to undo and nothing to relist. Deliberately a
+  separate question from `available`: the shop is saying "spoken for", not
+  "gone". Enforced in `worker/checkout.js` ahead of the VIP gate, so neither a
+  crafted request nor an early-access link can take a held piece.
 - **Site-wide sale** (optional): `src/data/sale.json` holds a percentage, a
   label and a start/end instant. Prices are **never rewritten** — the shop, the
   cart, the product pages and `checkout.js` all apply the percentage at the

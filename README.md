@@ -69,7 +69,7 @@ workflow from the repo's GitHub Actions tab.
 npm test
 ```
 
-194 checks covering the pricing, the postage, the catalogue, the
+213 checks covering the pricing, the postage, the catalogue, the holds, the
 early-purchase gate and the pages themselves. Worth running before a push that touches anything to do with
 money, drops or the catalogue. Details in `CLAUDE.md`.
 
@@ -124,6 +124,16 @@ commit and push. The product will:
 - ✅ Show "SOLD" if accessed directly
 - ✅ Prevent adding to cart
 - ✅ Keep the data for your records
+
+### Putting a piece on hold
+
+Tick **Reserved — on hold for a buyer** on the admin page. The piece stays in
+the shop with a &ldquo;Reserved&rdquo; tag, its price still showing, and no way
+to buy it — the checkout refuses it even through a VIP early-access link.
+
+It only moves to the Archive when you tick **Sold**. So if the hold falls
+through, untick Reserved and it is back on sale immediately, with nothing to
+relist. Ticking Sold clears Reserved for you, and a piece can never be both.
 
 ### Featuring a product on the homepage
 

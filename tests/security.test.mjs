@@ -80,6 +80,34 @@ const pageFiles = () => {
   return [{ name: 'index.html', html: readFileSync(path.join(SRC, 'index.html'), 'utf8') }, ...pages];
 };
 
+// Buying is refused on the server, not merely hidden in the page. The order
+// of the two gates matters: an early-access link is permission to buy ahead
+// of a drop, never permission to take a piece somebody else is holding, so
+// the reserved check has to come first.
+describe('the reserved gate at checkout', () => {
+  const checkout = readFileSync(path.join(SRC, '..', 'worker', 'checkout.js'), 'utf8');
+
+  test('checkout refuses a reserved piece', () => {
+    assert.match(checkout, /product\.reserved === true/,
+      'worker/checkout.js no longer refuses a reserved piece');
+  });
+
+  test('it is refused before the early-access gate, not after', () => {
+    const reserved = checkout.indexOf('product.reserved === true');
+    const vip = checkout.indexOf('await purchaseAllowed(');
+    assert.ok(reserved !== -1 && vip !== -1, 'one of the two gates is missing');
+    assert.ok(reserved < vip,
+      'the VIP gate runs before the reserved check — a VIP link could take a held piece');
+  });
+
+  test('the refusal is the same path as a sold piece', () => {
+    // Both push onto `unavailable`, so the shopper gets the 409 that clears
+    // the item from their bag rather than a silent failure at Stripe.
+    const block = checkout.slice(checkout.indexOf('product.reserved === true'));
+    assert.match(block.slice(0, 200), /unavailable\.push/);
+  });
+});
+
 describe('page hygiene', () => {
   for (const { name, html } of pageFiles()) {
     test(`${name} has one title and no duplicate element ids`, () => {
@@ -195,12 +223,19 @@ describe('generated product pages', () => {
     }
   });
 
-  test('sold pieces say SOLD, live ones offer a buy button', () => {
+  test('sold pieces say SOLD, reserved ones say RESERVED, live ones offer a buy button', () => {
     for (const p of products) {
       const html = readFileSync(path.join(dir, `${p.slug}.html`), 'utf8');
       if (p.available === false) {
         assert.ok(html.includes('SOLD'), `${p.slug} is sold but its page does not say so`);
         assert.ok(!html.includes('id="add-to-cart-btn"'), `${p.slug} is sold but has a buy button`);
+      } else if (p.reserved === true) {
+        // The button is never written into the page for a held piece, rather
+        // than written and hidden, so no stale script can bring it back.
+        assert.ok(html.includes('RESERVED'), `${p.slug} is reserved but its page does not say so`);
+        assert.ok(!html.includes('id="add-to-cart-btn"'), `${p.slug} is reserved but has a buy button`);
+        assert.ok(html.includes('schema.org/OutOfStock'),
+          `${p.slug} is reserved but still published as in stock`);
       } else {
         assert.ok(html.includes('id="add-to-cart-btn"'), `${p.slug} has no buy button`);
       }

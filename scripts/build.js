@@ -92,9 +92,16 @@ function priceValidUntil() {
 // A piece is buyable once any scheduled drop has passed. Mirrors
 // isPubliclyLive() in src/js/products.js — keep the two in step.
 function isPubliclyLive(product) {
+  if (isReserved(product)) return false;
   if (!product.dropAt) return true;
   const t = Date.parse(product.dropAt);
   return isNaN(t) || t <= Date.now();
+}
+
+// A piece being held for a buyer: still listed, not buyable, and only in the
+// Archive once it's actually sold. Mirrors isReserved() in src/js/products.js.
+function isReserved(product) {
+  return !!product && product.reserved === true && product.available !== false;
 }
 
 // Whether a piece appears in listings. Wider than isPubliclyLive: a scheduled
@@ -152,7 +159,11 @@ function buildTitleSuffixes(products) {
 // 'pages/product/' from the homepage.
 function cardMarkup(product, linkPrefix) {
   const isSold = product.available === false;
-  const scheduled = isScheduled(product);
+  const reserved = isReserved(product);
+  // Reserved wins over a pending drop, as it does in dropBadge() in
+  // src/js/products.js: a drop date on a piece already held promises
+  // something the shopper can't have.
+  const scheduled = !reserved && isScheduled(product);
   const price = formatPrice(product.price, product.currency);
   const image = (product.images || [])[0];
   const media = image
@@ -160,7 +171,7 @@ function cardMarkup(product, linkPrefix) {
     : '';
 
   return `
-        <article class="product-card${isSold ? ' is-sold' : ''}${scheduled ? ' is-scheduled' : ''}">${isSold ? '\n          <span class="sold-badge">Sold</span>' : ''}${scheduled ? `\n          <span class="drop-badge">Drops ${escapeHtml(dropLabel(product))}</span>` : ''}
+        <article class="product-card${isSold ? ' is-sold' : ''}${reserved ? ' is-reserved' : ''}${scheduled ? ' is-scheduled' : ''}">${isSold ? '\n          <span class="sold-badge">Sold</span>' : ''}${reserved ? '\n          <span class="reserved-badge">Reserved</span>' : ''}${scheduled ? `\n          <span class="drop-badge">Drops ${escapeHtml(dropLabel(product))}</span>` : ''}
           <a class="product-card-link-wrap" href="${linkPrefix}${escapeHtml(product.slug)}.html">
             ${media}
             <div class="product-card-body">
@@ -244,11 +255,15 @@ function productJsonLd(product, url) {
     itemCondition: 'https://schema.org/UsedCondition',
     availability: !inStock
       ? 'https://schema.org/SoldOut'
-      : isScheduled(product)
-        // Visible but not yet buyable — PreOrder is the honest signal, and
-        // stops Search Console flagging a page whose buy button is absent.
-        ? 'https://schema.org/PreOrder'
-        : 'https://schema.org/InStock',
+      : isReserved(product)
+        // Held for someone else: the page stays up and the piece may yet come
+        // back, so OutOfStock rather than SoldOut, which reads as gone.
+        ? 'https://schema.org/OutOfStock'
+        : isScheduled(product)
+          // Visible but not yet buyable — PreOrder is the honest signal, and
+          // stops Search Console flagging a page whose buy button is absent.
+          ? 'https://schema.org/PreOrder'
+          : 'https://schema.org/InStock',
     seller: { '@type': 'Organization', name: 'Robyn & Gold' },
     hasMerchantReturnPolicy: {
       '@type': 'MerchantReturnPolicy',
@@ -376,12 +391,20 @@ function carouselMarkup(product) {
 
 function infoMarkup(product) {
   const isSold = product.available === false;
+  const reserved = isReserved(product);
   const price = formatPrice(product.price, product.currency);
 
+  // The buy button is never written into the page for a sold or reserved
+  // piece, rather than written and then hidden, so there is nothing for a
+  // stale script or a disabled stylesheet to bring back.
   const buyBlock = isSold ? `
           <div style="background: var(--muted); color: white; padding: 1rem; border-radius: var(--radius-md); margin-top: 1.5rem; text-align: center;">
             <strong style="font-size: 1.1rem;">SOLD</strong>
             <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">This piece has found its home</p>
+          </div>` : reserved ? `
+          <div class="product-detail-reserved">
+            <strong>RESERVED</strong>
+            <p>This piece is on hold for another customer. Get in touch and we'll let you know if it becomes available again.</p>
           </div>` : `
           <button id="add-to-cart-btn" class="btn btn-primary" style="margin-top: 1.5rem;">
             Add to cart
@@ -400,7 +423,7 @@ function infoMarkup(product) {
           <h1 class="product-detail-title">${escapeHtml(product.name)}</h1>
           ${product.size ? `<p class="product-detail-meta">Size ${escapeHtml(product.size)}</p>` : ''}
           <p class="product-detail-price">${price}</p>
-          ${isSold ? '' : `<p class="product-detail-oneoff">✦ One of a kind — only one available</p>`}
+          ${isSold || reserved ? '' : `<p class="product-detail-oneoff">✦ One of a kind — only one available</p>`}
           ${buyBlock}
           <div class="product-detail-copy" style="margin-top: 1.8rem;">${escapeHtml(product.description || '')}</div>
           <p class="product-detail-vintage-note" style="margin-top: 1.4rem; font-size: 0.8rem; line-height: 1.6; color: var(--muted);">
@@ -768,5 +791,5 @@ if (require.main === module) main();
 module.exports = {
   isPubliclyLive, isScheduled, isListed, isSitemapEligible,
   dropLabel, metaDescription, deriveMaterial, ukSize, relatedTo,
-  skuFor, SKU_MAX, SHIPPING_ZONES_SEO, setHidden,
+  skuFor, SKU_MAX, SHIPPING_ZONES_SEO, setHidden, isReserved,
 };

@@ -1830,6 +1830,11 @@ a {
     z-index: 90;
     box-shadow: 0 6px 22px rgba(28, 20, 12, 0.22);
     padding: 0.8rem 1.7rem;
+    /* Sized to its own label. Positioned from the middle of the screen, it
+       would otherwise only get the right-hand half to fit into, and wrapped
+       onto two lines; it now wraps only on a phone too narrow for one. */
+    width: max-content;
+    max-width: calc(100vw - 2rem);
   }
   .mobile-shop-cta[hidden] { display: none; }
   /* Room so the floating button never hides the footer's last line */
@@ -1837,4 +1842,10 @@ a {
 
   /* Empty cart on mobile uses the floating CTA, so drop the inline button */
   body.cart-page .cart-empty .btn { display: none; }
+}
+
+/* The narrowest phones: a little less padding keeps the floating button's
+   label on one line, which at full padding misses by a few pixels. */
+@media (max-width: 359px) {
+  .mobile-shop-cta { padding-inline: 1.3rem; }
 }

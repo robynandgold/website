@@ -75,7 +75,7 @@ npm run test:unit      # logic, catalogue, security — instant, no browser
 npm run test:integration   # real pages in Chromium
 ```
 
-Node's built-in runner; no dependencies. 230 tests in `tests/`:
+Node's built-in runner; no dependencies. 233 tests in `tests/`:
 
 - **`unit.test.mjs`** — the listed/buyable split, sale pricing, postage
   zones, the published `sku`, and catalogue integrity (unique slugs, media
@@ -280,3 +280,11 @@ dashboard or ask, rather than claiming a deploy is live.
 - Payment Links sold in DMs bypass the webhook: no auto-sold, no confirmation
   email. Untick availability by hand after one.
 - Carts don't reserve stock; checkout sessions expire after 35 minutes.
+- Some live pieces are lab-grown, and the Terms promise to say so in each
+  listing. So no page may claim the shop's diamonds are natural across the
+  board — in its copy or its meta description — without "unless otherwise
+  stated"; a security test fails on it.
+- On the homepage the phone's floating "Explore the collection" stays hidden
+  until the hero's own button has scrolled off the top, and is checked on
+  every scroll (an IntersectionObserver misses a jump back to the top, which
+  is what tapping an iPhone's status bar does).

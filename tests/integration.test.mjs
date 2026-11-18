@@ -443,6 +443,43 @@ describe('the shop on a wide screen', () => {
   });
 });
 
+// On a phone the homepage's floating "Explore the collection" used to show
+// from the first moment, sitting over the hero copy right above the hero's own
+// identical button. It now waits until the shopper has scrolled past that one.
+describe('the floating shop button on the homepage', () => {
+  const state = page => page.evaluate(() => {
+    const f = document.querySelector('.mobile-shop-cta');
+    const r = f.getBoundingClientRect();
+    return { shown: getComputedStyle(f).display !== 'none', height: r.height };
+  });
+  const scrollPastHero = page => page.evaluate(() =>
+    scrollTo(0, document.querySelector('.hero-actions').getBoundingClientRect().bottom + scrollY + 200));
+
+  for (const width of [320, 390]) {
+    test(`at ${width}px it stays out of the way of the hero`, { skip: skip() }, async () => {
+      const page = await visit('/', { viewport: { width, height: 740 } });
+      assert.equal((await state(page)).shown, false, 'shown on arrival, over the hero');
+
+      // Where the hero's own button is on screen.
+      await page.evaluate(() => document.querySelector('.hero-actions .btn-primary').scrollIntoView({ block: 'end' }));
+      await page.waitForTimeout(150);
+      assert.equal((await state(page)).shown, false, 'shown while the hero button is on screen');
+
+      await scrollPastHero(page);
+      await page.waitForTimeout(150);
+      const past = await state(page);
+      assert.equal(past.shown, true, 'not offered once the hero button is out of reach');
+      assert.ok(past.height < 56, `its label wraps onto two lines (${Math.round(past.height)}px tall)`);
+
+      // A jump straight back to the top, as tapping an iPhone's status bar does.
+      await page.evaluate(() => scrollTo(0, 0));
+      await page.waitForTimeout(150);
+      assert.equal((await state(page)).shown, false, 'left showing after a jump back to the top');
+      await page.close();
+    });
+  }
+});
+
 describe('the header', () => {
   // The cart moved from beside the logo onto the row of links. Checked across
   // the range where the desktop header applies, down to the narrowest window

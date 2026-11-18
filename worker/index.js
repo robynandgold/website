@@ -10,6 +10,7 @@ import { handleCosts } from './costs.js';
 import { handleAbandoned } from './abandoned.js';
 import { handlePromos } from './promos.js';
 import { handleShipping } from './shipping-api.js';
+import { handleHint } from './hint.js';
 
 const methodNotAllowed = () =>
   new Response(JSON.stringify({ error: 'Method not allowed' }), {
@@ -27,6 +28,7 @@ const routes = {
   '/api/costs': handleCosts,
   '/api/abandoned': handleAbandoned,
   '/api/promos': handlePromos,
+  '/api/hint': handleHint,
 };
 
 // Endpoints that only read, and are therefore fetched with GET.

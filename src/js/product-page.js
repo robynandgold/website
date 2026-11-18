@@ -74,6 +74,10 @@
     // the wrong thing to show; its own panel is already on the page.
     if (currentProduct && currentProduct.reserved === true && currentProduct.available !== false) return true;
     if (!isScheduled(currentProduct)) return false;
+    // Nothing to hint at until it drops (early access included): /api/hint
+    // refuses a piece that isn't on sale to everyone yet.
+    const hint = document.getElementById('product-hint');
+    if (hint) hint.remove();
     if (hasEarlyAccess) { markEarlyAccess(); return false; }
     const label = `Available ${formatDropTime(currentProduct.dropAt)}`;
 
@@ -319,6 +323,62 @@
     } catch (e) { /* analytics must never break the page */ }
   }
 
+  // ---- Drop a hint ----------------------------------------------------------
+  // Posts the two first names and one address to /api/hint, which checks them
+  // again, checks the piece is still for sale, and sends the email.
+  function setupHint() {
+    const form = document.getElementById('hint-form');
+    if (!form) return;
+    const status = document.getElementById('hint-status');
+    const submit = document.getElementById('hint-submit');
+    const say = (text, isError) => {
+      status.textContent = text;
+      status.classList.toggle('is-error', !!isError);
+    };
+
+    // Characters left on the note. The limit is taken from the field itself
+    // so the page and the counter can't disagree; the Worker enforces it too.
+    const note = form.elements.message;
+    const countEl = document.getElementById('hint-count');
+    const countN = document.getElementById('hint-count-n');
+    const showCount = () => {
+      const n = note.value.length;
+      countN.textContent = n;
+      countEl.classList.toggle('is-near', n >= note.maxLength - 20);
+    };
+    note.addEventListener('input', showCount);
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form));
+      if (!data.fromName.trim() || !data.toName.trim()) {
+        return say('Please fill in both first names.', true);
+      }
+      if (!form.elements.toEmail.checkValidity() || !data.toEmail.trim()) {
+        return say('Please enter a valid email address for them.', true);
+      }
+
+      submit.disabled = true;
+      say('Sending…');
+      try {
+        const res = await fetch('/api/hint', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...data, slug: currentProduct.slug }),
+        });
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(out.error || 'Your hint could not be sent. Please try again later.');
+        form.reset();
+        showCount();
+        say(`Hint dropped. We've emailed ${data.toName.trim()} a link to this piece.`);
+      } catch (err) {
+        say(err.message, true);
+      } finally {
+        submit.disabled = false;
+      }
+    });
+  }
+
   // ---- Sale ---------------------------------------------------------------
   // The page is generated with the full price baked in, because a sale starts
   // and ends on a clock rather than at build time. When one is running we
@@ -382,6 +442,7 @@
       setupAddToCart();
       setupStickyBar();
     });
+    setupHint();
     renderRelated();
     recordView();
   }

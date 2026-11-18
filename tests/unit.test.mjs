@@ -684,3 +684,215 @@ describe('a reserved piece', () => {
     }
   });
 });
+
+describe('drop a hint (/api/hint)', async () => {
+  const hint = await import('../worker/hint.js');
+  const live = products.find(p => hint.hintable(p) && p.images && p.images.length);
+  const good = { slug: live.slug, fromName: 'Aoife', toName: 'Seán', toEmail: 'Sean@Example.ie' };
+
+  test('names are first names: letters, spaces, apostrophes and hyphens only', () => {
+    for (const ok of ['Aoife', 'Seán', "O'Brien", 'Mary-Kate', 'Zoë', 'Anne Marie']) {
+      assert.ok(hint.cleanName(ok), `${ok} was refused`);
+    }
+    for (const bad of ['', '   ', 'bit.ly/x', 'http://evil', 'me@x.com', 'Call 0871234567',
+      '<b>Hi</b>', '-Dash', 'x'.repeat(hint.NAME_MAX + 1)]) {
+      assert.equal(hint.cleanName(bad), null, `${JSON.stringify(bad)} was accepted`);
+    }
+    assert.equal(hint.cleanName('  Anne   Marie '), 'Anne Marie');
+  });
+
+  test('exactly one plain address is accepted', () => {
+    assert.equal(hint.cleanEmail(' Sean@Example.IE '), 'sean@example.ie');
+    for (const bad of ['', 'sean', 'sean@', 'a@b', 'a@b.com, c@d.com', 'a@b.com;c@d.com',
+      'Sean <sean@x.ie>', 'a b@c.com']) {
+      assert.equal(hint.cleanEmail(bad), null, `${JSON.stringify(bad)} was accepted`);
+    }
+  });
+
+  test('only a piece on sale right now can be hinted at', () => {
+    assert.equal(hint.hintable({ price: 1 }), true);
+    assert.equal(hint.hintable({ available: false }), false);
+    assert.equal(hint.hintable({ reserved: true }), false);
+    assert.equal(hint.hintable({ dropAt: future(HOUR) }), false);
+    assert.equal(hint.hintable({ dropAt: past(HOUR) }), true);
+    assert.equal(hint.hintable(undefined), false);
+    // Mirrors what the product pages offer it on.
+    for (const p of products) {
+      if (p.available === false || p.reserved === true) assert.equal(hint.hintable(p), false, p.slug);
+    }
+  });
+
+  test('the email carries the piece, the link and both names, escaped', () => {
+    const html = hint.hintEmailHtml({ fromName: 'Aoife', toName: "O'Brien", product: live, sale: null });
+    assert.ok(html.includes(`/pages/product/${live.slug}.html?utm_source=hint`));
+    assert.ok(html.includes('https://robynandgold.com' + live.images[0]));
+    assert.ok(html.includes('A little hint from Aoife'));
+    assert.ok(html.includes('Hi O&#39;Brien') || html.includes("Hi O'Brien"));
+    assert.ok(!/[–—]|&mdash;|&ndash;/.test(html), 'the email uses a dash the house style avoids');
+    const scary = hint.hintEmailHtml({ fromName: 'A', toName: 'B', product: { ...live, name: '<script>' }, sale: null });
+    assert.ok(!scary.includes('<script>'));
+  });
+
+  test('the email shows a running sale the way the till will charge it', () => {
+    const sale = { percent: 20, startsAt: past(HOUR), endsAt: future(HOUR) };
+    const html = hint.hintEmailHtml({ fromName: 'A', toName: 'B', product: { ...live, price: 100 }, sale });
+    assert.ok(html.includes('€80.00') && html.includes('line-through'));
+  });
+
+  // The handler, against an in-memory stand-in for D1, the static assets and
+  // Resend, so the limits are exercised end to end without a network.
+  function fakeEnv() {
+    const rows = [];
+    const run = (sql, args) => {
+      if (sql.startsWith('CREATE')) return { results: [] };
+      if (sql.startsWith('INSERT')) { rows.push({ sent_at: args[0], ip: args[1], to: args[2], slug: args[3] }); return {}; }
+      if (sql.startsWith('DELETE')) return {};
+      let hits = rows;
+      if (sql.includes('ip_hash = ?1')) hits = hits.filter(r => r.ip === args[0] && r.sent_at > args[1]);
+      else if (sql.includes('slug = ?2')) hits = hits.filter(r => r.to === args[0] && r.slug === args[1] && r.sent_at > args[2]);
+      else hits = hits.filter(r => r.to === args[0] && r.sent_at > args[1]);
+      return { results: [{ n: hits.length }] };
+    };
+    const stmt = (sql, args = []) => ({ bind: (...a) => stmt(sql, a), run: async () => run(sql, args), _go: () => run(sql, args) });
+    return {
+      rows,
+      RESEND_API_KEY: 'test',
+      DB: { prepare: sql => stmt(sql), batch: async list => list.map(s => s._go()) },
+      ASSETS: { fetch: async req => {
+        const p = new URL(req.url).pathname;
+        if (p === '/data/products.json') return new Response(JSON.stringify(products));
+        return new Response('{}');
+      } },
+    };
+  }
+  const post = (body, { ip = '1.2.3.4', origin = 'https://robynandgold.com' } = {}) =>
+    new Request('https://robynandgold.com/api/hint', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'CF-Connecting-IP': ip, ...(origin ? { Origin: origin } : {}) },
+      body: JSON.stringify(body),
+    });
+
+  async function withResend(fn) {
+    // `sent` holds the hints themselves; the shop's copies go to `sent.shop`.
+    const sent = [];
+    sent.shop = [];
+    const real = globalThis.fetch;
+    globalThis.fetch = async (url, init) => {
+      if (String(url).startsWith('https://api.resend.com/')) {
+        const mail = JSON.parse(init.body);
+        (mail.to[0] === 'info@robynandgold.com' ? sent.shop : sent).push(mail);
+        return new Response('{}');
+      }
+      throw new Error('unexpected fetch ' + url);
+    };
+    try { await fn(sent); } finally { globalThis.fetch = real; }
+  }
+
+  test('a good request sends one email, to one address, from the shop', async () => {
+    await withResend(async sent => {
+      const env = fakeEnv();
+      const res = await hint.handleHint(post(good), env);
+      assert.equal(res.status, 200);
+      assert.equal(sent.length, 1);
+      assert.deepEqual(sent[0].to, ['sean@example.ie']);
+      assert.match(sent[0].from, /info@robynandgold\.com/);
+      assert.equal(sent[0].subject, 'Aoife has dropped a hint | Robyn & Gold');
+      assert.equal(env.rows.length, 1);
+      assert.ok(!JSON.stringify(env.rows).includes('example.ie'), 'the address was stored in the clear');
+    });
+  });
+
+  test('the shop is copied in on every hint, note and all', async () => {
+    await withResend(async sent => {
+      const res = await hint.handleHint(post({ ...good, message: 'Size L, hint hint!' }), fakeEnv());
+      assert.equal(res.status, 200);
+      assert.equal(sent.shop.length, 1);
+      const copy = sent.shop[0];
+      assert.equal(copy.subject, `Hint dropped: ${live.name}`);
+      for (const bit of ['Aoife', 'Seán', 'sean@example.ie', 'Size L, hint hint!', `/pages/product/${live.slug}.html`]) {
+        assert.ok(copy.html.includes(bit), `the shop's copy is missing ${bit}`);
+      }
+      assert.ok(sent[0].html.includes('Size L, hint hint!'), 'the note did not reach the recipient');
+    });
+  });
+
+  test('a refused or rate-limited hint does not copy the shop in', async () => {
+    await withResend(async sent => {
+      const env = fakeEnv();
+      await hint.handleHint(post(good), env);
+      await hint.handleHint(post(good), env); // same piece, same person: refused
+      await hint.handleHint(post({ ...good, message: 'see bit.ly/x' }), env);
+      assert.equal(sent.shop.length, 1);
+    });
+  });
+
+  test('a failed shop copy still counts as a sent hint', async () => {
+    const real = globalThis.fetch;
+    globalThis.fetch = async (url, init) =>
+      JSON.parse(init.body).to[0] === 'info@robynandgold.com' ? new Response('no', { status: 500 }) : new Response('{}');
+    try {
+      assert.equal((await hint.handleHint(post(good), fakeEnv())).status, 200);
+    } finally { globalThis.fetch = real; }
+  });
+
+  test('the note is optional, short, and carries no way to contact anyone else', () => {
+    assert.deepEqual(hint.cleanMessage(undefined), { value: '' });
+    assert.deepEqual(hint.cleanMessage('  Love it.Please  '), { value: 'Love it.Please' });
+    assert.deepEqual(hint.cleanMessage('Size L!\r\n\n\n\nxx'), { value: 'Size L!\n\nxx' });
+    for (const ok of ['Christmas, hint hint', 'polka dot top', 'It is 2026 after all', 'x'.repeat(hint.MESSAGE_MAX)]) {
+      assert.ok(!hint.cleanMessage(ok).error, `${JSON.stringify(ok)} was refused`);
+    }
+    for (const bad of ['see bit.ly/x', 'evil.com', 'evil dot com', 'www.x', 'https://x', 'me@x.ie',
+      'ring 087 123 4567', '+353871234567', 'x'.repeat(hint.MESSAGE_MAX + 1)]) {
+      assert.ok(hint.cleanMessage(bad).error, `${JSON.stringify(bad)} was accepted`);
+    }
+    assert.ok(hint.validateHint({ ...good, message: 'evil.com' }).error);
+  });
+
+  test('the note is escaped and shown as written', () => {
+    const html = hint.hintEmailHtml({ fromName: 'Aoife', toName: 'B', message: '<img src=x>\nxx', product: live, sale: null });
+    assert.ok(!html.includes('<img src=x>'));
+    assert.ok(html.includes("Aoife's note"));
+    assert.ok(!hint.hintEmailHtml({ fromName: 'A', toName: 'B', product: live, sale: null }).includes("'s note"),
+      'an empty note still printed its heading');
+  });
+
+  test('the same piece is hinted to the same person once a month at most', async () => {
+    await withResend(async sent => {
+      const env = fakeEnv();
+      assert.equal((await hint.handleHint(post(good), env)).status, 200);
+      assert.equal((await hint.handleHint(post(good, { ip: '5.6.7.8' }), env)).status, 429);
+      assert.equal(sent.length, 1);
+    });
+  });
+
+  test('one sender is capped per day', async () => {
+    await withResend(async sent => {
+      const env = fakeEnv();
+      for (let i = 0; i < hint.LIMITS.perIpPerDay; i++) {
+        assert.equal((await hint.handleHint(post({ ...good, toEmail: `p${i}@example.ie` }), env)).status, 200);
+      }
+      assert.equal((await hint.handleHint(post({ ...good, toEmail: 'one-more@example.ie' }), env)).status, 429);
+      assert.equal(sent.length, hint.LIMITS.perIpPerDay);
+    });
+  });
+
+  test('refuses other sites, bad input, unbuyable pieces, and fails closed without its database', async () => {
+    await withResend(async sent => {
+      assert.equal((await hint.handleHint(post(good, { origin: 'https://evil.example' }), fakeEnv())).status, 403);
+      assert.equal((await hint.handleHint(post({ ...good, toName: 'visit evil.com' }), fakeEnv())).status, 400);
+      const soldPiece = products.find(p => p.available === false);
+      assert.equal((await hint.handleHint(post({ ...good, slug: soldPiece.slug }), fakeEnv())).status, 409);
+      assert.equal((await hint.handleHint(post(good), { ...fakeEnv(), DB: undefined })).status, 503);
+      assert.equal(sent.length, 0);
+    });
+  });
+
+  test('a filled honeypot gets a polite yes and no email', async () => {
+    await withResend(async sent => {
+      const res = await hint.handleHint(post({ ...good, website: 'spam' }), fakeEnv());
+      assert.equal(res.status, 200);
+      assert.equal(sent.length, 0);
+    });
+  });
+});

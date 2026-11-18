@@ -1293,6 +1293,94 @@ a {
   white-space: pre-line;   /* preserve paragraph breaks the shopkeeper types */
 }
 
+/* "Drop a hint", folded away under the buy button until it's wanted */
+.product-hint {
+  margin-top: 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-alt);
+}
+.product-hint summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.8rem 1rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+.product-hint summary::-webkit-details-marker { display: none; }
+.product-hint summary::after {
+  content: '+';
+  float: right;
+  color: var(--muted);
+}
+.product-hint[open] summary::after { content: '−'; }
+.product-hint-form {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0 1rem 1rem;
+}
+.product-hint-intro {
+  margin: 0 0 0.5rem;
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.product-hint-form label {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+}
+.product-hint-form input,
+.product-hint-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  font-size: 16px; /* 16px stops iOS zooming in on focus */
+  color: var(--ink);
+}
+.product-hint-form textarea { resize: vertical; min-height: 4.6rem; line-height: 1.5; }
+.product-hint-optional { color: var(--muted); letter-spacing: 0; }
+.product-hint-count {
+  margin: 0.15rem 0 0;
+  font-size: 0.74rem;
+  color: var(--muted);
+  text-align: right;
+}
+.product-hint-count.is-near { color: var(--ink); }
+.product-hint-form input:focus,
+.product-hint-form textarea:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+.product-hint-form .btn { margin-top: 0.9rem; justify-self: start; }
+.product-hint-form .btn:disabled { opacity: 0.6; cursor: wait; }
+.product-hint-status {
+  margin: 0.4rem 0 0;
+  font-size: 0.86rem;
+  color: var(--accent);
+}
+.product-hint-status:empty { display: none; }
+.product-hint-status.is-error { color: #9b2c2c; }
+.product-hint-note {
+  margin: 0.3rem 0 0;
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+/* The honeypot: off-screen rather than display:none, which some bots skip */
+.product-hint-trap {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 /* Trust signals beside the buy button */
 .product-trust {
   list-style: none;

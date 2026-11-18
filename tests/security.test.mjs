@@ -264,13 +264,16 @@ describe('generated product pages', () => {
   // and assert none of them survives on a piece that cannot be bought. A
   // third button added later is caught without anyone remembering to.
   const BUY_CONTROLS = ['add-to-cart-btn', 'psb-add-btn'];
+  // Not a way to buy, but only offered while the piece is for sale: a hint
+  // about a ring someone else has bought or is holding would be a dead end.
+  const FOR_SALE_ONLY = [...BUY_CONTROLS, 'hint-submit'];
 
   test('a piece that cannot be bought has no way to buy it, anywhere on the page', () => {
     for (const p of products) {
       const unbuyable = p.available === false || p.reserved === true;
       if (!unbuyable) continue;
       const html = readFileSync(path.join(dir, `${p.slug}.html`), 'utf8');
-      for (const id of BUY_CONTROLS) {
+      for (const id of FOR_SALE_ONLY) {
         assert.ok(!html.includes(`id="${id}"`),
           `${p.slug} cannot be bought but its page still carries #${id}`);
       }
@@ -281,7 +284,7 @@ describe('generated product pages', () => {
     const live = products.find(p => p.available !== false && p.reserved !== true);
     assert.ok(live, 'no live piece to check against');
     const html = readFileSync(path.join(dir, `${live.slug}.html`), 'utf8');
-    for (const id of BUY_CONTROLS) {
+    for (const id of FOR_SALE_ONLY) {
       assert.ok(html.includes(`id="${id}"`), `${live.slug} is live but is missing #${id}`);
     }
   });
@@ -291,7 +294,7 @@ describe('generated product pages', () => {
     // named above or the check silently stops covering it.
     const build = readFileSync(path.join(SRC, '..', 'scripts', 'build.js'), 'utf8');
     const ids = [...build.matchAll(/<button[^>]*\bid="([^"]+)"/g)].map(m => m[1]);
-    const unknown = ids.filter(id => !BUY_CONTROLS.includes(id) && !id.startsWith('carousel-'));
+    const unknown = ids.filter(id => !FOR_SALE_ONLY.includes(id) && !id.startsWith('carousel-'));
     assert.deepEqual(unknown, [],
       `scripts/build.js renders button(s) the reserved/sold check does not know about: ${unknown.join(', ')}`);
   });

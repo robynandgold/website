@@ -214,6 +214,42 @@ describe('product pages', () => {
     await page.close();
   });
 
+  test('drop a hint checks the form, then posts the piece and both names', { skip: skip() }, async () => {
+    const piece = listed.find(p => !API.isScheduled(p) && p.reserved !== true);
+    const page = await visit(`/pages/product/${piece.slug}.html`);
+    let posted = null;
+    await page.route('**/api/hint', route => {
+      posted = JSON.parse(route.request().postData());
+      route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' });
+    });
+    await page.click('#product-hint summary');
+    await page.click('#hint-submit');
+    assert.match(await page.textContent('#hint-status'), /both first names/);
+    assert.equal(posted, null, 'an empty form was sent');
+
+    await page.fill('#hint-from', 'Aoife');
+    await page.fill('#hint-to', 'Seán');
+    await page.fill('#hint-email', 'not-an-email');
+    await page.click('#hint-submit');
+    assert.match(await page.textContent('#hint-status'), /valid email/);
+
+    await page.fill('#hint-email', 'sean@example.ie');
+    await page.click('#hint-submit');
+    await page.waitForFunction(() => /Hint dropped/.test(document.getElementById('hint-status').textContent));
+    assert.deepEqual(
+      { slug: posted.slug, fromName: posted.fromName, toName: posted.toName, toEmail: posted.toEmail },
+      { slug: piece.slug, fromName: 'Aoife', toName: 'Seán', toEmail: 'sean@example.ie' });
+    assert.equal(await page.inputValue('#hint-email'), '', 'the form was not cleared after sending');
+    assert.deepEqual(page.problems, []);
+    await page.close();
+  });
+
+  test('a sold piece offers no hint', { skip: skip() }, async () => {
+    const page = await visit(`/pages/product/${sold[0].slug}.html`);
+    assert.equal(await page.$('#product-hint'), null);
+    await page.close();
+  });
+
   test('structured data matches the visible price', { skip: skip() }, async () => {
     const piece = listed.find(p => !API.isScheduled(p));
     const page = await visit(`/pages/product/${piece.slug}.html`);

@@ -389,6 +389,32 @@ function carouselMarkup(product) {
         </div>`;
 }
 
+// "Drop a hint": email someone a link to this piece. Only written for a piece
+// that can be bought, alongside the buy button; product-page.js removes it
+// again ahead of a drop, and /api/hint makes the same checks for itself.
+function hintMarkup() {
+  return `
+          <details class="product-hint" id="product-hint">
+            <summary>✦ Drop a hint</summary>
+            <form class="product-hint-form" id="hint-form" novalidate>
+              <p class="product-hint-intro">Hoping someone will take the hint? We'll email them a photo of this piece and a link to it.</p>
+              <label for="hint-from">Your first name</label>
+              <input id="hint-from" name="fromName" type="text" autocomplete="given-name" maxlength="40" required />
+              <label for="hint-to">Their first name</label>
+              <input id="hint-to" name="toName" type="text" autocomplete="off" maxlength="40" required />
+              <label for="hint-email">Their email</label>
+              <input id="hint-email" name="toEmail" type="email" autocomplete="off" maxlength="254" required />
+              <div class="product-hint-trap" aria-hidden="true">
+                <label for="hint-website">Website</label>
+                <input id="hint-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+              </div>
+              <button type="submit" class="btn btn-ghost" id="hint-submit">Send hint</button>
+              <p class="product-hint-status" id="hint-status" role="status" aria-live="polite"></p>
+              <p class="product-hint-note">One email, sent once. We won't add them to any mailing list.</p>
+            </form>
+          </details>`;
+}
+
 function infoMarkup(product) {
   const isSold = product.available === false;
   const reserved = isReserved(product);
@@ -409,7 +435,8 @@ function infoMarkup(product) {
           <button id="add-to-cart-btn" class="btn btn-primary" style="margin-top: 1.5rem;">
             Add to cart
           </button>
-          <p id="cart-message" style="margin-top: 0.8rem; font-size: 0.9rem; color: var(--muted); display: none;"></p>`;
+          <p id="cart-message" style="margin-top: 0.8rem; font-size: 0.9rem; color: var(--muted); display: none;"></p>
+${hintMarkup()}`;
 
   const trust = isSold ? '' : `
           <ul class="product-trust">

@@ -108,11 +108,13 @@ compare; `/api/view` is public and writes nothing but a daily tally.
   — change it there and the bag and Stripe both follow. Nothing is gated: the
   rates are public information.
 - **`/api/hint`** (`hint.js`) — "Drop a hint" on a product page: emails one
-  address a photo of the piece and a link to it, via Resend. Because it mails
-  whatever address it's given from the shop's domain, the email is fixed:
-  the sender controls only two first names (letters, spaces, apostrophes and
-  hyphens, so no link can ride along) and there is no free-text message. The
-  piece must be on sale right now. Sends are capped in the `hint_log` table in
+  address a photo of the piece and a link to it, via Resend, and sends
+  info@robynandgold.com a plain copy (who, to whom, the note) on every hint.
+  Because it mails whatever address it's given from the shop's domain, the
+  email is fixed: the sender controls two first names (letters, spaces,
+  apostrophes and hyphens) and an optional note of up to 200 characters,
+  refused if it carries a link, an email address or a phone number, so the
+  only link in the email is ours. The piece must be on sale right now. Sends are capped in the `hint_log` table in
   D1 (5 per sender IP a day, 2 per recipient a day, one per piece per
   recipient a month), which stores only SHA-256 hashes and prunes itself
   after 30 days; without D1 or `RESEND_API_KEY` it refuses rather than send

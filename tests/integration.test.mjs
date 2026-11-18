@@ -234,12 +234,16 @@ describe('product pages', () => {
     assert.match(await page.textContent('#hint-status'), /valid email/);
 
     await page.fill('#hint-email', 'sean@example.ie');
+    await page.fill('#hint-message', 'Size L, hint hint!');
+    assert.equal(await page.textContent('#hint-count-n'), '18');
+    assert.equal(await page.getAttribute('#hint-message', 'maxlength'), '200');
     await page.click('#hint-submit');
     await page.waitForFunction(() => /Hint dropped/.test(document.getElementById('hint-status').textContent));
     assert.deepEqual(
-      { slug: posted.slug, fromName: posted.fromName, toName: posted.toName, toEmail: posted.toEmail },
-      { slug: piece.slug, fromName: 'Aoife', toName: 'Seán', toEmail: 'sean@example.ie' });
+      { slug: posted.slug, fromName: posted.fromName, toName: posted.toName, toEmail: posted.toEmail, message: posted.message },
+      { slug: piece.slug, fromName: 'Aoife', toName: 'Seán', toEmail: 'sean@example.ie', message: 'Size L, hint hint!' });
     assert.equal(await page.inputValue('#hint-email'), '', 'the form was not cleared after sending');
+    assert.equal(await page.textContent('#hint-count-n'), '0', 'the counter was not reset with the form');
     assert.deepEqual(page.problems, []);
     await page.close();
   });

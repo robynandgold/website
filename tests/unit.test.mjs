@@ -773,10 +773,16 @@ describe('drop a hint (/api/hint)', async () => {
     });
 
   async function withResend(fn) {
+    // `sent` holds the hints themselves; the shop's copies go to `sent.shop`.
     const sent = [];
+    sent.shop = [];
     const real = globalThis.fetch;
     globalThis.fetch = async (url, init) => {
-      if (String(url).startsWith('https://api.resend.com/')) { sent.push(JSON.parse(init.body)); return new Response('{}'); }
+      if (String(url).startsWith('https://api.resend.com/')) {
+        const mail = JSON.parse(init.body);
+        (mail.to[0] === 'info@robynandgold.com' ? sent.shop : sent).push(mail);
+        return new Response('{}');
+      }
       throw new Error('unexpected fetch ' + url);
     };
     try { await fn(sent); } finally { globalThis.fetch = real; }
@@ -794,6 +800,61 @@ describe('drop a hint (/api/hint)', async () => {
       assert.equal(env.rows.length, 1);
       assert.ok(!JSON.stringify(env.rows).includes('example.ie'), 'the address was stored in the clear');
     });
+  });
+
+  test('the shop is copied in on every hint, note and all', async () => {
+    await withResend(async sent => {
+      const res = await hint.handleHint(post({ ...good, message: 'Size L, hint hint!' }), fakeEnv());
+      assert.equal(res.status, 200);
+      assert.equal(sent.shop.length, 1);
+      const copy = sent.shop[0];
+      assert.equal(copy.subject, `Hint dropped: ${live.name}`);
+      for (const bit of ['Aoife', 'Seán', 'sean@example.ie', 'Size L, hint hint!', `/pages/product/${live.slug}.html`]) {
+        assert.ok(copy.html.includes(bit), `the shop's copy is missing ${bit}`);
+      }
+      assert.ok(sent[0].html.includes('Size L, hint hint!'), 'the note did not reach the recipient');
+    });
+  });
+
+  test('a refused or rate-limited hint does not copy the shop in', async () => {
+    await withResend(async sent => {
+      const env = fakeEnv();
+      await hint.handleHint(post(good), env);
+      await hint.handleHint(post(good), env); // same piece, same person: refused
+      await hint.handleHint(post({ ...good, message: 'see bit.ly/x' }), env);
+      assert.equal(sent.shop.length, 1);
+    });
+  });
+
+  test('a failed shop copy still counts as a sent hint', async () => {
+    const real = globalThis.fetch;
+    globalThis.fetch = async (url, init) =>
+      JSON.parse(init.body).to[0] === 'info@robynandgold.com' ? new Response('no', { status: 500 }) : new Response('{}');
+    try {
+      assert.equal((await hint.handleHint(post(good), fakeEnv())).status, 200);
+    } finally { globalThis.fetch = real; }
+  });
+
+  test('the note is optional, short, and carries no way to contact anyone else', () => {
+    assert.deepEqual(hint.cleanMessage(undefined), { value: '' });
+    assert.deepEqual(hint.cleanMessage('  Love it.Please  '), { value: 'Love it.Please' });
+    assert.deepEqual(hint.cleanMessage('Size L!\r\n\n\n\nxx'), { value: 'Size L!\n\nxx' });
+    for (const ok of ['Christmas, hint hint', 'polka dot top', 'It is 2026 after all', 'x'.repeat(hint.MESSAGE_MAX)]) {
+      assert.ok(!hint.cleanMessage(ok).error, `${JSON.stringify(ok)} was refused`);
+    }
+    for (const bad of ['see bit.ly/x', 'evil.com', 'evil dot com', 'www.x', 'https://x', 'me@x.ie',
+      'ring 087 123 4567', '+353871234567', 'x'.repeat(hint.MESSAGE_MAX + 1)]) {
+      assert.ok(hint.cleanMessage(bad).error, `${JSON.stringify(bad)} was accepted`);
+    }
+    assert.ok(hint.validateHint({ ...good, message: 'evil.com' }).error);
+  });
+
+  test('the note is escaped and shown as written', () => {
+    const html = hint.hintEmailHtml({ fromName: 'Aoife', toName: 'B', message: '<img src=x>\nxx', product: live, sale: null });
+    assert.ok(!html.includes('<img src=x>'));
+    assert.ok(html.includes("Aoife's note"));
+    assert.ok(!hint.hintEmailHtml({ fromName: 'A', toName: 'B', product: live, sale: null }).includes("'s note"),
+      'an empty note still printed its heading');
   });
 
   test('the same piece is hinted to the same person once a month at most', async () => {

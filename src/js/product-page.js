@@ -336,6 +336,18 @@
       status.classList.toggle('is-error', !!isError);
     };
 
+    // Characters left on the note. The limit is taken from the field itself
+    // so the page and the counter can't disagree; the Worker enforces it too.
+    const note = form.elements.message;
+    const countEl = document.getElementById('hint-count');
+    const countN = document.getElementById('hint-count-n');
+    const showCount = () => {
+      const n = note.value.length;
+      countN.textContent = n;
+      countEl.classList.toggle('is-near', n >= note.maxLength - 20);
+    };
+    note.addEventListener('input', showCount);
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const data = Object.fromEntries(new FormData(form));
@@ -357,6 +369,7 @@
         const out = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(out.error || 'Your hint could not be sent. Please try again later.');
         form.reset();
+        showCount();
         say(`Hint dropped. We've emailed ${data.toName.trim()} a link to this piece.`);
       } catch (err) {
         say(err.message, true);

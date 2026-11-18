@@ -1332,7 +1332,8 @@ a {
   letter-spacing: 0.06em;
   color: var(--ink);
 }
-.product-hint-form input {
+.product-hint-form input,
+.product-hint-form textarea {
   width: 100%;
   box-sizing: border-box;
   padding: 0.65rem 0.8rem;
@@ -1343,7 +1344,17 @@ a {
   font-size: 16px; /* 16px stops iOS zooming in on focus */
   color: var(--ink);
 }
-.product-hint-form input:focus {
+.product-hint-form textarea { resize: vertical; min-height: 4.6rem; line-height: 1.5; }
+.product-hint-optional { color: var(--muted); letter-spacing: 0; }
+.product-hint-count {
+  margin: 0.15rem 0 0;
+  font-size: 0.74rem;
+  color: var(--muted);
+  text-align: right;
+}
+.product-hint-count.is-near { color: var(--ink); }
+.product-hint-form input:focus,
+.product-hint-form textarea:focus {
   outline: none;
   border-color: var(--ink);
 }

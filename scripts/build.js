@@ -404,6 +404,9 @@ function hintMarkup() {
               <input id="hint-to" name="toName" type="text" autocomplete="off" maxlength="40" required />
               <label for="hint-email">Their email</label>
               <input id="hint-email" name="toEmail" type="email" autocomplete="off" maxlength="254" required />
+              <label for="hint-message">Add a note <span class="product-hint-optional">(optional)</span></label>
+              <textarea id="hint-message" name="message" rows="3" maxlength="200" aria-describedby="hint-count"></textarea>
+              <p class="product-hint-count" id="hint-count"><span id="hint-count-n">0</span> / 200 characters</p>
               <div class="product-hint-trap" aria-hidden="true">
                 <label for="hint-website">Website</label>
                 <input id="hint-website" name="website" type="text" tabindex="-1" autocomplete="off" />

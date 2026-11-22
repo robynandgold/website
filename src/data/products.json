@@ -570,8 +570,8 @@
     "featured": true,
     "keepsake": false,
     "category": "rings",
-    "available": true,
-    "reserved": true,
+    "available": false,
+    "reserved": false,
     "dropAt": "",
     "previewDrop": true,
     "createdAt": "2026-07-02T17:59:31.691Z",
@@ -582,7 +582,8 @@
     ],
     "videos": [
       "/images/products/IMG_9173.mp4"
-    ]
+    ],
+    "soldAt": "2026-11-22T19:52:18.817Z"
   },
   {
     "id": "18ct-yellow-gold-antique-sapphire-and-diamond-gypsy-ring-kq291",

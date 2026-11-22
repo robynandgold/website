@@ -2225,5 +2225,31 @@
     "videos": [
       "/images/products/IMG_3661.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-marquise-shaped-diamond-cluster-c1sqa",
+    "name": "9ct Yellow Gold Marquise-shaped Diamond Cluster",
+    "slug": "9ct-yellow-gold-marquise-shaped-diamond-cluster-c1sqa",
+    "description": "Beautiful, bright round diamonds form an elongated marquise-shaped cluster that tapers to a point at either end. White-toned claws frame the diamonds against a simple gold band. She’s classy and timeless, I adore her understated elegance. \n\n2.3g",
+    "size": "UK M · US 6.25",
+    "price": 505,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "reserved": false,
+    "dropAt": "",
+    "previewDrop": true,
+    "createdAt": "2026-11-22T13:20:47.644Z",
+    "images": [
+      "/images/products/IMG_3705.jpeg",
+      "/images/products/IMG_3704.jpeg",
+      "/images/products/IMG_3703.jpeg",
+      "/images/products/IMG_3706.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_3665.mp4"
+    ]
   }
 ]

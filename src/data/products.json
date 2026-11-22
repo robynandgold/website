@@ -2172,5 +2172,32 @@
     "videos": [
       "/images/products/IMG_3663.mp4"
     ]
+  },
+  {
+    "id": "sterling-silver-tiffany-co-diamond-band-klc8k",
+    "name": "Sterling Silver Tiffany & Co Diamond Band",
+    "slug": "sterling-silver-tiffany-co-diamond-band-klc8k",
+    "description": "A single round diamond nestles into a slender, softly rounded sterling silver band. The polished silver curves around the stone in one smooth line, giving the design its understated look. This timeless band would look beautiful in a mixed metals stack.",
+    "size": "UK K½ · US 5.5",
+    "price": 250,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "reserved": false,
+    "dropAt": "",
+    "previewDrop": true,
+    "createdAt": "2026-11-22T13:13:48.014Z",
+    "images": [
+      "/images/products/IMG_3692.jpeg",
+      "/images/products/IMG_3695.jpeg",
+      "/images/products/IMG_3694.jpeg",
+      "/images/products/IMG_3698.jpeg",
+      "/images/products/IMG_3721.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_3662.mp4"
+    ]
   }
 ]

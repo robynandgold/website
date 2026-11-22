@@ -2251,5 +2251,31 @@
     "videos": [
       "/images/products/IMG_3665.mp4"
     ]
+  },
+  {
+    "id": "18ct-yellow-gold-diamond-four-stone-48yqn",
+    "name": "18ct Yellow Gold Diamond Four Stone",
+    "slug": "18ct-yellow-gold-diamond-four-stone-48yqn",
+    "description": "Four bright, white round diamonds sit side by side in white-toned claw settings, with two slightly larger stones at the centre. The gently graduated row gives the ring a softly scalloped outline against its warm gold band. If the number 4 is sentimental for you, this is the perfect piece for you!\n\n2.2g",
+    "size": "UK O½ · US 7.5",
+    "price": 825,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "reserved": false,
+    "dropAt": "",
+    "previewDrop": true,
+    "createdAt": "2026-11-22T13:24:45.757Z",
+    "images": [
+      "/images/products/IMG_3710.jpeg",
+      "/images/products/IMG_3708.jpeg",
+      "/images/products/IMG_3709.jpeg",
+      "/images/products/IMG_3711.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_3664.mp4"
+    ]
   }
 ]

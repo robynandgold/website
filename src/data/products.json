@@ -2082,8 +2082,8 @@
     "featured": false,
     "keepsake": false,
     "category": "rings",
-    "available": true,
-    "reserved": true,
+    "available": false,
+    "reserved": false,
     "dropAt": "",
     "previewDrop": true,
     "createdAt": "2026-11-22T12:55:39.304Z",
@@ -2095,7 +2095,8 @@
     ],
     "videos": [
       "/images/products/IMG_3658.mp4"
-    ]
+    ],
+    "soldAt": "2026-11-22T20:16:46.321Z"
   },
   {
     "id": "9ct-yellow-gold-scattered-gem-bomb-ring-z0o8e",

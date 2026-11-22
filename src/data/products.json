@@ -2120,5 +2120,31 @@
     "videos": [
       "/images/products/IMG_3659.mp4"
     ]
+  },
+  {
+    "id": "18ct-yellow-gold-three-diamond-etoile-band-jxyx5",
+    "name": "18ct Yellow Gold Three Diamond Etoile Band",
+    "slug": "18ct-yellow-gold-three-diamond-etoile-band-jxyx5",
+    "description": "Three round diamonds are spaced across a smooth, softly rounded band of polished yellow gold. The stones sit low in the band, adding a little sparkle to its clean silhouette. We love an etoile band around here and this is a stunning, weighty example. \n\n4.1g",
+    "size": "UK R½ · US 9",
+    "price": 875,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "reserved": false,
+    "dropAt": "",
+    "previewDrop": true,
+    "createdAt": "2026-11-22T13:06:08.720Z",
+    "images": [
+      "/images/products/IMG_3683.jpeg",
+      "/images/products/IMG_3685.jpeg",
+      "/images/products/IMG_3684.jpeg",
+      "/images/products/IMG_3687.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_3660.mp4"
+    ]
   }
 ]

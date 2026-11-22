@@ -2069,5 +2069,31 @@
     "videos": [
       "/images/products/IMG_3666.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-wavy-diamond-etoile-band-y4vc5",
+    "name": "9ct Yellow Gold Wavy Diamond Etoile Band",
+    "slug": "9ct-yellow-gold-wavy-diamond-etoile-band-y4vc5",
+    "description": "A polished yellow gold band with a soft wave that flows across the finger. Round diamonds sit low in the gold, tracing the curves and catching the light at different angles. She’s perfect in a stack but formidable enough to be worn alone.\n\n3.8g",
+    "size": "UK T · US 9.75",
+    "price": 480,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "reserved": false,
+    "dropAt": "",
+    "previewDrop": true,
+    "createdAt": "2026-11-22T12:55:39.304Z",
+    "images": [
+      "/images/products/IMG_3718.jpeg",
+      "/images/products/IMG_3672.jpeg",
+      "/images/products/IMG_3674.jpeg",
+      "/images/products/IMG_3673.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_3658.mp4"
+    ]
   }
 ]

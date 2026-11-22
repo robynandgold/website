@@ -2043,5 +2043,31 @@
     "videos": [
       "/images/products/IMG_2995.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-green-blue-quartz-butterfly-ring-mmm87",
+    "name": "9ct Yellow Gold Green-Blue Quartz Butterfly Ring",
+    "slug": "9ct-yellow-gold-green-blue-quartz-butterfly-ring-mmm87",
+    "description": "This oval quartz has a striking presence on the finger, with broad facets that shift from bright blue to soft green as they catch the light. Sculpted butterfly claws frame the stone, and the polished 9ct gold band brings out the warmth in its colour.\n\n6.7g",
+    "size": "UK S½ · US 9.5",
+    "price": 750,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "reserved": false,
+    "dropAt": "",
+    "previewDrop": true,
+    "createdAt": "2026-11-22T12:52:39.025Z",
+    "images": [
+      "/images/products/IMG_3712.jpeg",
+      "/images/products/IMG_3713.jpeg",
+      "/images/products/IMG_3714.jpeg",
+      "/images/products/IMG_3715.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_3666.mp4"
+    ]
   }
 ]

@@ -2146,5 +2146,31 @@
     "videos": [
       "/images/products/IMG_3660.mp4"
     ]
+  },
+  {
+    "id": "10ct-yellow-gold-cushion-cut-lab-grown-diamond-solitaire-ube10",
+    "name": "10ct Yellow Gold Cushion-cut Lab Grown Diamond Solitaire",
+    "slug": "10ct-yellow-gold-cushion-cut-lab-grown-diamond-solitaire-ube10",
+    "description": "A 1ct cushion-cut lab-grown diamond (fully IGI-certified) sits in a smooth gold bezel that follows the stone’s softly rounded corners. Broad, polished shoulders taper into the band, giving the ring a sculptural, signet-like silhouette. The perfect preloved pinky piece!",
+    "size": "UK I · US 4.25",
+    "price": 905,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "reserved": false,
+    "dropAt": "",
+    "previewDrop": true,
+    "createdAt": "2026-11-22T13:10:39.072Z",
+    "images": [
+      "/images/products/IMG_3691.jpeg",
+      "/images/products/IMG_3688.jpeg",
+      "/images/products/IMG_3690.jpeg",
+      "/images/products/IMG_3689.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_3663.mp4"
+    ]
   }
 ]

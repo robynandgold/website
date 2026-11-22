@@ -2199,5 +2199,31 @@
     "videos": [
       "/images/products/IMG_3662.mp4"
     ]
+  },
+  {
+    "id": "10ct-yellow-gold-diamond-ribbon-twist-band-7dxdw",
+    "name": "10ct Yellow Gold Diamond Ribbon Twist Band",
+    "slug": "10ct-yellow-gold-diamond-ribbon-twist-band-7dxdw",
+    "description": "A slender ribbon of polished yellow gold twists across pairs of round diamonds, framing them in a series of leaf-shaped sections. Fine beaded edges add texture to a ring that wears beautifully alone or stacked. She would make a perfect wedding ring. \n\n2.2g",
+    "size": "UK K · US 5.25",
+    "price": 405,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "reserved": false,
+    "dropAt": "",
+    "previewDrop": true,
+    "createdAt": "2026-11-22T13:16:40.069Z",
+    "images": [
+      "/images/products/IMG_3701.jpeg",
+      "/images/products/IMG_3699.jpeg",
+      "/images/products/IMG_3700.jpeg",
+      "/images/products/IMG_3702.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_3661.mp4"
+    ]
   }
 ]

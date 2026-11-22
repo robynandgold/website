@@ -2095,5 +2095,30 @@
     "videos": [
       "/images/products/IMG_3658.mp4"
     ]
+  },
+  {
+    "id": "9ct-yellow-gold-scattered-gem-bomb-ring-z0o8e",
+    "name": "9ct Yellow Gold Scattered Gem Bombé Ring",
+    "slug": "9ct-yellow-gold-scattered-gem-bomb-ring-z0o8e",
+    "description": "Deep blue sapphires, raspberry-red rubies and rich green emeralds are scattered across a softly domed gold band. Square, round and marquise-shaped settings sit against a textured surface framed by smooth, polished edges. She is just a dream! \n\n3.1g",
+    "size": "UK O · US 7.25",
+    "price": 650,
+    "currency": "EUR",
+    "featured": false,
+    "keepsake": false,
+    "category": "rings",
+    "available": true,
+    "reserved": false,
+    "dropAt": "",
+    "previewDrop": true,
+    "createdAt": "2026-11-22T13:00:46.843Z",
+    "images": [
+      "/images/products/IMG_3677.jpeg",
+      "/images/products/IMG_3679.jpeg",
+      "/images/products/IMG_3680.jpeg"
+    ],
+    "videos": [
+      "/images/products/IMG_3659.mp4"
+    ]
   }
 ]

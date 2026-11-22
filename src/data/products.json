@@ -2083,7 +2083,7 @@
     "keepsake": false,
     "category": "rings",
     "available": true,
-    "reserved": false,
+    "reserved": true,
     "dropAt": "",
     "previewDrop": true,
     "createdAt": "2026-11-22T12:55:39.304Z",

@@ -333,8 +333,13 @@
     "price": 575,
     "currency": "EUR",
     "featured": false,
+    "keepsake": false,
     "category": "rings",
     "available": false,
+    "reserved": false,
+    "dropAt": "",
+    "previewDrop": true,
+    "createdAt": "2026-06-15T22:21:03+01:00",
     "images": [
       "/images/products/IMG_4602.jpeg",
       "/images/products/IMG_4600.jpeg"
@@ -342,7 +347,6 @@
     "videos": [
       "/images/products/IMG_4586.mp4"
     ],
-    "createdAt": "2026-06-15T22:21:03+01:00",
     "soldAt": "2026-11-14T07:50:05.431Z"
   },
   {

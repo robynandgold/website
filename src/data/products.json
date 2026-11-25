@@ -1335,11 +1335,13 @@
     "size": "UK N½ · US 7",
     "price": 595,
     "currency": "EUR",
-    "featured": false,
+    "featured": true,
     "keepsake": false,
     "category": "rings",
     "available": true,
-    "dropAt": "2026-08-23T16:00:00.000Z",
+    "reserved": false,
+    "dropAt": "",
+    "previewDrop": true,
     "createdAt": "2026-08-23T12:15:30.102Z",
     "images": [
       "/images/products/IMG_1119.jpeg",
@@ -1650,11 +1652,12 @@
     "size": "UK N · US 6.75",
     "price": 2575,
     "currency": "EUR",
-    "featured": false,
+    "featured": true,
     "keepsake": true,
     "category": "rings",
     "available": true,
-    "dropAt": "2026-10-04T16:00:00.000Z",
+    "reserved": false,
+    "dropAt": "",
     "previewDrop": true,
     "createdAt": "2026-09-26T16:11:56.881Z",
     "images": [
@@ -2165,7 +2168,7 @@
     "featured": false,
     "keepsake": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "reserved": false,
     "dropAt": "",
     "previewDrop": true,
@@ -2178,7 +2181,8 @@
     ],
     "videos": [
       "/images/products/IMG_3663.mp4"
-    ]
+    ],
+    "soldAt": "2026-11-25T11:24:11.915Z"
   },
   {
     "id": "sterling-silver-tiffany-co-diamond-band-klc8k",

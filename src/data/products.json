@@ -688,8 +688,12 @@
     "price": 385,
     "currency": "EUR",
     "featured": false,
+    "keepsake": false,
     "category": "rings",
     "available": false,
+    "reserved": false,
+    "dropAt": "",
+    "previewDrop": true,
     "createdAt": "2026-07-06T12:19:11.440Z",
     "images": [
       "/images/products/IMG_7371.jpeg",

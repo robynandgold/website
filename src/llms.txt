@@ -25,7 +25,7 @@ continuously and sold pieces move to the archive rather than disappearing.
 
 ## About and policies
 
-- [Our story](https://robynandgold.com/pages/about.html): who sources the
+- [About](https://robynandgold.com/pages/about.html): who sources the
   pieces and how they are chosen.
 - [FAQ](https://robynandgold.com/pages/faq.html): authenticity, hallmarks,
   ring sizing, old-cut diamonds, shipping, payment and returns.

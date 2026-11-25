@@ -754,4 +754,92 @@ describe('the admin page', () => {
     assert.match(box.label, /sold/i);
     await page.close();
   });
+
+  // The edit picker reads the catalogue from GitHub's API, so it's served
+  // here from a copy, with one sold piece still wrongly flagged featured (as
+  // an old hand edit could leave it) to prove Sold wins.
+  async function openEditPicker() {
+    const copy = JSON.parse(JSON.stringify(products));
+    const stale = copy.find(p => p.available === false);
+    stale.featured = true;
+    const page = await visit('/pages/add-product.html');
+    await page.route('https://api.github.com/repos/robynandgold/website/contents/src/data/products.json*', route =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ content: Buffer.from(JSON.stringify(copy)).toString('base64') }),
+      }));
+    // The tabs sit behind the password overlay, so switch mode directly.
+    await page.evaluate(() => { document.getElementById('auth-gate').style.display = 'none'; switchMode('edit'); });
+    await page.waitForSelector('#product-pick-list .product-pick-item');
+    return { page, copy, stale };
+  }
+
+  test('sold pieces are listed apart, folded away, newest sale first', { skip: skip() }, async () => {
+    const { page, copy, stale } = await openEditPicker();
+    const layout = await page.evaluate(() => {
+      const group = document.getElementById('pick-sold-group');
+      const names = el => [...el.querySelectorAll('.product-pick-name')].map(n => n.textContent);
+      const outside = [...document.querySelectorAll('#product-pick-list > .product-pick-item .product-pick-name')]
+        .map(n => n.textContent);
+      return {
+        open: group && group.open,
+        summary: group && group.querySelector('summary').textContent,
+        inside: group ? names(group) : [],
+        outside,
+        last: document.getElementById('product-pick-list').lastElementChild === group,
+      };
+    });
+    const soldPieces = copy.filter(p => p.available === false);
+    const live = copy.filter(p => p.available !== false);
+    assert.equal(layout.open, false, 'the sold section should start folded');
+    assert.equal(layout.summary, `Sold (${soldPieces.length})`);
+    assert.ok(layout.last, 'the sold section is not at the bottom');
+    assert.equal(layout.inside.length, soldPieces.length);
+    assert.equal(layout.outside.length, live.length);
+    assert.ok(layout.inside.includes(stale.name), 'a sold piece flagged featured escaped the sold section');
+    // Newest sale first among the dated ones.
+    const ms = p => (p.soldAt && !isNaN(Date.parse(p.soldAt))) ? Date.parse(p.soldAt) : 0;
+    const expected = [...soldPieces].sort((a, b) => ms(b) - ms(a)).map(p => p.name);
+    assert.deepEqual(layout.inside, expected);
+    await page.close();
+  });
+
+  test('marking a piece sold switches Featured off and locks it', { skip: skip() }, async () => {
+    const { page, stale } = await openEditPicker();
+    // A live piece: Featured is usable until Sold is ticked.
+    await page.evaluate(() =>
+      document.querySelector('#product-pick-list > .product-pick-item .product-pick-info').click());
+    await page.evaluate(() => {
+      const f = document.getElementById('f-featured');
+      if (!f.disabled) f.checked = true;
+    });
+    await page.click('#f-sold', { force: true });
+    let state = await page.evaluate(() => ({
+      checked: document.getElementById('f-featured').checked,
+      disabled: document.getElementById('f-featured').disabled,
+      note: document.getElementById('featured-note').textContent,
+    }));
+    assert.deepEqual([state.checked, state.disabled], [false, true]);
+    assert.match(state.note, /Sold pieces come off the homepage/);
+
+    await page.click('#f-sold', { force: true });
+    assert.ok(!/Sold pieces/.test(await page.textContent('#featured-note')), 'the sold note outlived unticking Sold');
+
+    // Opening a sold piece (even one wrongly flagged featured) shows it locked off.
+    await page.evaluate(name => {
+      document.getElementById('pick-sold-group').open = true;
+      [...document.querySelectorAll('#pick-sold-group .product-pick-item')]
+        .find(el => el.querySelector('.product-pick-name').textContent === name)
+        .querySelector('.product-pick-info').click();
+    }, stale.name);
+    state = await page.evaluate(() => ({
+      sold: document.getElementById('f-sold').checked,
+      checked: document.getElementById('f-featured').checked,
+      disabled: document.getElementById('f-featured').disabled,
+    }));
+    assert.deepEqual(state, { sold: true, checked: false, disabled: true });
+    assert.deepEqual(page.problems.filter(p => !p.includes('api.github.com')), []);
+    await page.close();
+  });
 });

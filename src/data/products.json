@@ -2168,7 +2168,7 @@
     "featured": false,
     "keepsake": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "reserved": false,
     "dropAt": "",
     "previewDrop": true,
@@ -2181,7 +2181,8 @@
     ],
     "videos": [
       "/images/products/IMG_3663.mp4"
-    ]
+    ],
+    "soldAt": "2026-11-25T11:24:11.915Z"
   },
   {
     "id": "sterling-silver-tiffany-co-diamond-band-klc8k",

@@ -689,7 +689,7 @@
     "currency": "EUR",
     "featured": false,
     "category": "rings",
-    "available": true,
+    "available": false,
     "createdAt": "2026-07-06T12:19:11.440Z",
     "images": [
       "/images/products/IMG_7371.jpeg",
@@ -698,7 +698,8 @@
     ],
     "videos": [
       "/images/products/IMG_8840.mp4"
-    ]
+    ],
+    "soldAt": "2026-11-25T21:32:43.870Z"
   },
   {
     "id": "9ct-yellow-gold-diamond-signet-ring-ox6n6",

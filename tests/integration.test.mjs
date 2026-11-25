@@ -805,6 +805,39 @@ describe('the admin page', () => {
     await page.close();
   });
 
+  test('a recent sale opens that piece in the editor, and "Add cost" goes to its buying price', { skip: skip() }, async () => {
+    const { page } = await openEditPicker();
+    // Costs come from the Worker: give the newest sale one, leave the next without.
+    const ms = p => (p.soldAt && !isNaN(Date.parse(p.soldAt))) ? Date.parse(p.soldAt) : 0;
+    const [costed, uncosted] = products.filter(p => p.available === false).sort((a, b) => ms(b) - ms(a));
+    await page.route('**/api/costs', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ costs: { [costed.slug]: 100 } }),
+    }));
+    await page.evaluate(() => { sessionStorage.setItem(PW_KEY, 'test'); switchMode('sales'); });
+    await page.waitForSelector('#sales-body [data-edit]');
+
+    const tags = await page.$$eval('#sales-body .sales-add-cost', els => els.map(e => e.dataset.edit));
+    assert.ok(tags.includes(uncosted.slug), 'a sale with no buying price has no "Add cost"');
+    assert.ok(!tags.includes(costed.slug), 'a sale with a buying price still asks for one');
+
+    await page.click(`#sales-body .sales-edit-link[data-edit="${costed.slug}"]`);
+    await page.waitForFunction(slug => document.getElementById('f-slug').value === slug, costed.slug);
+    const opened = await page.evaluate(slug => ({
+      heading: document.getElementById('page-heading').textContent,
+      soldOpen: document.getElementById('pick-sold-group').open,
+      selected: document.querySelector('.product-pick-item.selected')?.dataset.slug,
+    }), costed.slug);
+    assert.deepEqual(opened, { heading: 'Edit a piece', soldOpen: true, selected: costed.slug });
+
+    await page.evaluate(() => switchMode('sales'));
+    await page.waitForSelector(`#sales-body .sales-add-cost[data-edit="${uncosted.slug}"]`);
+    await page.click(`#sales-body .sales-add-cost[data-edit="${uncosted.slug}"]`);
+    await page.waitForFunction(slug => document.getElementById('f-slug').value === slug, uncosted.slug);
+    assert.equal(await page.evaluate(() => document.activeElement && document.activeElement.id), 'f-cost');
+    await page.close();
+  });
+
   test('marking a piece sold switches Featured off and locks it', { skip: skip() }, async () => {
     const { page, stale } = await openEditPicker();
     // A live piece: Featured is usable until Sold is ticked.

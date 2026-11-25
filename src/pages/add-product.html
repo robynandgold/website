@@ -223,6 +223,16 @@
     .insights-rank { width: 1.6rem; text-align: right; color: var(--muted); font-size: 0.85rem; flex-shrink: 0; }
     .insights-name { flex: 1; min-width: 0; color: var(--ink); font-size: 0.9rem; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .insights-name:hover { text-decoration: underline; }
+    /* A report row that opens the piece in the editor */
+    .sales-edit-link {
+      background: none; border: none; padding: 0; font: inherit; text-align: left; cursor: pointer;
+    }
+    .sales-add-cost {
+      font: inherit; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em;
+      color: #a07830; background: rgba(198,168,120,0.16); border: none;
+      border-radius: 4px; padding: 0.15rem 0.45rem; margin-left: 0.3rem; cursor: pointer;
+    }
+    .sales-add-cost:hover { background: rgba(198,168,120,0.3); }
     .insights-views { color: var(--muted); font-size: 0.82rem; white-space: nowrap; flex-shrink: 0; }
     .insights-sold {
       font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em;
@@ -1026,7 +1036,25 @@
         publishBtn.textContent = publishBtn.dataset.editLabel;
         currentEditProduct = null;   // nothing selected yet — keeps the share block hidden
         clearForm();
-        loadProductPicker();
+        return loadProductPicker();
+      }
+    }
+
+    // Jump from a report row to that piece in the editor. Waits for the
+    // picker to load, opens the Sold section if that's where the piece is,
+    // and puts the cursor in "What you paid" when that's the gap to fill.
+    async function openInEditor(slug, focusCost) {
+      await switchMode('edit');
+      const item = document.querySelector(`#product-pick-list .product-pick-item[data-slug="${CSS.escape(slug)}"]`);
+      if (!item) return;
+      const group = item.closest('details');
+      if (group) group.open = true;
+      item.querySelector('.product-pick-info').click();
+      item.scrollIntoView({ block: 'nearest' });
+      if (focusCost) {
+        const cost = document.getElementById('f-cost');
+        cost.scrollIntoView({ block: 'center' });
+        cost.focus({ preventScroll: true });
       }
     }
 
@@ -1263,10 +1291,12 @@
           ? new Date(p.soldAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
           : 'At launch';
         const c = costOf(p);
-        const made = c === null ? '' : ` <span class="sales-profit">+${money((Number(p.price) || 0) - c)}</span>`;
+        const made = c === null
+          ? ` <button type="button" class="sales-add-cost" data-edit="${p.slug}" data-cost="1">Add cost</button>`
+          : ` <span class="sales-profit">+${money((Number(p.price) || 0) - c)}</span>`;
         return `
         <div class="insights-row">
-          <span class="insights-name">${p.name}</span>
+          <button type="button" class="insights-name sales-edit-link" data-edit="${p.slug}" title="Edit this piece">${p.name}</button>
           <span class="insights-views">${when} · ${money(p.price)}${made}</span>
         </div>`;
       }).join('');
@@ -1309,7 +1339,7 @@
       const costNote = !costsStorage
         ? ' Buying prices need the views database bound to save.'
         : costed.length < dated.length
-          ? ` Profit covers the ${costed.length} of ${dated.length} sold ${dated.length === 1 ? 'piece' : 'pieces'} with a recorded buying price — add the rest from the Edit tab and the figure fills in.`
+          ? ` Profit covers the ${costed.length} of ${dated.length} sold ${dated.length === 1 ? 'piece' : 'pieces'} with a recorded buying price. Click a sale to open it in the editor, or "Add cost" to go straight to its buying price, and the figure fills in.`
           : '';
 
       body.innerHTML = `
@@ -1327,6 +1357,9 @@
           A piece sold through a DM payment link only appears here once you untick its
           availability.
         </p>`;
+
+      body.querySelectorAll('[data-edit]').forEach(el =>
+        el.addEventListener('click', () => openInEditor(el.dataset.edit, el.dataset.cost === '1')));
 
       // Loaded after the rest so a slow Stripe call never holds up the page.
       renderAbandoned(products);
@@ -1732,6 +1765,7 @@
             : '';
           const meta = (product.size ? `${product.size} · ${status}` : status) + dropNote;
           const item = document.createElement('div');
+          item.dataset.slug = product.slug;
           item.className = 'product-pick-item'
             + (dropsFuture ? ' is-scheduled' : '')
             + (product.featured === true ? ' is-featured' : '');

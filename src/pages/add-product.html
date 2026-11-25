@@ -330,6 +330,11 @@
       color: var(--muted); margin: 0.5rem 0.3rem 0.2rem;
     }
     .pick-group-label:first-child { margin-top: 0.2rem; }
+    .pick-sold-group { margin-top: 0.6rem; border-top: 1px solid var(--border); padding-top: 0.3rem; }
+    .pick-sold-group > summary { cursor: pointer; list-style: none; margin-top: 0.4rem; }
+    .pick-sold-group > summary::-webkit-details-marker { display: none; }
+    .pick-sold-group > summary::before { content: '▸ '; }
+    .pick-sold-group[open] > summary::before { content: '▾ '; }
 
     /* ── Featured cap note ───────────────────────── */
     .featured-note {
@@ -393,7 +398,7 @@
       <nav class="nav nav-left" id="primary-nav" aria-label="Primary">
         <a href="shop.html" class="nav-link">Shop</a>
         <a href="keepsake-collection.html" class="nav-link">Keepsake collection</a>
-        <a href="about.html" class="nav-link">Our story</a>
+        <a href="about.html" class="nav-link">About</a>
         <a href="../index.html#ethos" class="nav-link">Ethos</a>
       </nav>
       <div class="brand-banner">
@@ -674,7 +679,7 @@
 <div class="footer-links">
         <a href="/pages/shop.html" class="footer-link">Shop</a>
         <a href="/pages/keepsake-collection.html" class="footer-link">Keepsake collection</a>
-        <a href="/pages/about.html" class="footer-link">Our story</a>
+        <a href="/pages/about.html" class="footer-link">About</a>
         <a href="/#ethos" class="footer-link">Ethos</a>
         <a href="/pages/contact.html" class="footer-link">Contact</a>
         <a href="/pages/terms.html" class="footer-link">T&amp;Cs</a>
@@ -795,6 +800,16 @@
       const cb = document.getElementById('f-featured');
       const note = document.getElementById('featured-note');
       if (!cb || !note) return;
+      // A sold piece can't be on the homepage, so ticking Sold clears and
+      // locks Featured. Checked first: every path that re-enables the box
+      // (loading a piece, the catalogue refresh, the cap) comes through here.
+      if (document.getElementById('f-sold').checked) {
+        cb.checked = false;
+        cb.disabled = true;
+        note.className = 'featured-note ok';
+        note.textContent = 'Sold pieces come off the homepage, so Featured is switched off.';
+        return;
+      }
       const isThisFeatured = currentId && featuredIds.has(currentId);
       const count = featuredIds.size;
       const atCap = count >= FEATURED_MAX && !isThisFeatured;
@@ -858,6 +873,7 @@
     document.getElementById('f-sold').addEventListener('change', () => {
       if (document.getElementById('f-sold').checked) document.getElementById('f-reserved').checked = false;
       updateReservedNote();
+      applyFeaturedCap(currentEditProduct?.id || null);
     });
 
     // ── What you paid (private) ───────────────────────────────────
@@ -1733,13 +1749,20 @@
         }
 
         // Pieces waiting on a drop sit at the top, then the homepage picks,
-        // then everything else. The drop group is temporary by construction:
-        // membership is tested against the current time, so a piece leaves it
-        // the moment its drop passes and falls back into its usual place.
-        const scheduled = products.filter(isScheduled)
+        // then everything else still for sale, and the sold pieces last, folded
+        // away. The drop group is temporary by construction: membership is
+        // tested against the current time, so a piece leaves it the moment its
+        // drop passes and falls back into its usual place.
+        const isSold = p => p.available === false;
+        const unsold = products.filter(p => !isSold(p));
+        const scheduled = unsold.filter(isScheduled)
           .sort((a, b) => Date.parse(a.dropAt) - Date.parse(b.dropAt));
-        const featured = products.filter(p => !isScheduled(p) && p.featured === true);
-        const rest = products.filter(p => !isScheduled(p) && p.featured !== true);
+        const featured = unsold.filter(p => !isScheduled(p) && p.featured === true);
+        const rest = unsold.filter(p => !isScheduled(p) && p.featured !== true);
+        // Most recently sold first; pieces with no soldAt (sold before launch)
+        // go to the end.
+        const soldAtMs = p => (p.soldAt && !isNaN(Date.parse(p.soldAt))) ? Date.parse(p.soldAt) : 0;
+        const sold = products.filter(isSold).sort((a, b) => soldAtMs(b) - soldAtMs(a));
 
         if (scheduled.length) {
           const lbl = document.createElement('p');
@@ -1758,9 +1781,20 @@
         if (rest.length) {
           const lbl = document.createElement('p');
           lbl.className = 'pick-group-label';
-          lbl.textContent = (featured.length || scheduled.length) ? 'All other pieces' : 'All pieces';
+          lbl.textContent = (featured.length || scheduled.length) ? 'Other pieces for sale' : 'Pieces for sale';
           list.appendChild(lbl);
           rest.forEach(p => list.appendChild(makeItem(p)));
+        }
+        if (sold.length) {
+          const group = document.createElement('details');
+          group.className = 'pick-sold-group';
+          group.id = 'pick-sold-group';
+          const summary = document.createElement('summary');
+          summary.className = 'pick-group-label';
+          summary.textContent = `Sold (${sold.length})`;
+          group.appendChild(summary);
+          sold.forEach(p => group.appendChild(makeItem(p)));
+          list.appendChild(group);
         }
 
         loading.style.display = 'none';
@@ -2601,7 +2635,7 @@
       }
 
       // Enforce the homepage featured cap (defensive — the checkbox is also disabled at cap)
-      if (document.getElementById('f-featured').checked) {
+      if (document.getElementById('f-featured').checked && !document.getElementById('f-sold').checked) {
         const othersFeatured = [...featuredIds].filter(id => id !== slug).length;
         if (othersFeatured >= FEATURED_MAX) {
           setStatus('error', `Only ${FEATURED_MAX} pieces can be featured on the homepage. Un-feature one first, then try again.`);
@@ -2638,7 +2672,8 @@
           size:        categoryHasSize() ? document.getElementById('f-size').value.trim() : '',
           price:       parseFloat(document.getElementById('f-price').value) || 0,
           currency:    'EUR',
-          featured:    document.getElementById('f-featured').checked,
+          // Never featured once sold, as the Stripe webhook also ensures.
+          featured:    document.getElementById('f-featured').checked && !document.getElementById('f-sold').checked,
           // Keepsake pieces list on the Keepsake collection page, not the shop.
           keepsake:    document.getElementById('f-keepsake').checked,
           category:    document.getElementById('f-category').value,
